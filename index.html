@@ -152,28 +152,36 @@ async function checkTokenRisk(){
  const address=$('riskAddress').value.trim(),chain=$('riskChain').value,box=$('riskResult'),button=$('riskCheckBtn');
  if(!address){box.innerHTML='<strong>Adresse fehlt</strong><span class="muted">Bitte zuerst eine Token-Adresse einfügen.</span>';return}
  if(address.length<30){box.innerHTML='<strong class="negative">Ungültige Adresse</strong><span class="muted">Die Adresse sieht zu kurz aus. Bitte prüfe sie.</span>';return}
- button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">Rufe Sicherheitsdaten ab.</span>';
+ button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">Prüfe Sicherheitsdaten, Holder und Wallet-Verbindungen.</span>';
  try{
-  let report={},full={},risks=[],score=null,rawScore=null,metrics=[],bad=[],isRugged=false,provider='';
+  let report={},full={},risks=[],score=null,metrics=[],bad=[],isRugged=false,provider='',bubble=null,bubbleGrade=null,bubbleSummary=null;
   if(chain==='solana'){
-   provider='RugCheck';
+   provider='RugCheck + Bubbles';
    const base='https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address);
    const results=await Promise.allSettled([
     fetch(base+'/report/summary',{headers:{accept:'application/json'}}),
-    fetch(base+'/report',{headers:{accept:'application/json'}})
+    fetch(base+'/report',{headers:{accept:'application/json'}}),
+    fetch('https://bubblemaps.dev/api/map/'+encodeURIComponent(address),{headers:{accept:'application/json'}})
    ]);
    if(results[0].status!=='fulfilled'||!results[0].value.ok)throw new Error(results[0].status==='fulfilled'?(results[0].value.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+results[0].value.status):'RugCheck ist nicht erreichbar.');
    report=await results[0].value.json();
    if(results[1].status==='fulfilled'&&results[1].value.ok){try{full=await results[1].value.json()}catch(e){}}
+   if(results[2].status==='fulfilled'&&results[2].value.ok){try{bubble=await results[2].value.json();bubbleGrade=bubble.grade||null;bubbleSummary=bubble.summary||null}catch(e){}}
    risks=Array.isArray(report.risks)?report.risks:(Array.isArray(full.risks)?full.risks:[]);
    score=Number.isFinite(Number(report.score_normalised))?Number(report.score_normalised):null;
-   rawScore=Number.isFinite(Number(report.score))?Number(report.score):null;
    isRugged=report.rugged===true||full.rugged===true||report.isRugged===true||full.isRugged===true;
    const token=full.token||{};
    if(token.mintAuthority!==undefined)metrics.push('Mint Authority: '+(token.mintAuthority?'aktiv':'keine'));
    if(token.freezeAuthority!==undefined)metrics.push('Freeze Authority: '+(token.freezeAuthority?'aktiv':'keine'));
    if(report.lpLockedPct!==undefined)metrics.push('LP gesperrt: '+Number(report.lpLockedPct).toFixed(1)+'%');
-   if(full.topHolders?.length)metrics.push('Top-Holders geprüft: '+full.topHolders.length);
+   if(full.topHolders?.length){
+    metrics.push('Top-Holders geprüft: '+full.topHolders.length);
+    const holders=full.topHolders.slice().sort((a,b)=>Number(b.pct||0)-Number(a.pct||0));
+    const top10=holders.slice(0,10).reduce((sum,h)=>sum+Number(h.pct||0),0);
+    if(top10>0)metrics.push('Top-10 Holder: '+top10.toFixed(1)+'%');
+   }
+   const insider=full.insiderNetworks||report.insiderNetworks;
+   if(Array.isArray(insider)&&insider.length)metrics.push('Insider-Netzwerke: '+insider.length);
   }else{
    provider='GoPlus';
    const url='https://api.gopluslabs.io/api/v1/token_security/'+chain+'?contract_addresses='+encodeURIComponent(address.toLowerCase());
@@ -187,26 +195,44 @@ async function checkTokenRisk(){
    if(report.holder_count)metrics.push('Holder: '+report.holder_count);
    if(report.is_open_source==='0')bad.push('Quellcode nicht verifiziert / nicht offen');
    risks=bad.map(name=>({name,level:'danger',description:'GoPlus hat dieses Risiko-Flag gemeldet.'}));
-   if(report.is_honeypot==='1'||report.cannot_sell_all==='1'||report.hidden_owner==='1')score=90;
-   else if(bad.length>=3)score=75;else if(bad.length)score=45;else score=15;
    if(report.is_open_source==='1')metrics.push('Quellcode offen');
+   if(report.is_honeypot==='1'||report.cannot_sell_all==='1')score=95;
+   else if(report.hidden_owner==='1'||report.owner_change_balance==='1')score=80;
+   else if(bad.length)score=Math.min(75,35+bad.length*10);
+   else score=null;
+   metrics.push('Bubble-Map: für diese EVM-Chain in FeeFlow nicht verfügbar');
   }
   const riskList=risks.map(r=>{const level=String(r.level||'').toLowerCase(),cls=['danger','high','critical'].includes(level)?'negative':['warn','medium','warning'].includes(level)?'':'positive';return '<li class="'+cls+'"><strong>'+safe(r.name||'Risiko')+' · '+safe(level||'level unbekannt')+'</strong>'+(r.value?' · '+safe(r.value):'')+'<div class="muted">'+safe(r.description||'')+'</div></li>'}).join('');
   const dangerCount=risks.filter(r=>['danger','high','critical'].includes(String(r.level||'').toLowerCase())).length;
   const warnCount=risks.filter(r=>['warn','warning','medium'].includes(String(r.level||'').toLowerCase())).length;
-  const dangerous=isRugged||dangerCount>0||bad.length>0;
-  const verdict=isRugged?words[language].rugged:dangerous?words[language].critical:warnCount?words[language].warning:words[language].clean;
-  const color=dangerous?'negative':warnCount?'':'positive';
-  // FeeFlow-Anzeige: grobe, regelbasierte Risikoeinschätzung – ausdrücklich keine statistische Wahrscheinlichkeit.
-  let rugPercent=5;
-  if(isRugged) rugPercent=99;
-  else if(dangerCount>0) rugPercent=Math.min(95,65+dangerCount*10);
-  else if(bad.length>0) rugPercent=Math.min(95,60+bad.length*8);
-  else if(warnCount>0) rugPercent=Math.min(60,20+warnCount*10);
-  else if(risks.length>0) rugPercent=15;
-  const riskLabel=rugPercent>=65?'SEHR HOHES RUG-RISIKO':rugPercent>=30?'ERHÖHTES RUG-RISIKO':rugPercent>5?'NIEDRIGES BIS MITTLERES RUG-RISIKO':'WENIGE BEKANNTE RISIKO-HINWEISE';
-  const scoreText=words[language].risk+': '+rugPercent+'% · '+riskLabel;
-  box.innerHTML='<strong class="'+(rugPercent>=30?'negative':color)+'">'+verdict+'</strong><div style="font-size:30px;font-weight:850;margin:8px 0;color:'+(rugPercent>=30?'var(--red)':'var(--green)')+'">'+rugPercent+'% <span style="font-size:13px;font-weight:600">'+words[language].risk+' (FeeFlow)</span></div><span class="muted">'+scoreText+'</span>'+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Der Anbieter hat in dieser Abfrage keine konkreten Warnungen zurückgegeben. Die 5% sind nur ein niedriger FeeFlow-Schätzwert und beweisen nicht, dass der Coin sicher ist oder nicht bereits geruggt wurde.</p>')+'<p class="muted">Es wurden '+risks.length+' Risiko-Einträge gefunden ('+dangerCount+' kritisch, '+warnCount+' Warnungen). Die Prozentzahl ist eine regelbasierte FeeFlow-Schätzung, KEINE echte statistische Wahrscheinlichkeit und keine Garantie. Unvollständige oder fehlende Anbieter-Daten können das Ergebnis verfälschen.</p><div class="muted" style="margin-top:10px">Quelle: '+provider+' · Geprüft: '+new Date().toLocaleString()+'</div>';
+  let bubbleRisk=null,bubbleDetails=[];
+  if(chain==='solana'&&bubbleGrade&&Number.isFinite(Number(bubbleGrade.score))){
+   bubbleRisk=Math.max(0,Math.min(100,100-Number(bubbleGrade.score)));
+   if(bubbleGrade.grade)bubbleDetails.push('Bubbles-Note: '+bubbleGrade.grade);
+   if(bubbleGrade.confidence)bubbleDetails.push('Bubble-Map Vertrauen: '+bubbleGrade.confidence);
+   if(bubbleSummary){
+    if(Number.isFinite(Number(bubbleSummary.top10Share)))bubbleDetails.push('Bubble-Map Top-10: '+Number(bubbleSummary.top10Share).toFixed(1)+'%');
+    if(Number.isFinite(Number(bubbleSummary.topClusterShare)))bubbleDetails.push('Größter Wallet-Cluster: '+Number(bubbleSummary.topClusterShare).toFixed(1)+'%');
+    if(Number.isFinite(Number(bubbleSummary.clusteredShare)))bubbleDetails.push('In Clustern: '+Number(bubbleSummary.clusteredShare).toFixed(1)+'%');
+    if(bubbleSummary.holders)bubbleDetails.push('Bubble-Map Holder: '+bubbleSummary.holders);
+   }
+   (bubbleGrade.factors||[]).filter(f=>f.available&&Number(f.penalty)>0).forEach(f=>bubbleDetails.push((f.text||f.key)+' (Risikopunkte: '+Number(f.penalty).toFixed(1)+')'));
+  }
+  const scores=[];
+  if(Number.isFinite(score))scores.push(score);
+  if(Number.isFinite(bubbleRisk))scores.push(bubbleRisk);
+  let rugPercent=scores.length?Math.max(...scores):null;
+  if(isRugged)rugPercent=100;
+  const dangerous=isRugged||dangerCount>0||bad.some(x=>/honeypot|verkauf|owner|blacklist|mint|self-destruct/i.test(x));
+  const verdict=isRugged?'ALS RUG GEMELDET':dangerous?'KRITISCHE WARNUNGEN':rugPercent===null?'DATEN UNVOLLSTÄNDIG':rugPercent>=60?'HOHES RISIKO':rugPercent>=30?'ERHÖHTES RISIKO':warnCount?'WARNUNGEN GEFUNDEN':'KEINE STARKEN SIGNALE ERKANNT';
+  const color=dangerous||rugPercent>=60?'negative':rugPercent===null?'':rugPercent>=30||warnCount?'':'positive';
+  const riskLabel=rugPercent===null?'Kein belastbarer Score – Daten fehlen':rugPercent>=60?'HOHES RISIKO':rugPercent>=30?'ERHÖHTES RISIKO':'WENIGER RISIKOSIGNALE ERKANNT';
+  const scoreBlock=rugPercent===null?'<div style="font-size:18px;font-weight:800;margin:8px 0">Kein Score verfügbar</div><span class="muted">FeeFlow zeigt absichtlich keine erfundene 5%-Zahl, wenn keine belastbare Bewertung vorliegt.</span>':'<div style="font-size:30px;font-weight:850;margin:8px 0;color:'+(rugPercent>=30?'var(--red)':'var(--green)')+'">'+rugPercent.toFixed(0)+'/100 <span style="font-size:13px;font-weight:600">Risikowert · höher = riskanter</span></div><span class="muted">'+riskLabel+' · '+(scores.length===2?'RugCheck und Bubble-Map, konservativ höchster Wert':chain==='solana'?'RugCheck':'GoPlus-Flags')+'</span>';
+  const bubbleStatus=chain!=='solana'?'Bubble-Map nicht unterstützt für ausgewählte Chain':bubbleGrade?'Bubble-Map analysiert':'Bubble-Map Daten fehlen oder werden noch erstellt';
+  const mapLink=chain==='solana'?'<p><a href="https://bubblemaps.dev/embed/'+encodeURIComponent(address)+'" target="_blank" rel="noopener" style="color:#c69bff">Bubble-Map öffnen ↗</a></p>':'';
+  const factors=bubbleDetails.length?'<p class="muted"><strong>Bubble-Map / Wallet-Verbindungen</strong><br>'+bubbleDetails.map(safe).join('<br>')+'</p>':'';
+  const confidence=bubbleGrade&&bubbleGrade.confidence?'<p class="muted">Bubbles Datenvertrauen: '+safe(bubbleGrade.confidence)+(bubbleGrade.partialReasons?.length?' · Teilweise fehlend: '+safe(bubbleGrade.partialReasons.join(', ')):'')+'</p>':'';
+  box.innerHTML='<strong class="'+color+'">'+verdict+'</strong>'+scoreBlock+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+'<p class="muted">'+bubbleStatus+'</p>'+factors+confidence+mapLink+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Keine konkreten Risiko-Einträge von diesem Anbieter zurückgegeben. Das ist kein Sicherheitsnachweis.</p>')+'<p class="muted">Es wurden '+risks.length+' RugCheck-Risiko-Einträge gefunden ('+dangerCount+' kritisch, '+warnCount+' Warnungen). Ein Score wird nur angezeigt, wenn ein Anbieter tatsächlich einen Wert geliefert hat. Bei Solana wird der höhere Risikowert aus RugCheck und (100 minus Bubbles-Score) verwendet. Wallet-Verbindungen sind Hinweise auf mögliche Zusammenhänge, kein Beweis für dieselbe Person. Auch eine gute Bewertung garantiert keine Sicherheit.</p><div class="muted" style="margin-top:10px">Quelle: '+provider+' · Geprüft: '+new Date().toLocaleString()+'</div>';
  }catch(e){box.innerHTML='<strong class="negative">Prüfung nicht möglich</strong><span class="muted">'+safe(e.message)+'</span><div class="muted" style="margin-top:8px">Versuche es später erneut oder prüfe die Adresse direkt beim jeweiligen Sicherheitsanbieter.</div>'}
  finally{button.disabled=false;button.textContent='Check'}
 }
