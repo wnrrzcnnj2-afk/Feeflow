@@ -606,7 +606,7 @@ function updateChartHeader(c){$('chartTitle').textContent=c.name+' ('+c.symbol.t
 let jupiterScriptPromise=null;
 function loadJupiterScript(){if(window.Jupiter)return Promise.resolve();if(jupiterScriptPromise)return jupiterScriptPromise;jupiterScriptPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://terminal.jup.ag/main-v4.js';script.async=true;script.onload=()=>window.Jupiter?resolve():reject(new Error('Jupiter konnte nicht initialisiert werden.'));script.onerror=()=>reject(new Error('Jupiter-Script konnte nicht geladen werden.'));document.head.appendChild(script)});return jupiterScriptPromise}
 async function mountJupiterSwap(c){const panel=$('swapPanel'),target=$('swapTerminal');if(String(c?.chainId||'').toLowerCase()!=='solana'||!c?.tokenAddress){panel.hidden=true;return}panel.hidden=false;target.innerHTML='<div class="chart-empty">Lade sicheren Swap-Bereich…</div>';try{await loadJupiterScript();if(state.selected?.tokenAddress!==c.tokenAddress)return;if(window.Jupiter.root){window.Jupiter.close();window.Jupiter.root.unmount();window.Jupiter.root=null}target.innerHTML='';window.Jupiter.init({displayMode:'integrated',integratedTargetId:'swapTerminal',endpoint:'https://api.mainnet-beta.solana.com',defaultExplorer:'Solscan',formProps:{initialInputMint:'So11111111111111111111111111111111111111112',initialOutputMint:c.tokenAddress}})}catch(e){target.innerHTML='<div class="chart-empty">'+safe(e.message)+'<br><a href="https://jup.ag/swap/SOL-'+encodeURIComponent(c.tokenAddress)+'" target="_blank" rel="noopener noreferrer" style="color:#c59aff">Jupiter direkt öffnen ↗</a></div>'}}
-async function selectCoin(c){state.selected=c;if(!c.dexPair&&state.chartMode==='candles'){state.chartMode='line';document.querySelectorAll('[data-chart-mode]').forEach(b=>b.classList.toggle('active',b.dataset.chartMode==='line'))}updateChartHeader(c);updateTokenActions(c);$('market').scrollIntoView({behavior:'smooth',block:'center'});await Promise.allSettled([loadChart(),loadWhaleTrades(),mountJupiterSwap(c)])}
+async function selectCoin(c){state.selected=c;state.chartData=[];state.chartViewStart=0;state.chartViewEnd=0;if(!c.dexPair&&state.chartMode==='candles'){state.chartMode='line';document.querySelectorAll('[data-chart-mode]').forEach(b=>b.classList.toggle('active',b.dataset.chartMode==='line'))}updateChartHeader(c);updateTokenActions(c);$('market').scrollIntoView({behavior:'smooth',block:'center'});await Promise.allSettled([loadChart(),loadWhaleTrades(),mountJupiterSwap(c)])}
 function geckoNetwork(chain){return ({ethereum:'eth',solana:'solana',base:'base',bsc:'bsc',polygon:'polygon_pos',arbitrum:'arbitrum',optimism:'optimism',avalanche:'avax',cronos:'cronos',fantom:'ftm',zksync:'zksync',linea:'linea',scroll:'scroll',mantle:'mantle',sui:'sui',ton:'ton'})[String(chain||'').toLowerCase()]||null}
 async function loadChart(){
  const c=state.selected;if(!c)return;
@@ -632,8 +632,13 @@ async function loadChart(){
   if(points.length<2)throw new Error('Für diesen Coin sind noch nicht genügend Chart-Daten vorhanden.');
   if(state.chartMode==='candles'){
    if(ohlc.length<2)throw new Error('Für diesen Coin sind noch nicht genügend Kerzendaten vorhanden.');
-   drawCandles(ohlc);
-  }else drawChart(points);
+   state.chartData=ohlc;
+  }else{
+   state.chartData=points.map((value,i)=>({value,time:timestamps[i]}));
+  }
+  state.chartViewStart=0;
+  state.chartViewEnd=state.chartData.length;
+  renderChartView();
   const first=new Date(timestamps[0]),last=new Date(timestamps[timestamps.length-1]);
   $('chartStart').textContent=state.days===1?first.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):first.toLocaleDateString();
   $('chartEnd').textContent=state.days===1?'Letzter Scan '+last.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):last.toLocaleDateString();
