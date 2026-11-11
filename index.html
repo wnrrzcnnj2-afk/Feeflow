@@ -165,11 +165,15 @@ async function loadTrendingBoard(){
    }
   }
   if(!candidates.size)throw new Error('Der öffentliche Scanner-Feed liefert gerade keine Token.');
+  // Include notable established Solana runners that may no longer appear in the latest-boost feeds.
+  const niHaoAddress='4CxjZyMNoF1p6eXHXHv1TWpS2X47CuUmLwtGe18spump';
+  candidates.set('solana:'+niHaoAddress,{chainId:'solana',tokenAddress:niHaoAddress});
   const groups=new Map();
   for(const item of candidates.values()){
    if(!groups.has(item.chainId))groups.set(item.chainId,[]);
    groups.get(item.chainId).push(item.tokenAddress);
   }
+  if(groups.has('solana')){const sol=groups.get('solana');groups.set('solana',[niHaoAddress,...sol.filter(a=>a!==niHaoAddress)]);}
   const selectedGroups=[...groups.entries()].sort((a,b)=>b[1].length-a[1].length).slice(0,8);
   const requests=selectedGroups.map(([chain,addresses])=>
    getJSON('https://api.dexscreener.com/tokens/v1/'+encodeURIComponent(chain)+'/'+addresses.slice(0,30).map(encodeURIComponent).join(','))
