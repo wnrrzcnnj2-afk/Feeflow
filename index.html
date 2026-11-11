@@ -236,7 +236,7 @@ const money=(n,opts={})=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US
 const compact=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(Number(n)):'—';
 const shortNum=n=>{const v=Number(n);if(!Number.isFinite(v))return '—';if(v>=1)return money(v,{maximumFractionDigits:v<1?6:2});return '$'+v.toPrecision(4)};
 function toast(message){const el=$('toast');el.textContent=message;el.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display='none',3200)}
-async function getResponse(url,options={}){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);try{return await fetch(url,{...options,headers:{accept:'application/json',...(options.headers||{})},signal:controller.signal})}catch(e){if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');throw e}finally{clearTimeout(timer)}}
+async function getResponse(url,options={},timeoutMs=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);try{return await fetch(url,{...options,headers:{accept:'application/json',...(options.headers||{})},signal:controller.signal})}catch(e){if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');throw e}finally{clearTimeout(timer)}}
 async function getJSON(url,options={}){const res=await getResponse(url,options);if(!res.ok)throw new Error(res.status===429?'API-Rate-Limit erreicht — bitte kurz warten.':'Datenanbieter antwortet mit HTTP '+res.status);return res.json()}
 async function loadMarket(){if(state.refreshing)return;state.refreshing=true;$('refreshBtn').disabled=true;$('marketStatus').textContent='UPDATING…';try{
  const global=await getJSON('https://api.coingecko.com/api/v3/global');const g=global.data||{};
@@ -449,16 +449,16 @@ async function checkTokenRisk(){
  const address=$('riskAddress').value.trim(),chain=$('riskChain').value,box=$('riskResult'),button=$('riskCheckBtn');
  if(!address){box.innerHTML='<strong>Adresse fehlt</strong><span class="muted">Bitte zuerst eine Token-Adresse einfügen.</span>';return}
  if(address.length<30){box.innerHTML='<strong class="negative">Ungültige Adresse</strong><span class="muted">Die Adresse sieht zu kurz aus. Bitte prüfe sie.</span>';return}
- button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">Prüfe RugCheck, Holder-Verteilung, Bubble-Map und Wallet-Cluster.</span>';
+ button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">RugCheck wird priorisiert. Holder- und Bubble-Map-Daten laufen parallel und werden bei Verzögerung übersprungen.</span>';
  try{
   let report={},full={},risks=[],rugcheckRisk=null,metrics=[],bad=[],isRugged=false,provider='',bubble=null,bubbleMap=null,launch=null,bubbleRisk=null,bubbleDetails=[],bubblePending=false;
   if(chain==='solana'){
    provider='RugCheck + Bubbles';
    const base='https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address);
    const results=await Promise.allSettled([
-    getResponse(base+'/report/summary'),
-    getResponse(base+'/report'),
-    getResponse('https://bubblemaps.dev/api/map/'+encodeURIComponent(address))
+    getResponse(base+'/report/summary',{},7000),
+    getResponse(base+'/report',{},5000),
+    getResponse('https://bubblemaps.dev/api/map/'+encodeURIComponent(address),{},3500)
    ]);
    if(results[0].status!=='fulfilled'||!results[0].value.ok)throw new Error(results[0].status==='fulfilled'?(results[0].value.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+results[0].value.status):'RugCheck ist nicht erreichbar.');
    report=await results[0].value.json();
