@@ -161,7 +161,7 @@ img,svg,canvas{max-width:100%}
       <div class="chart" id="chart"><div class="chart-empty">Wähle einen Coin aus der Trending-Liste oder Suche, um den Chart zu laden.</div></div>
       <div class="chart-labels"><span id="chartStart">—</span><span id="chartEnd">Now</span></div>
       <div class="chart-type-row"><span class="muted">CHARTTYP</span><div class="chart-controls chart-style"><button type="button" data-chart-mode="candles" class="active">Kerzen</button><button type="button" data-chart-mode="line">Linie</button></div></div>
-      <div class="chart-zoom-row"><span id="chartInteractionHint">Chart ziehen oder zoomen</span><div><button type="button" id="chartZoomOut" aria-label="Zoom heraus">−</button><button type="button" id="chartZoomIn" aria-label="Zoom hinein">+</button><button type="button" id="chartZoomReset">Reset</button></div></div>\n      <div class="token-actions" id="tokenActions" hidden><span class="token-address" id="tokenAddressLabel">Wähle einen DEX-Coin aus</span><button type="button" id="copyTokenAddress">Adresse kopieren</button><a id="openDexPair" href="#" target="_blank" rel="noopener noreferrer">DEX Screener ↗</a></div>
+      <div class="chart-zoom-row"><span id="chartInteractionHint">Chart ziehen oder zoomen</span><div><button type="button" id="chartZoomOut" aria-label="Zoom heraus">−</button><button type="button" id="chartZoomIn" aria-label="Zoom hinein">+</button><button type="button" id="chartZoomReset">Reset</button></div></div>\n      <div class="token-actions" id="tokenActions" hidden><span class="token-address" id="tokenAddressLabel">Wähle einen Coin aus</span><button type="button" id="copyTokenAddress">Adresse kopieren</button><a id="openDexPair" href="#" target="_blank" rel="noopener noreferrer">Pair ansehen ↗</a><a id="tradeLink" href="#" target="_blank" rel="noopener noreferrer">Jetzt handeln ↗</a></div>
 
       <p class="notice">Wähle einen Coin aus, um den Chart zu laden.</p>
     </div>
@@ -178,7 +178,7 @@ img,svg,canvas{max-width:100%}
       <div class="wallet-info" id="walletInfo"><strong>Not connected</strong><span class="muted">No wallet connected in this session.</span></div>
       <div class="wallet-actions"><button class="secondary-btn" id="disconnectBtn" hidden>Hide wallet</button></div>
       <div class="status" id="walletStatus" role="status"></div>
-      <p class="notice">FeeFlow zeigt nur deine öffentliche Wallet-Adresse an. Keine Transaktionen, kein Zugriff auf Private Keys.</p>
+      <p class="notice">FeeFlow verwahrt keine Coins und fragt niemals nach deiner Seed Phrase. Trades werden vom jeweiligen DEX vorbereitet und müssen in deiner Wallet bestätigt werden.</p>
     </div>
   </section>
 
@@ -200,7 +200,7 @@ img,svg,canvas{max-width:100%}
    <p class="notice">Preisalarme funktionieren nur bei geöffnetem FeeFlow. Portfolio-Werte sind Schätzungen.</p>
   </section>
 <section class="launch-panel" id="createCoin"><div class="panel-head"><h2>🚀 Eigenen Coin erstellen</h2><span class="pill">SOLANA · PUMP.FUN</span></div><p class="notice" style="margin-top:0">Erstelle einen Solana-Token. Die Transaktion wird in Phantom von dir bestätigt.</p><div class="launch-grid"><div><div class="launch-form"><div class="launch-field"><label for="launchName">Token-Name *</label><input id="launchName" maxlength="32" placeholder="z. B. FeeFlow Coin"></div><div class="launch-field"><label for="launchSymbol">Ticker *</label><input id="launchSymbol" maxlength="10" placeholder="z. B. FEE"></div><div class="launch-field full"><label for="launchDescription">Beschreibung</label><textarea id="launchDescription" maxlength="500" placeholder="Worum geht es bei deinem Coin?"></textarea></div><div class="launch-field full"><label for="launchImage">Coin-Bild (PNG/JPG/WebP, max. 5 MB) *</label><input id="launchImage" type="file" accept="image/png,image/jpeg,image/webp"></div><div class="launch-field"><label for="launchWebsite">Website (optional)</label><input id="launchWebsite" placeholder="https://…"></div><div class="launch-field"><label for="launchTwitter">X / Twitter (optional)</label><input id="launchTwitter" placeholder="https://x.com/…"></div><div class="launch-field"><label for="launchTelegram">Telegram (optional)</label><input id="launchTelegram" placeholder="https://t.me/…"></div><div class="launch-field"><label for="launchBuy">Initialer Kauf in SOL</label><input id="launchBuy" type="number" min="0.0001" max="5" step="0.0001" value="0.0001"></div><div class="launch-field full"><label for="launchPinata">Pinata JWT für IPFS-Upload *</label><input id="launchPinata" type="password" autocomplete="off" placeholder="Deinen eigenen Pinata JWT hier einfügen"></div></div><div class="launch-actions"><button class="btn" id="launchCreateBtn" type="button">🚀 Coin erstellen</button><button class="secondary-btn" id="launchConnectBtn" type="button">Phantom verbinden</button></div><div class="launch-result" id="launchStatus" role="status" aria-live="polite">Bereit. Für den IPFS-Upload wird ein eigener Pinata JWT benötigt.</div></div><aside class="launch-side"><strong>Vor dem Launch</strong><div class="launch-status">1. Pinata API-Key erstellen und JWT einfügen.<br><br>2. Token-Daten und Bild hochladen.<br><br>3. FeeFlow erstellt die Transaktion; Phantom zeigt sie zur Prüfung und Signatur an.<br><br>4. Danach erhältst du Mint-Adresse und Solscan-Link.</div><div class="launch-warning">Echter Mainnet-Launch: Du benötigst SOL für den initialen Kauf, Netzwerk-/Priority-Gebühren und mögliche Pump.fun-/Trading-Gebühren. Kosten und Ausführung können sich ändern. Prüfe jede Transaktion in Phantom. Verwende nur deinen eigenen Pinata JWT.</div><div class="launch-status" style="margin-top:10px">Der JWT wird nicht gespeichert; er bleibt nur im Formular dieser Sitzung.</div></aside></div></section>
-  <p class="disclaimer">Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by CoinGecko. No swaps, deposits, withdrawals or trades are performed here.</p>
+  <p class="disclaimer">Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by CoinGecko. Trades are routed through linked third-party DEX services; FeeFlow never holds your funds.</p>
 </main>
 <footer><span>© 2026 FeeFlow · Follow the flow.</span><span>Marktdaten: CoinGecko &amp; DEX Screener · Wallet bleibt im Browser</span></footer>
 </div>
@@ -334,7 +334,11 @@ function updateTokenActions(c){
  const addr=c?.tokenAddress||'';
  if(!c?.dexPair||!addr||!c.pairAddress){box.hidden=true;return}
  box.hidden=false;$('tokenAddressLabel').textContent=addr;
- $('openDexPair').href='https://dexscreener.com/'+encodeURIComponent(c.chainId||'solana')+'/'+encodeURIComponent(c.pairAddress);
+ const pairUrl='https://dexscreener.com/'+encodeURIComponent(c.chainId||'solana')+'/'+encodeURIComponent(c.pairAddress);
+ $('openDexPair').href=pairUrl;
+ const solana=String(c.chainId||'').toLowerCase()==='solana';
+ $('tradeLink').href=solana?'https://jup.ag/swap/SOL-'+encodeURIComponent(addr):pairUrl;
+ $('tradeLink').textContent=solana?'Mit Jupiter handeln ↗':'Auf DEX Screener handeln ↗';
 }
 $('copyTokenAddress')?.addEventListener('click',async()=>{
  const addr=state.selected?.tokenAddress;if(!addr)return;
@@ -595,7 +599,7 @@ async function checkTokenRisk(){
 }
 $('riskCheckBtn').addEventListener('click',checkTokenRisk);$('riskAddress').addEventListener('keydown',e=>{if(e.key==='Enter')checkTokenRisk()});
 function updateChartHeader(c){$('chartTitle').textContent=c.name+' ('+c.symbol.toUpperCase()+')';$('chartPrice').textContent=shortNum(c.current_price);const n=Number(c.price_change_percentage_24h);$('chartChange').textContent=(n>=0?'+':'')+(Number.isFinite(n)?n.toFixed(2)+'%':'—')+' · 24h';$('chartChange').className='chart-change '+(n>=0?'positive':'negative')}
-async function selectCoin(c){state.selected=c;updateChartHeader(c);updateTokenActions(c);$('market').scrollIntoView({behavior:'smooth',block:'center'});await Promise.allSettled([loadChart(),loadWhaleTrades()])}
+async function selectCoin(c){state.selected=c;if(!c.dexPair&&state.chartMode==='candles'){state.chartMode='line';document.querySelectorAll('[data-chart-mode]').forEach(b=>b.classList.toggle('active',b.dataset.chartMode==='line'))}updateChartHeader(c);updateTokenActions(c);$('market').scrollIntoView({behavior:'smooth',block:'center'});await Promise.allSettled([loadChart(),loadWhaleTrades()])}
 function geckoNetwork(chain){return ({ethereum:'eth',solana:'solana',base:'base',bsc:'bsc',polygon:'polygon_pos',arbitrum:'arbitrum',optimism:'optimism',avalanche:'avax',cronos:'cronos',fantom:'ftm',zksync:'zksync',linea:'linea',scroll:'scroll',mantle:'mantle',sui:'sui',ton:'ton'})[String(chain||'').toLowerCase()]||null}
 async function loadChart(){
  const c=state.selected;if(!c)return;
@@ -670,7 +674,7 @@ $('coinRows').addEventListener('click',e=>{const tr=e.target.closest('tr');if(!t
 $('coinRows').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-pair]')){e.preventDefault();chooseDexRow(e.target)}});
 $('chartZoomIn').addEventListener('click',()=>zoomChart(.7));$('chartZoomOut').addEventListener('click',()=>zoomChart(1.4));$('chartZoomReset').addEventListener('click',resetChartView);
 document.querySelectorAll('[data-days]').forEach(b=>b.addEventListener('click',()=>{state.days=Number(b.dataset.days);document.querySelectorAll('[data-days]').forEach(x=>x.classList.toggle('active',x===b));loadChart()}));
-document.querySelectorAll('[data-chart-mode]').forEach(b=>b.addEventListener('click',()=>{state.chartMode=b.dataset.chartMode;document.querySelectorAll('[data-chart-mode]').forEach(x=>x.classList.toggle('active',x===b));loadChart()}));
+document.querySelectorAll('[data-chart-mode]').forEach(b=>b.addEventListener('click',()=>{state.chartMode=b.dataset.chartMode;if(state.selected&&!state.selected.dexPair&&state.chartMode==='candles'){state.chartMode='line';toast('Für diesen Coin sind nur Kursdaten verfügbar – Linienchart aktiviert.')}document.querySelectorAll('[data-chart-mode]').forEach(x=>x.classList.toggle('active',x.dataset.chartMode===state.chartMode));loadChart()}));
 setInterval(()=>{if(state.selected&&!document.hidden)loadChart()},30000);
 const amount=$('amount'),rate=$('rate');function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.min(100,Math.max(0,Number(rate.value)||0)),f=a*r/100;$('feeResult').textContent=money(f);$('netResult').textContent='Net amount: '+money(a-f)}amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
 async function connectWallet(){const status=$('walletStatus');status.className='status';status.textContent='Suche nach einer installierten Wallet…';try{
