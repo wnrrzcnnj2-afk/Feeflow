@@ -51,9 +51,6 @@ function transferMatches(tx) {
     if (!Number.isFinite(amount) || amount < TOKEN_AMOUNT) continue;
     const destIndex = post.find(x => x.owner === WALLET && x.mint === USDC_MINT);
     if (!destIndex) continue;
-    const sourceOwner = pre.find(x => x.owner && (x.accountIndex === info.source || x.accountIndex === info.sourceIndex));
-    const destinationOwner = post.find(x => x.owner === WALLET && x.mint === USDC_MINT);
-    if (sourceOwner && sourceOwner.owner === destinationOwner.owner) continue;
     const destinationAccountIndex = tx.transaction?.message?.accountKeys?.findIndex(k =>
       (typeof k === "string" ? k : k.pubkey) === info.destination
     );
@@ -62,7 +59,7 @@ function transferMatches(tx) {
     );
     const destOwner = destinationAccountIndex >= 0 ? ownerFor(destinationAccountIndex, post) : null;
     const payerOwner = sourceAccountIndex >= 0 ? ownerFor(sourceAccountIndex, pre) : null;
-    if (destOwner === WALLET && payerOwner && payerOwner !== WALLET) return true;
+    if (destOwner === WALLET && payerOwner === WALLET) return true;
   }
   return false;
 }
