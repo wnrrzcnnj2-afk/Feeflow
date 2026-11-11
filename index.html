@@ -43,8 +43,8 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
     <div class="panel" id="trending">
       <div class="panel-head"><h2>Trending coins</h2><span class="pill" id="marketStatus">CONNECTING…</span></div>
       <div class="panel-head" style="margin:4px 0 10px"><h2>Top 10 · Live Momentum</h2><span class="pill" id="trendStatus">SCANNING…</span></div>
-      <p class="notice" style="margin:0 0 12px">Die 10 stärksten aktuell erkannten Bewegungen. Neue Coins unter 30 Minuten mit mindestens 150.000 $ Market Cap werden als Hype-Kandidaten bevorzugt.</p>
-      <div class="table-wrap"><table><thead><tr><th>#</th><th>Coin</th><th>Signal</th><th>1h</th><th>Market Cap</th><th>Alter</th></tr></thead><tbody id="trendRows"><tr><td colspan="6" class="muted">Live-Trends werden geladen…</td></tr></tbody></table></div>
+      <p class="notice" style="margin:0 0 12px">Die 10 stärksten aktuell erkannten Bewegungen. Neue Handelspaare unter 30 Minuten mit mindestens 150.000 $ Market Cap werden als Hype-Kandidaten bevorzugt.</p>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Coin</th><th>Signal</th><th>1h</th><th>Market Cap</th><th>Pair-Alter</th></tr></thead><tbody id="trendRows"><tr><td colspan="6" class="muted">Live-Trends werden geladen…</td></tr></tbody></table></div>
       <div class="search-row" style="margin-top:20px"><input class="search" id="coinSearch" placeholder="Coin oder Contract-Adresse suchen…" aria-label="Search coins"><button class="refresh" id="searchAllBtn" title="Search coins">⌕</button><button class="refresh" id="refreshBtn" title="Refresh market data" aria-label="Refresh">↻</button></div>
       <div id="searchResults" hidden><div class="muted" style="margin:4px 0 8px">Suchergebnisse</div><div class="table-wrap"><table><thead><tr><th>#</th><th>Asset</th><th>Price</th><th>24h</th><th>Market cap</th></tr></thead><tbody id="coinRows"><tr><td colspan="5" class="muted">Tippe einen Namen, ein Kürzel oder eine Adresse ein.</td></tr></tbody></table></div></div>
       <button id="loadMoreBtn" hidden></button><p class="notice" id="dataNote">Live-Daten von DEX Screener und CoinGecko. Die Erkennung ist ein FeeFlow-eigener Momentum-Score, keine offizielle FOMO-Liste.</p>
@@ -128,9 +128,9 @@ async function loadMoreCoins(){return}
 async function loadTrendingBoard(){
  if(state.trendRefreshing)return;state.trendRefreshing=true;$('trendStatus').textContent='SCANNING…';
  try{
-  const [boosts,profiles]=await Promise.all([getJSON('https://api.dexscreener.com/token-boosts/latest/v1'),getJSON('https://api.dexscreener.com/token-profiles/latest/v1')]);
+  const [boosts,topBoosts,profiles]=await Promise.all([getJSON('https://api.dexscreener.com/token-boosts/latest/v1'),getJSON('https://api.dexscreener.com/token-boosts/top/v1'),getJSON('https://api.dexscreener.com/token-profiles/latest/v1')]);
   const candidates=new Map();
-  for(const item of [...(Array.isArray(boosts)?boosts:[]),...(Array.isArray(profiles)?profiles:[])]){
+  for(const item of [...(Array.isArray(boosts)?boosts:[]),...(Array.isArray(topBoosts)?topBoosts:[]),...(Array.isArray(profiles)?profiles:[])]){
    if(!item?.chainId||!item?.tokenAddress)continue;const key=item.chainId+':'+item.tokenAddress;if(!candidates.has(key))candidates.set(key,item);
   }
   const groups=new Map();for(const item of candidates.values()){if(!groups.has(item.chainId))groups.set(item.chainId,[]);groups.get(item.chainId).push(item.tokenAddress)}
@@ -139,7 +139,7 @@ async function loadTrendingBoard(){
   const best=new Map();for(const p of pairs){const address=p.baseToken?.address;if(!address)continue;const key=p.chainId+':'+address,liq=Number(p.liquidity?.usd||0),prev=best.get(key);if(!prev||liq>Number(prev.liquidity?.usd||0))best.set(key,p)}
   const now=Date.now(),scored=[];
   for(const p of best.values()){
-   const mc=Number(p.marketCap||p.fdv||0),liq=Number(p.liquidity?.usd||0),created=Number(p.pairCreatedAt||0),ageMs=created?Math.max(0,now-created):Infinity,ageMin=ageMs/60000;
+   const mc=Number(p.marketCap||0),liq=Number(p.liquidity?.usd||0),created=Number(p.pairCreatedAt||0),ageMs=created?Math.max(0,now-created):Infinity,ageMin=ageMs/60000;
    const h1=Number(p.priceChange?.h1||0),m5=Number(p.priceChange?.m5||0),h6=Number(p.priceChange?.h6||0),h24=Number(p.priceChange?.h24||0),vol1=Number(p.volume?.h1||0),vol24=Number(p.volume?.h24||0),buys=Number(p.txns?.h1?.buys||0),sells=Number(p.txns?.h1?.sells||0);
    const hype=ageMin<=30&&mc>=150000;if(mc<50000||liq<8000||(!hype&&vol24<10000))continue;
    const flowRatio=vol1/Math.max(liq,1),buyRatio=buys/Math.max(buys+sells,1),momentum=Math.max(-30,Math.min(50,m5*1.2+h1*.8+h6*.18));
@@ -154,7 +154,7 @@ async function loadTrendingBoard(){
   }).join('')||'<tr><td colspan="6" class="muted">Aktuell keine passenden Trend-Kandidaten gefunden. Feed wird automatisch erneut geprüft.</td></tr>';
   const top=state.trendCoins[0];$('topCoin').textContent=top?(top.pair.baseToken?.symbol||'—').toUpperCase():'—';$('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · 1h Momentum':'No data';
   $('coinCount').textContent=String(state.trendCoins.length)+' trending';$('trendStatus').textContent='● LIVE';$('trendStatus').style.color='var(--green)';
-  $('dataNote').textContent='10er Scoreboard aus den neuesten DEX-Screener-Profilen und Boosts. Hype-Regel: Pair-Alter ≤30 Min. und Market Cap ≥150.000 $.';
+  $('dataNote').textContent='10er Scoreboard aus DEX-Screener-Profilen und Boosts. Hype-Regel: Pair-Alter ≤30 Min. und gemeldete Market Cap ≥150.000 $. Das Pair-Alter ist nur ein Näherungswert für das Token-Alter.';
  }catch(e){$('trendStatus').textContent='FEED UNAVAILABLE';$('trendStatus').style.color='var(--red)';$('trendRows').innerHTML='<tr><td colspan="6" class="muted">'+safe(e.message)+'</td></tr>'}
  finally{state.trendRefreshing=false}
 }
