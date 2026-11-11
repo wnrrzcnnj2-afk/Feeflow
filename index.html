@@ -24,7 +24,7 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
 <header>
   <a class="brand" href="#overview" style="text-decoration:none;color:inherit"><div class="logo">F</div>Fee<span>Flow</span></a>
   <nav class="nav"><a class="active" href="#overview">Overview</a><a href="#trending">Trending</a><a href="#market">Charts</a><a href="#fees">Fee calculator</a></nav>
-  <div class="top-actions"><span class="network"><i class="live-dot"></i>Live market</span><button class="connect" id="connectBtn">Connect wallet</button></div>
+  <div class="top-actions"><select id="languageSelect" aria-label="Language" style="background:#171525;color:#eee;border:1px solid var(--line);border-radius:9px;padding:9px"><option value="de">Deutsch</option><option value="en">English</option></select><span class="network"><i class="live-dot"></i>Live market</span><button class="connect" id="connectBtn">Connect wallet</button></div>
 </header>
 <main id="overview">
   <section class="hero">
@@ -53,6 +53,7 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
       <select id="riskChain" class="search" style="margin-bottom:10px"><option value="solana">Solana</option><option value="1">Ethereum</option><option value="8453">Base</option><option value="56">BNB Chain</option><option value="137">Polygon</option><option value="42161">Arbitrum</option><option value="10">Optimism</option><option value="43114">Avalanche</option></select>
       <div class="search-row"><input class="search" id="riskAddress" placeholder="Token-Adresse / Mint-Adresse einfügen" autocomplete="off" spellcheck="false"><button class="btn" id="riskCheckBtn">Check</button></div>
       <div id="riskResult" class="wallet-info" aria-live="polite"><strong>Bereit zum Prüfen</strong><span class="muted">Noch keine Adresse geprüft.</span></div>
+      <p class="notice" id="riskSafetyNote">Wichtig: Diese Einschätzung ist nicht zu 100 % sicher und kann einen Rug übersehen. Prüfe den Coin immer selbst.</p>
       <p class="notice">Wichtig: Ein niedriger Risikoscore bedeutet nicht garantiert sicher. Neue oder unbekannte Token können unvollständige Daten haben. Keine Prüfung kann einen Rug zu 100 % ausschließen.</p>
     </div>
     <div class="panel" id="market">
@@ -87,6 +88,24 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
 'use strict';
 const $=id=>document.getElementById(id);
 const state={coins:[],selected:null,days:1,provider:null,account:null,chainId:null,kind:null,refreshing:false,page:1,loadingMore:false,searchMode:false,launches:[],launchSocket:null,launchRetry:1500};
+
+let language='de';
+const words={
+de:{nav:['Übersicht','Trending','Charts','Gebührenrechner'],connect:'Wallet verbinden',hero:'Dein Live-Dashboard für Krypto-Trends, Kursbewegungen und Gebühren. Verbinde eine Wallet nur zum Anzeigen deiner öffentlichen Adresse — FeeFlow fragt niemals nach deiner Seed Phrase oder deinem Private Key.',trend:'Trending-Coins',rug:'Rug-/Scam-Check',intro:'Füge die Contract- oder Mint-Adresse ein. FeeFlow prüft bekannte On-Chain-Risiken für Solana und EVM-Token.',chain:'Blockchain',address:'Token-Adresse / Mint-Adresse einfügen',check:'Prüfen',ready:'Bereit zum Prüfen',none:'Noch keine Adresse geprüft.',safety:'Wichtig: Diese Einschätzung ist NICHT zu 100 % sicher. Sie kann einen Rug übersehen. Auch 5 % bedeutet nicht risikofrei. Prüfe den Coin immer selbst.',chart:'Markt-Chart',fee:'Gebührenrechner',wallet:'Deine Wallet',disclaimer:'Risikohinweis: Krypto- und Meme-Coins sind sehr volatil; du kannst dein gesamtes Investment verlieren. FeeFlow dient nur der Information und ist keine Finanzberatung.',risk:'Geschätztes Rug-Risiko',rugged:'RUG PULL VOM ANBIETER ERKANNT',critical:'KRITISCHE RISIKEN GEFUNDEN',warning:'WARNUNGEN GEFUNDEN',clean:'KEINE BEKANNTEN WARNUNGEN – NICHT ALS SICHER BESTÄTIGT'},
+en:{nav:['Overview','Trending','Charts','Fee calculator'],connect:'Connect wallet',hero:'Your live dashboard for crypto trends, price movements and fees. Connect a wallet only to display your public address — FeeFlow never asks for your seed phrase or private key.',trend:'Trending coins',rug:'Rug / Scam Check',intro:'Enter the contract or mint address. FeeFlow checks known on-chain risks for Solana and EVM tokens.',chain:'Blockchain',address:'Enter token / mint address',check:'Check',ready:'Ready to check',none:'No address checked yet.',safety:'Important: This assessment is NOT 100% accurate. It can miss a rug. Even 5% does not mean risk-free. Always do your own research.',chart:'Market chart',fee:'Fee calculator',wallet:'Your wallet',disclaimer:'Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is informational only and is not financial advice.',risk:'Estimated rug risk',rugged:'RUG PULL REPORTED BY PROVIDER',critical:'CRITICAL RISKS FOUND',warning:'WARNINGS FOUND',clean:'NO KNOWN WARNINGS – NOT CONFIRMED SAFE'}
+};
+function setText(selector,value){const el=document.querySelector(selector);if(el)el.textContent=value}
+function applyLanguage(value){
+ language=value==='en'?'en':'de';const t=words[language];document.documentElement.lang=language;
+ document.querySelectorAll('.nav a').forEach((a,i)=>{if(t.nav[i])a.textContent=t.nav[i]});
+ setText('#connectBtn',t.connect);setText('.hero p',t.hero);setText('#trending h2',t.trend);setText('#rugcheck h2',t.rug);setText('#rugcheck .notice',t.intro);
+ const labels=document.querySelectorAll('#rugcheck label');if(labels[0])labels[0].textContent=t.chain;
+ $('riskAddress').placeholder=t.address;$('riskCheckBtn').textContent=t.check;
+ setText('#riskSafetyNote',t.safety);setText('#market h2',t.chart);setText('#fees h2',t.fee);setText('#walletPanel h2',t.wallet);setText('.disclaimer',t.disclaimer);
+ if(!$('riskAddress').value)$('riskResult').innerHTML='<strong>'+t.ready+'</strong><span class="muted">'+t.none+'</span>';
+}
+$('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
+
 const money=(n,opts={})=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',...opts}).format(Number(n)):'—';
 const compact=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(Number(n)):'—';
 const shortNum=n=>{const v=Number(n);if(!Number.isFinite(v))return '—';if(v>=1)return money(v,{maximumFractionDigits:v<1?6:2});return '$'+v.toPrecision(4)};
@@ -176,7 +195,7 @@ async function checkTokenRisk(){
   const dangerCount=risks.filter(r=>['danger','high','critical'].includes(String(r.level||'').toLowerCase())).length;
   const warnCount=risks.filter(r=>['warn','warning','medium'].includes(String(r.level||'').toLowerCase())).length;
   const dangerous=isRugged||dangerCount>0||bad.length>0;
-  const verdict=isRugged?'RUG PULL VOM ANBIETER ERKANNT':dangerous?'KRITISCHE RISIKEN GEFUNDEN':warnCount?'WARNUNGEN GEFUNDEN':'KEINE BEKANNTEN WARNUNGEN – NICHT ALS SICHER BESTÄTIGT';
+  const verdict=isRugged?words[language].rugged:dangerous?words[language].critical:warnCount?words[language].warning:words[language].clean;
   const color=dangerous?'negative':warnCount?'':'positive';
   // FeeFlow-Anzeige: grobe, regelbasierte Risikoeinschätzung – ausdrücklich keine statistische Wahrscheinlichkeit.
   let rugPercent=5;
@@ -186,8 +205,8 @@ async function checkTokenRisk(){
   else if(warnCount>0) rugPercent=Math.min(60,20+warnCount*10);
   else if(risks.length>0) rugPercent=15;
   const riskLabel=rugPercent>=65?'SEHR HOHES RUG-RISIKO':rugPercent>=30?'ERHÖHTES RUG-RISIKO':rugPercent>5?'NIEDRIGES BIS MITTLERES RUG-RISIKO':'WENIGE BEKANNTE RISIKO-HINWEISE';
-  const scoreText='Geschätztes Rug-Risiko: '+rugPercent+'% · '+riskLabel;
-  box.innerHTML='<strong class="'+(rugPercent>=30?'negative':color)+'">'+verdict+'</strong><div style="font-size:30px;font-weight:850;margin:8px 0;color:'+(rugPercent>=30?'var(--red)':'var(--green)')+'">'+rugPercent+'% <span style="font-size:13px;font-weight:600">Rug-Risiko (FeeFlow-Schätzung)</span></div><span class="muted">'+scoreText+'</span>'+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Der Anbieter hat in dieser Abfrage keine konkreten Warnungen zurückgegeben. Die 5% sind nur ein niedriger FeeFlow-Schätzwert und beweisen nicht, dass der Coin sicher ist oder nicht bereits geruggt wurde.</p>')+'<p class="muted">Es wurden '+risks.length+' Risiko-Einträge gefunden ('+dangerCount+' kritisch, '+warnCount+' Warnungen). Die Prozentzahl ist eine regelbasierte FeeFlow-Schätzung, KEINE echte statistische Wahrscheinlichkeit und keine Garantie. Unvollständige oder fehlende Anbieter-Daten können das Ergebnis verfälschen.</p><div class="muted" style="margin-top:10px">Quelle: '+provider+' · Geprüft: '+new Date().toLocaleString()+'</div>';
+  const scoreText=words[language].risk+': '+rugPercent+'% · '+riskLabel;
+  box.innerHTML='<strong class="'+(rugPercent>=30?'negative':color)+'">'+verdict+'</strong><div style="font-size:30px;font-weight:850;margin:8px 0;color:'+(rugPercent>=30?'var(--red)':'var(--green)')+'">'+rugPercent+'% <span style="font-size:13px;font-weight:600">'+words[language].risk+' (FeeFlow)</span></div><span class="muted">'+scoreText+'</span>'+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Der Anbieter hat in dieser Abfrage keine konkreten Warnungen zurückgegeben. Die 5% sind nur ein niedriger FeeFlow-Schätzwert und beweisen nicht, dass der Coin sicher ist oder nicht bereits geruggt wurde.</p>')+'<p class="muted">Es wurden '+risks.length+' Risiko-Einträge gefunden ('+dangerCount+' kritisch, '+warnCount+' Warnungen). Die Prozentzahl ist eine regelbasierte FeeFlow-Schätzung, KEINE echte statistische Wahrscheinlichkeit und keine Garantie. Unvollständige oder fehlende Anbieter-Daten können das Ergebnis verfälschen.</p><div class="muted" style="margin-top:10px">Quelle: '+provider+' · Geprüft: '+new Date().toLocaleString()+'</div>';
  }catch(e){box.innerHTML='<strong class="negative">Prüfung nicht möglich</strong><span class="muted">'+safe(e.message)+'</span><div class="muted" style="margin-top:8px">Versuche es später erneut oder prüfe die Adresse direkt beim jeweiligen Sicherheitsanbieter.</div>'}
  finally{button.disabled=false;button.textContent='Check'}
 }
@@ -207,7 +226,7 @@ async function connectWallet(){const status=$('walletStatus');status.textContent
 function renderWallet(){const addr=state.account||'';const short=addr.length>18?addr.slice(0,8)+'…'+addr.slice(-6):addr;$('walletInfo').innerHTML='<strong>'+safe(state.kind)+' wallet connected</strong><span>'+safe(short)+'</span><span class="muted">Network: '+safe(state.chainId||'Unknown')+'</span>'; $('connectBtn').textContent=short;$('disconnectBtn').hidden=false}
 function clearWallet(){state.account=null;state.provider=null;state.chainId=null;state.kind=null;$('walletInfo').innerHTML='<strong>Not connected</strong><span class="muted">No wallet connected in this session.</span>';$('connectBtn').textContent='Connect wallet';$('disconnectBtn').hidden=true}
 $('connectBtn').addEventListener('click',connectWallet);$('disconnectBtn').addEventListener('click',()=>{clearWallet();$('walletStatus').textContent='Wallet hidden in FeeFlow. If your wallet offers a disconnect option, use it there too.'});
-loadMarket();setInterval(loadMarket,60000);connectLaunchStream();
+applyLanguage('de');loadMarket();setInterval(loadMarket,60000);connectLaunchStream();
 </script>
 </body>
 </html>
