@@ -209,7 +209,36 @@ function renderTrendRows(){
  renderMarketPulse();
 }
 
-function renderMarketPulse(){const a=state.trendCoins||[];const fmtPct=n=>(n>=0?'+':'')+Number(n||0).toFixed(1)+'%';const mover=a.slice().sort((x,y)=>(Number(y.h1)||0)-(Number(x.h1)||0))[0];const vol=a.slice().sort((x,y)=>(Number(y.vol24)||0)-(Number(x.vol24)||0))[0];const trades=a.reduce((n,x)=>n+(Number(x.trades)||0),0),buys=a.reduce((n,x)=>n+(Number(x.buyRatio)||0)*(Number(x.trades)||0),0),ratio=trades?Math.round(buys/trades*100):null;$('pulseMover').textContent=mover?(mover.pair.baseToken?.symbol||'Coin')+' '+fmtPct(mover.h1):'Warte auf Scan…';$('pulseMoverMeta').textContent=mover?(mover.pair.chainId||'')+' · 1 Stunde':'Noch keine Daten';$('pulseVolume').textContent=vol?'{try{localStorage.setItem(key,JSON.stringify(value))}catch(e){}}
+function renderMarketPulse(){
+ const a=state.trendCoins||[];
+ const fmtPct=n=>(n>=0?'+':'')+Number(n||0).toFixed(1)+'%';
+ const mover=a.slice().sort((x,y)=>(Number(y.h1)||0)-(Number(x.h1)||0))[0];
+ const vol=a.slice().sort((x,y)=>(Number(y.vol24)||0)-(Number(x.vol24)||0))[0];
+ const trades=a.reduce((n,x)=>n+(Number(x.trades)||0),0);
+ const buys=a.reduce((n,x)=>n+(Number(x.buyRatio)||0)*(Number(x.trades)||0),0);
+ const ratio=trades?Math.round(buys/trades*100):null;
+ $('pulseMover').textContent=mover?(mover.pair.baseToken?.symbol||'Coin')+' '+fmtPct(mover.h1):'Warte auf Scan…';
+ $('pulseMoverMeta').textContent=mover?(mover.pair.chainId||'')+' · 1 Stunde':'Noch keine Daten';
+ $('pulseVolume').textContent=vol?'$'+compact(vol.vol24):'—';
+ $('pulseVolumeMeta').textContent=vol?(vol.pair.baseToken?.symbol||'Coin')+' · 24h':'Im aktuellen Radar';
+ $('pulseBuy').textContent=ratio===null?'—':ratio+'%';
+ $('pulseBuyMeta').textContent=trades?trades+' erfasste Trades':'Keine Trade-Daten';
+ $('pulseWatch').textContent=state.watchlist.size+' Coins';
+ $('pulseFoot').textContent=a.length?'Basierend auf '+a.length+' erkannten Token · '+new Date().toLocaleTimeString():'Werte erscheinen nach dem nächsten erfolgreichen Scan.';
+}
+function updateTokenActions(c){
+ const box=$('tokenActions');if(!box)return;
+ const addr=c?.tokenAddress||'';
+ if(!c?.dexPair||!addr||!c.pairAddress){box.hidden=true;return}
+ box.hidden=false;$('tokenAddressLabel').textContent=addr;
+ $('openDexPair').href='https://dexscreener.com/'+encodeURIComponent(c.chainId||'solana')+'/'+encodeURIComponent(c.pairAddress);
+}
+$('copyTokenAddress')?.addEventListener('click',async()=>{
+ const addr=state.selected?.tokenAddress;if(!addr)return;
+ try{await navigator.clipboard.writeText(addr);$('copyTokenAddress').textContent='Kopiert ✓';setTimeout(()=>$('copyTokenAddress').textContent='Adresse kopieren',1800)}
+ catch(e){$('tokenAddressLabel').textContent=addr+' · Bitte manuell kopieren'}
+});
+function saveLocal(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(e){}}
 try{state.performance=JSON.parse(localStorage.getItem('feeflow_performance')||'{}')}catch(e){state.performance={}}
 let sentimentLast=0;
 async function refreshMarketSentiment(){
