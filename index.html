@@ -253,7 +253,7 @@ async function getResponse(url,options={},timeoutMs=9000){
   throw e;
  }
 }
-async function getJSON(url,options={},timeoutMs=9000){const res=await getResponse(url,options,timeoutMs);if(!res.ok)throw new Error(res.status===429?'API-Rate-Limit erreicht — bitte kurz warten.':'Datenanbieter antwortet mit HTTP '+res.status);return res.json()}
+async function getJSON(url,options={}){const res=await getResponse(url,options);if(!res.ok)throw new Error(res.status===429?'API-Rate-Limit erreicht — bitte kurz warten.':'Datenanbieter antwortet mit HTTP '+res.status);return res.json()}
 async function loadMarket(){
  if(state.refreshing)return;
  state.refreshing=true;
@@ -263,18 +263,18 @@ async function loadMarket(){
   {name:'CoinPaprika',url:'https://api.coinpaprika.com/v1/global',parse:g=>({cap:Number(g.market_cap_usd),volume:Number(g.volume_24h_usd),change:Number(g.market_cap_change_24h||0)})},
   {name:'CoinGecko',url:'https://api.coingecko.com/api/v3/global',parse:g=>{const d=g.data||{};return {cap:Number(d.total_market_cap?.usd),volume:Number(d.total_volume?.usd),change:Number(d.market_cap_change_percentage_24h||0)}}}
  ];
+ const errors=[];
  try{
-  const results=await Promise.allSettled(providers.map(async provider=>{
-   const data=await getJSON(provider.url,{},5000),parsed=provider.parse(data);
-   if(!Number.isFinite(parsed.cap)||parsed.cap<=0||!Number.isFinite(parsed.volume)||parsed.volume<=0)throw new Error('Unvollständige Marktdaten');
-   return {stats:parsed,source:provider.name};
-  }));
-  const valid=results.find(r=>r.status==='fulfilled');
-  if(!valid){
-   const errors=results.map((r,i)=>providers[i].name+': '+(r.reason?.message||'Fehler')).join(' | ');
-   throw new Error(errors||'Keine Datenquelle erreichbar');
+  let stats=null,source='';
+  for(const provider of providers){
+   try{
+    const data=await getJSON(provider.url);
+    const parsed=provider.parse(data);
+    if(!Number.isFinite(parsed.cap)||parsed.cap<=0||!Number.isFinite(parsed.volume)||parsed.volume<=0)throw new Error('Unvollständige Marktdaten');
+    stats=parsed;source=provider.name;break;
+   }catch(error){errors.push(provider.name+': '+(error?.message||'unbekannter Fehler'))}
   }
-  const {stats,source}=valid.value;
+  if(!stats)throw new Error(errors.join(' | ')||'Keine Datenquelle erreichbar');
   $('marketCap').textContent='$'+compact(stats.cap);
   $('marketVolume').textContent='$'+compact(stats.volume);
   $('marketCapChange').textContent=(stats.change>=0?'+':'')+stats.change.toFixed(2)+'% · 24h · '+source;
@@ -391,17 +391,12 @@ $('addSmartWallet').addEventListener('click',()=>{const w=$('smartWallet').value
 document.querySelector('#market-intel').addEventListener('click',e=>{const a=e.target.closest('[data-remove-alert]'),p=e.target.closest('[data-remove-position]'),w=e.target.closest('[data-remove-wallet]');if(a){state.alerts.splice(Number(a.dataset.removeAlert),1);saveLocal('feeflow_alerts',state.alerts);renderIntel()}if(p){state.positions.splice(Number(p.dataset.removePosition),1);saveLocal('feeflow_positions',state.positions);renderIntel()}if(w){state.smartWallets.splice(Number(w.dataset.removeWallet),1);saveLocal('feeflow_smart_wallets',state.smartWallets);renderIntel()}});
 $('openHolderScan').addEventListener('click',()=>{$('rugcheck').scrollIntoView({behavior:'smooth',block:'start'});$('riskAddress').focus()});
 async function loadTrendingBoard(){
- if(state.trendRefreshing)return;
- if(!state.trendCoins.length){
-  try{const cached=JSON.parse(localStorage.getItem('feeflow_trending_cache')||'[]');if(Array.isArray(cached)&&cached.length){state.trendCoins=cached;renderTrendRows();$('trendStatus').textContent='CACHED · LIVE UPDATE';$('trendStatus').style.color='var(--muted)';}}
-  catch(e){}
- }
- state.trendRefreshing=true;$('trendStatus').textContent=state.trendCoins.length?'UPDATING…':'SCANNING…';
+ if(state.trendRefreshing)return;state.trendRefreshing=true;$('trendStatus').textContent='SCANNING…';
  try{
   const feeds=await Promise.allSettled([
-   getJSON('https://api.dexscreener.com/token-profiles/latest/v1',{},5500),
-   getJSON('https://api.dexscreener.com/token-boosts/latest/v1',{},5500),
-   getJSON('https://api.dexscreener.com/token-boosts/top/v1',{},5500)
+   getJSON('https://api.dexscreener.com/token-profiles/latest/v1'),
+   getJSON('https://api.dexscreener.com/token-boosts/latest/v1'),
+   getJSON('https://api.dexscreener.com/token-boosts/top/v1')
   ]);
   const candidates=new Map();
   for(const result of feeds){
@@ -424,7 +419,7 @@ async function loadTrendingBoard(){
   if(groups.has('solana')){const sol=groups.get('solana');groups.set('solana',[niHaoAddress,...sol.filter(a=>a!==niHaoAddress)]);}
   const selectedGroups=[...groups.entries()].sort((a,b)=>b[1].length-a[1].length).slice(0,8);
   const requests=selectedGroups.map(([chain,addresses])=>
-   getJSON('https://api.dexscreener.com/tokens/v1/'+encodeURIComponent(chain)+'/'+addresses.slice(0,30).map(encodeURIComponent).join(','),{},5500)
+   getJSON('https://api.dexscreener.com/tokens/v1/'+encodeURIComponent(chain)+'/'+addresses.slice(0,30).map(encodeURIComponent).join(','))
   );
   const results=await Promise.allSettled(requests),pairs=[];
   for(const result of results)if(result.status==='fulfilled'&&Array.isArray(result.value))pairs.push(...result.value);
@@ -458,7 +453,7 @@ async function loadTrendingBoard(){
   }
   scored.sort((a,b)=>b.score-a.score);
   state.trendCoins=scored.slice(0,20);
-  saveLocal('feeflow_trending_cache',state.trendCoins);savePerformance(state.trendCoins);
+  savePerformance(state.trendCoins);
   renderTrendRows();renderIntel();checkPriceAlerts();checkSmartSignals();if(state.positions.length)refreshPortfolio();
 
   const top=state.trendCoins[0];
@@ -472,7 +467,7 @@ async function loadTrendingBoard(){
   $('dataNote').textContent='Öffentlicher DEX-Scanner: neue Profile, aktuelle und Top-Boosts. Ranking nach Handelsvolumen, Trades und Kaufdruck. Market Cap wird nur angezeigt, wenn der Anbieter einen echten MC-Wert liefert – FDV wird nicht ersatzweise verwendet.';
  }catch(e){
   $('trendStatus').textContent='SCAN PAUSED';$('trendStatus').style.color='var(--red)';
-  if(!state.trendCoins.length)$('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';else $('trendStatus').textContent='● CACHED · FEED OFFLINE';
+  $('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';
   $('trendCount').textContent='Datenquelle nicht erreichbar';
  }
  finally{state.trendRefreshing=false}
@@ -508,9 +503,9 @@ async function checkTokenRisk(){
    provider='RugCheck + Bubbles';
    const base='https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address);
    const results=await Promise.allSettled([
-    getResponse(base+'/report/summary',{},6000),
-    getResponse(base+'/report',{},2500),
-    getResponse('https://bubblemaps.dev/api/map/'+encodeURIComponent(address),{},2000)
+    getResponse(base+'/report/summary',{},7000),
+    getResponse(base+'/report',{},5000),
+    getResponse('https://bubblemaps.dev/api/map/'+encodeURIComponent(address),{},3500)
    ]);
    if(results[0].status!=='fulfilled'||!results[0].value.ok)throw new Error(results[0].status==='fulfilled'?(results[0].value.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+results[0].value.status):'RugCheck ist nicht erreichbar.');
    report=await results[0].value.json();
