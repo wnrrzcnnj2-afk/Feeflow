@@ -236,7 +236,23 @@ const money=(n,opts={})=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US
 const compact=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(Number(n)):'—';
 const shortNum=n=>{const v=Number(n);if(!Number.isFinite(v))return '—';if(v>=1)return money(v,{maximumFractionDigits:v<1?6:2});return '$'+v.toPrecision(4)};
 function toast(message){const el=$('toast');el.textContent=message;el.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display='none',3200)}
-async function getResponse(url,options={},timeoutMs=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);try{return await fetch(url,{...options,headers:{accept:'application/json',...(options.headers||{})},signal:controller.signal})}catch(e){if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');throw e}finally{clearTimeout(timer)}}
+async function getResponse(url,options={},timeoutMs=9000){
+ const controller=new AbortController();
+ let timer,settled=false;
+ const clear=()=>{if(!settled){settled=true;clearTimeout(timer)}};
+ timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{
+  const res=await fetch(url,{...options,headers:{accept:'application/json',...(options.headers||{})},signal:controller.signal});
+  if(!res.ok){clear();return res}
+  const originalJson=res.json.bind(res);
+  res.json=async()=>{try{return await originalJson()}catch(e){if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');throw e}finally{clear()}};
+  return res;
+ }catch(e){
+  clear();
+  if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');
+  throw e;
+ }
+}
 async function getJSON(url,options={}){const res=await getResponse(url,options);if(!res.ok)throw new Error(res.status===429?'API-Rate-Limit erreicht — bitte kurz warten.':'Datenanbieter antwortet mit HTTP '+res.status);return res.json()}
 async function loadMarket(){if(state.refreshing)return;state.refreshing=true;$('refreshBtn').disabled=true;$('marketStatus').textContent='UPDATING…';try{
  const global=await getJSON('https://api.coingecko.com/api/v3/global');const g=global.data||{};
