@@ -2,90 +2,120 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#090812">
-<title>FeeFlow — Meme Coin Analytics</title>
+<meta name="description" content="FeeFlow — Live Meme Coin Market Dashboard, Trending Tokens und Fee Calculator.">
+<title>FeeFlow — Live Crypto Dashboard</title>
 <style>
-:root{--bg:#090812;--panel:#12111d;--panel2:#191727;--line:#29263b;--text:#f5f3ff;--muted:#9994ad;--purple:#9b5cff;--purple2:#6d35d8;--green:#36d69a;--red:#ff6b83}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#29134c 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
-button,input{font:inherit}.wrap{max-width:1180px;margin:auto;padding:0 22px}
-header{height:76px;border-bottom:1px solid #211d31;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:23px;letter-spacing:-1px}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(140deg,#c18aff,#702ce0);display:grid;place-items:center;box-shadow:0 0 28px #8b4cf455;font-weight:900}
-.brand span{color:#b987ff}.nav{display:flex;gap:26px;color:var(--muted);font-size:14px}.nav a{color:inherit;text-decoration:none}.nav a.active,.nav a:hover{color:white}
-.top-actions{display:flex;align-items:center;gap:10px}.network{border:1px solid var(--line);padding:8px 12px;border-radius:10px;color:#c8b6e8;font-size:12px}.connect{background:linear-gradient(120deg,#a96aff,#7139db);border:0;color:white;border-radius:10px;padding:10px 15px;font-weight:700;cursor:pointer}
-.hero{padding:55px 0 30px}.eyebrow{color:#bd91ff;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.06;letter-spacing:-2.5px;margin:12px 0}.hero h1 em{font-style:normal;color:#b17aff}.hero p{color:var(--muted);max-width:600px;margin:0 0 23px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap}.primary,.secondary{padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:#9654f4;color:white}.secondary{border:1px solid var(--line);color:#ddd5ed}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0 30px}.stat,.panel{background:linear-gradient(145deg,#171525,#100f19);border:1px solid var(--line);border-radius:16px}.stat{padding:17px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin:7px 0 2px;letter-spacing:-.7px}.positive{color:var(--green);font-size:12px}.muted{color:var(--muted);font-size:12px}
-.content{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:40px}.panel{padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.panel h2{font-size:17px;margin:0}.pill{background:#241a39;color:#c69bff;padding:5px 9px;border-radius:20px;font-size:11px}
-.search{width:100%;background:#0c0b14;border:1px solid var(--line);border-radius:10px;color:white;padding:11px 13px;margin-bottom:13px;outline:none}.search:focus,input:focus{border-color:var(--purple)}
-table{width:100%;border-collapse:collapse;text-align:left}th{color:var(--muted);font-size:11px;font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}td{padding:14px 8px;border-bottom:1px solid #211e2d;font-size:13px}tr:last-child td{border:0}.coin{display:flex;align-items:center;gap:9px;font-weight:700}.coin-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#302044;color:#d5b7ff}.coin small{display:block;color:var(--muted);font-weight:400;font-size:11px}.change{color:var(--green)}.negative{color:var(--red)}
-.chart{height:155px;position:relative;margin-top:8px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 37px,#242033 38px)}.chart svg{width:100%;height:100%;overflow:visible}.chart-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:8px}
-.calculator label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}.calculator input{width:100%;background:#0c0b14;border:1px solid var(--line);border-radius:9px;padding:11px;color:white;outline:none}.result{background:#211735;border:1px solid #49316d;border-radius:12px;padding:14px;margin-top:16px}.result strong{display:block;font-size:25px;color:#c59aff}
-.disclaimer{color:#827c95;font-size:11px;margin:22px 0 30px}footer{border-top:1px solid #211d31;padding:22px 0 34px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#211735;border:1px solid #67429a;color:white;padding:12px 17px;border-radius:12px;display:none;box-shadow:0 10px 40px #0008}
-@media(max-width:760px){.wrap{padding:0 15px}header{height:auto;padding:14px 0;gap:12px;flex-wrap:wrap}.nav{order:3;width:100%;justify-content:space-between;gap:10px;font-size:12px}.network{display:none}.hero{padding-top:38px}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:14px}.stat strong{font-size:21px}.content{grid-template-columns:1fr}.panel{padding:15px}.table-wrap{overflow-x:auto}table{min-width:440px}}
+:root{color-scheme:dark;--bg:#090812;--panel:#12111d;--panel2:#191727;--line:#29263b;--text:#f5f3ff;--muted:#9994ad;--purple:#a66aff;--green:#36d69a;--red:#ff7188}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#29134c 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}.wrap{max-width:1220px;margin:auto;padding:0 22px}
+header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:23px;letter-spacing:-1px;white-space:nowrap}.brand span{color:#b987ff}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(140deg,#c18aff,#702ce0);display:grid;place-items:center;box-shadow:0 0 28px #8b4cf455;font-weight:900}.nav{display:flex;gap:25px;color:var(--muted);font-size:14px}.nav a{color:inherit;text-decoration:none}.nav a.active,.nav a:hover{color:white}.top-actions{display:flex;align-items:center;gap:10px}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px}.network{border:1px solid var(--line);padding:8px 12px;border-radius:10px;color:#c8b6e8;font-size:12px;white-space:nowrap}.connect,.btn{background:linear-gradient(120deg,#a96aff,#7139db);border:0;color:white;border-radius:10px;padding:10px 15px;font-weight:750;cursor:pointer}.connect:hover,.btn:hover{filter:brightness(1.12)}button:disabled{opacity:.55;cursor:wait}
+.hero{padding:52px 0 25px}.eyebrow{color:#bd91ff;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.06;letter-spacing:-2.5px;margin:12px 0}.hero h1 em{font-style:normal;color:#b17aff}.hero p{color:var(--muted);max-width:650px;margin:0 0 22px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap}.primary,.secondary{padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:#9654f4;color:white}.secondary{border:1px solid var(--line);color:#ddd5ed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 24px}.stat,.panel{background:linear-gradient(145deg,#171525,#100f19);border:1px solid var(--line);border-radius:16px}.stat{padding:17px;min-width:0}.stat small{color:var(--muted)}.stat strong{display:block;font-size:clamp(19px,2.5vw,25px);margin:7px 0 2px;letter-spacing:-.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.positive{color:var(--green)}.negative{color:var(--red)}.muted{color:var(--muted);font-size:12px}
+.content{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,1fr);gap:16px;margin-bottom:35px}.panel{padding:20px;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}.panel h2{font-size:17px;margin:0}.pill{background:#241a39;color:#c69bff;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:750;white-space:nowrap}.search-row{display:flex;gap:9px;margin-bottom:12px}.search{width:100%;min-width:0;background:#0c0b14;border:1px solid var(--line);border-radius:10px;color:white;padding:11px 13px;outline:none}.search:focus,input:focus{border-color:var(--purple)}.refresh{border:1px solid var(--line);background:#1b1828;color:#e9defc;border-radius:10px;padding:0 13px;cursor:pointer}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{color:var(--muted);font-size:11px;font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}td{padding:13px 8px;border-bottom:1px solid #211e2d;font-size:13px}tr:last-child td{border:0}tbody tr{cursor:pointer}tbody tr:hover{background:#ffffff08}.coin{display:flex;align-items:center;gap:9px;font-weight:700}.coin img{width:30px;height:30px;border-radius:50%;background:#302044}.coin small{display:block;color:var(--muted);font-weight:400;font-size:11px}.rank{color:var(--muted);font-size:11px;width:24px}
+.chart-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:9px}.chart-price{font-size:25px;font-weight:800;letter-spacing:-1px}.chart-change{font-size:12px}.chart{height:190px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#242033 47px);border-bottom:1px solid var(--line)}.chart svg{width:100%;height:100%;overflow:visible}.chart-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:8px}.chart-empty{height:100%;display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center;padding:20px}.chart-controls{display:flex;gap:6px}.chart-controls button{background:#171525;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer}.chart-controls button.active{color:white;border-color:#8652c9;background:#2a1b40}
+.calculator label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}.calculator input{width:100%;background:#0c0b14;border:1px solid var(--line);border-radius:9px;padding:11px;color:white;outline:none}.result{background:#211735;border:1px solid #49316d;border-radius:12px;padding:14px;margin-top:16px}.result strong{display:block;font-size:25px;color:#c59aff}.wallet-info{background:#0c0b14;border:1px solid var(--line);padding:13px;border-radius:11px;margin-top:14px;overflow-wrap:anywhere}.wallet-info strong{display:block;color:#c59aff;margin-bottom:3px}.wallet-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.secondary-btn{background:#1b1828;border:1px solid var(--line);color:#e9defc;border-radius:9px;padding:9px 12px;cursor:pointer}.notice{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px}.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:8px}.error{color:var(--red)}.disclaimer{color:#827c95;font-size:11px;margin:22px 0 30px}footer{border-top:1px solid #211d31;padding:22px 0 34px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#211735;border:1px solid #67429a;color:white;padding:12px 17px;border-radius:12px;display:none;box-shadow:0 10px 40px #0008;z-index:5;max-width:90%;text-align:center}
+@media(max-width:800px){.wrap{padding:0 15px}header{padding:14px 0;flex-wrap:wrap}.nav{order:3;width:100%;justify-content:space-between;gap:8px;font-size:12px}.network{display:none}.hero{padding-top:37px}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:14px}.content{grid-template-columns:1fr}.panel{padding:15px}}
+@media(max-width:390px){.brand{font-size:20px}.connect{padding:9px 10px;font-size:12px}.nav{font-size:11px}.stats{gap:8px}.stat strong{font-size:18px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="brand"><div class="logo">F</div>Fee<span>Flow</span></div>
-  <nav class="nav"><a class="active" href="#overview">Overview</a><a href="#trending">Trending</a><a href="#fees">Fee calculator</a><a href="#about">About</a></nav>
-  <div class="top-actions"><span class="network">● Demo mode</span><button class="connect" id="connectBtn">Connect wallet</button></div>
+  <a class="brand" href="#overview" style="text-decoration:none;color:inherit"><div class="logo">F</div>Fee<span>Flow</span></a>
+  <nav class="nav"><a class="active" href="#overview">Overview</a><a href="#trending">Trending</a><a href="#market">Charts</a><a href="#fees">Fee calculator</a></nav>
+  <div class="top-actions"><span class="network"><i class="live-dot"></i>Live market</span><button class="connect" id="connectBtn">Connect wallet</button></div>
 </header>
 <main id="overview">
   <section class="hero">
     <div class="eyebrow">Meme coin insights, made simple</div>
     <h1>Follow the flow.<br><em>Understand the market.</em></h1>
-    <p>Dein übersichtliches Dashboard für Meme-Coin-Trends, Marktbewegungen und Gebühren. Alle Werte auf dieser Vorschau sind Beispieldaten.</p>
-    <div class="hero-actions"><a class="primary" href="#trending">Explore market ↗</a><a class="secondary" href="#fees">Calculate fees</a></div>
+    <p>Dein Live-Dashboard für Krypto-Trends, Kursbewegungen und Gebühren. Verbinde eine Wallet nur zum Anzeigen deiner öffentlichen Adresse — FeeFlow fragt niemals nach deiner Seed Phrase oder deinem Private Key.</p>
+    <div class="hero-actions"><a class="primary" href="#trending">Explore trending ↗</a><a class="secondary" href="#fees">Calculate fees</a></div>
   </section>
-  <section class="stats" aria-label="Market overview">
-    <div class="stat"><small>Market sentiment</small><strong> Bullish</strong><span class="positive">Demo snapshot</span></div>
-    <div class="stat"><small>Coins tracked</small><strong>1,284</strong><span class="muted">Example metric</span></div>
-    <div class="stat"><small>24h volume</small><strong>$8.42M</strong><span class="positive">+12.8% · sample</span></div>
-    <div class="stat"><small>Average fee</small><strong>0.85%</strong><span class="muted">Illustrative only</span></div>
+  <section class="stats" aria-label="Live market overview">
+    <div class="stat"><small>Global market cap</small><strong id="marketCap">Loading…</strong><span class="muted" id="marketCapChange">Live data from CoinGecko</span></div>
+    <div class="stat"><small>24h market volume</small><strong id="marketVolume">Loading…</strong><span class="muted">USD · global market</span></div>
+    <div class="stat"><small>Top coin today</small><strong id="topCoin">Loading…</strong><span class="positive" id="topCoinChange">24h performance</span></div>
+    <div class="stat"><small>Tracked coins</small><strong id="coinCount">—</strong><span class="muted">Live market list</span></div>
   </section>
   <section class="content">
     <div class="panel" id="trending">
-      <div class="panel-head"><h2>Trending coins</h2><span class="pill">SAMPLE DATA</span></div>
-      <input class="search" id="coinSearch" placeholder="Search coin or ticker…" aria-label="Search coins">
-      <div class="table-wrap"><table><thead><tr><th>Asset</th><th>Price</th><th>24h</th><th>Volume</th></tr></thead><tbody id="coinRows">
-      <tr><td><div class="coin"><span class="coin-icon">🐸</span><span>Pepe<small>PEPE</small></span></div></td><td>$0.000012</td><td class="change">+8.42%</td><td>$1.24M</td></tr>
-      <tr><td><div class="coin"><span class="coin-icon">🐕</span><span>Bonk<small>BONK</small></span></div></td><td>$0.000021</td><td class="change">+4.16%</td><td>$842K</td></tr>
-      <tr><td><div class="coin"><span class="coin-icon">🐶</span><span>Dogwifhat<small>WIF</small></span></div></td><td>$0.72</td><td class="negative">−2.31%</td><td>$623K</td></tr>
-      <tr><td><div class="coin"><span class="coin-icon">🌙</span><span>MoonCat<small>MCAT</small></span></div></td><td>$0.0048</td><td class="change">+18.70%</td><td>$318K</td></tr>
-      </tbody></table></div>
+      <div class="panel-head"><h2>Trending coins</h2><span class="pill" id="marketStatus">CONNECTING…</span></div>
+      <div class="search-row"><input class="search" id="coinSearch" placeholder="Search name or ticker…" aria-label="Search coins"><button class="refresh" id="refreshBtn" title="Refresh market data" aria-label="Refresh">↻</button></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Asset</th><th>Price</th><th>24h</th><th>Market cap</th></tr></thead><tbody id="coinRows"><tr><td colspan="5" class="muted">Loading live coin data…</td></tr></tbody></table></div>
+      <p class="notice" id="dataNote">Prices are supplied by CoinGecko and may be delayed or rate-limited.</p>
     </div>
-    <div class="panel">
-      <div class="panel-head"><h2>Market activity</h2><span class="pill">ILLUSTRATIVE</span></div>
-      <div class="chart"><svg viewBox="0 0 500 155" preserveAspectRatio="none" role="img" aria-label="Illustrative upward market chart"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a66aff" stop-opacity=".38"/><stop offset="1" stop-color="#a66aff" stop-opacity="0"/></linearGradient></defs><path d="M0 125 C25 120 32 95 58 105 S92 119 116 87 S153 94 176 78 S211 91 239 59 S278 77 301 54 S340 62 365 34 S404 53 427 26 S470 37 500 10 L500 155 L0 155Z" fill="url(#fill)"/><path d="M0 125 C25 120 32 95 58 105 S92 119 116 87 S153 94 176 78 S211 91 239 59 S278 77 301 54 S340 62 365 34 S404 53 427 26 S470 37 500 10" fill="none" stroke="#b77aff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg></div>
-      <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span></div>
-      <p class="muted" style="margin:18px 0 0">Example chart — no live market feed connected.</p>
+    <div class="panel" id="market">
+      <div class="panel-head"><h2 id="chartTitle">Market chart</h2><span class="pill">LIVE</span></div>
+      <div class="chart-meta"><div><div class="muted">Selected coin · USD</div><div class="chart-price" id="chartPrice">—</div><div class="chart-change" id="chartChange">Choose a coin from the list</div></div><div class="chart-controls"><button data-days="1" class="active">24H</button><button data-days="7">7D</button><button data-days="30">30D</button></div></div>
+      <div class="chart" id="chart"><div class="chart-empty">Loading live chart…</div></div>
+      <div class="chart-labels"><span id="chartStart">—</span><span id="chartEnd">Now</span></div>
+      <p class="notice">Select a token in the trending list to load its price history.</p>
     </div>
     <div class="panel calculator" id="fees">
-      <div class="panel-head"><h2>Fee calculator</h2><span class="pill">QUICK ESTIMATE</span></div>
+      <div class="panel-head"><h2>Fee calculator</h2><span class="pill">INSTANT</span></div>
       <label for="amount">Trade amount (USD)</label><input id="amount" type="number" min="0" step="any" value="1000">
-      <label for="rate">Fee rate (%)</label><input id="rate" type="number" min="0" step="any" value="0.85">
+      <label for="rate">Fee rate (%)</label><input id="rate" type="number" min="0" max="100" step="any" value="0.85">
       <div class="result"><span class="muted">Estimated fee</span><strong id="feeResult">$8.50</strong><span class="muted" id="netResult">Net amount: $991.50</span></div>
+      <p class="notice">Estimate only. The actual fee depends on the service or network you use.</p>
     </div>
-    <div class="panel" id="about">
-      <div class="panel-head"><h2>Built for the meme coin community</h2><span class="pill">FEEFLOW</span></div>
-      <p style="color:#c4bfd2;margin-top:0">Track what matters. Compare activity, review fee estimates and keep your research in one clean workspace.</p>
-      <ul style="color:var(--muted);padding-left:18px;font-size:13px"><li>Simple market overview</li><li>Searchable token watchlist</li><li>Transparent fee estimates</li><li>Room for your own analysis tools</li></ul>
-      <p class="muted">This is a front-end demo. Wallet connection, real-time prices, accounts and saved analyses are not active yet.</p>
+    <div class="panel" id="walletPanel">
+      <div class="panel-head"><h2>Your wallet</h2><span class="pill">NON-CUSTODIAL</span></div>
+      <p style="color:#c4bfd2;margin-top:0">Connect an installed wallet to view its public address and network.</p>
+      <div class="wallet-info" id="walletInfo"><strong>Not connected</strong><span class="muted">No wallet connected in this session.</span></div>
+      <div class="wallet-actions"><button class="secondary-btn" id="disconnectBtn" hidden>Hide wallet</button></div>
+      <div class="status" id="walletStatus" role="status"></div>
+      <p class="notice">Wallet access uses your browser wallet (EIP-1193 / Phantom). This dashboard only requests the public account address. It does not sign transactions, move funds, or store secret keys. Wallet state is kept only in this page session.</p>
     </div>
   </section>
-  <p class="disclaimer">Risk notice: Meme coins are highly volatile and can result in a total loss. FeeFlow is an informational demo, not financial advice. Token names and market figures shown here are examples, not live prices or recommendations.</p>
+  <p class="disclaimer">Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by CoinGecko. No swaps, deposits, withdrawals or trades are performed here.</p>
 </main>
-<footer><span>© 2026 FeeFlow. Follow the flow.</span><span>Dark mode · Purple edition</span></footer>
+<footer><span>© 2026 FeeFlow. Follow the flow.</span><span>Market data: CoinGecko · Wallet stays in your browser</span></footer>
 </div>
 <div class="toast" id="toast" role="status"></div>
 <script>
-const amount=document.getElementById('amount'),rate=document.getElementById('rate'),feeResult=document.getElementById('feeResult'),netResult=document.getElementById('netResult');
-function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.max(0,Number(rate.value)||0),f=a*r/100;feeResult.textContent=f.toLocaleString('en-US',{style:'currency',currency:'USD'});netResult.textContent='Net amount: '+(a-f).toLocaleString('en-US',{style:'currency',currency:'USD'});}
-amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
-document.getElementById('coinSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#coinRows tr').forEach(row=>row.hidden=!row.textContent.toLowerCase().includes(q));});
-document.getElementById('connectBtn').addEventListener('click',()=>{const t=document.getElementById('toast');t.textContent='Wallet connection will be added in a future version.';t.style.display='block';setTimeout(()=>t.style.display='none',2600);});
+'use strict';
+const $=id=>document.getElementById(id);
+const state={coins:[],selected:null,days:1,provider:null,account:null,chainId:null,kind:null,refreshing:false};
+const money=(n,opts={})=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',...opts}).format(Number(n)):'—';
+const compact=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(Number(n)):'—';
+const shortNum=n=>{const v=Number(n);if(!Number.isFinite(v))return '—';if(v>=1)return money(v,{maximumFractionDigits:v<1?6:2});return '$'+v.toPrecision(4)};
+function toast(message){const el=$('toast');el.textContent=message;el.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display='none',3200)}
+async function getJSON(url){const res=await fetch(url,{headers:{accept:'application/json'}});if(!res.ok)throw new Error(res.status===429?'API rate limit — bitte kurz warten.':'Market API error ('+res.status+')');return res.json()}
+async function loadMarket(){if(state.refreshing)return;state.refreshing=true;$('refreshBtn').disabled=true;$('marketStatus').textContent='UPDATING…';try{
+ const [coins,global]=await Promise.all([
+  getJSON('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h'),
+  getJSON('https://api.coingecko.com/api/v3/global')
+ ]);
+ state.coins=coins.filter(c=>c&&c.id);$('coinCount').textContent=state.coins.length.toLocaleString('en-US');const g=global.data||{};
+ $('marketCap').textContent='$'+compact(g.total_market_cap?.usd);$('marketVolume').textContent='$'+compact(g.total_volume?.usd);
+ const gainers=[...state.coins].filter(c=>Number.isFinite(c.price_change_percentage_24h)).sort((a,b)=>b.price_change_percentage_24h-a.price_change_percentage_24h);const top=gainers[0];
+ $('topCoin').textContent=top?top.symbol.toUpperCase():'—';$('topCoinChange').textContent=top?(top.price_change_percentage_24h>=0?'+':'')+top.price_change_percentage_24h.toFixed(2)+'% · 24h':'No data';
+ $('marketCapChange').textContent=(g.market_cap_change_percentage_24h>=0?'+':'')+(g.market_cap_change_percentage_24h??0).toFixed(2)+'% · 24h';
+ $('marketStatus').textContent='● LIVE';$('marketStatus').style.color='var(--green)';renderCoins();
+ if(!state.selected&&state.coins.length)selectCoin(state.coins[0]);else if(state.selected){const fresh=state.coins.find(c=>c.id===state.selected.id);if(fresh){state.selected=fresh;updateChartHeader(fresh)}}
+ $('dataNote').textContent='Updated '+new Date().toLocaleTimeString()+' · Source: CoinGecko public API';
+ }catch(err){$('marketStatus').textContent='DATA UNAVAILABLE';$('marketStatus').style.color='var(--red)';$('dataNote').textContent=err.message+' Check your connection or try refresh in a moment.';if(!state.coins.length)$('coinRows').innerHTML='<tr><td colspan="5" class="muted">Live data could not be loaded. Please tap refresh to try again.</td></tr>'}
+ finally{state.refreshing=false;$('refreshBtn').disabled=false}}
+function renderCoins(){const q=$('coinSearch').value.trim().toLowerCase();const list=state.coins.filter(c=>c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q));$('coinRows').innerHTML=list.map(c=>{const i=state.coins.indexOf(c)+1,chg=Number(c.price_change_percentage_24h),cls=chg>=0?'positive':'negative',active=state.selected?.id===c.id?' style="background:#ffffff0c"':'';return '<tr data-id="'+safe(c.id)+'"'+active+'><td class="rank">'+i+'</td><td><div class="coin"><img src="'+safe(c.image)+'" alt="" loading="lazy"><span>'+safe(c.name)+'<small>'+safe(c.symbol.toUpperCase())+'</small></span></div></td><td>'+shortNum(c.current_price)+'</td><td class="'+cls+'">'+(chg>=0?'+':'')+(Number.isFinite(chg)?chg.toFixed(2)+'%':'—')+'</td><td>$'+compact(c.market_cap)+'</td></tr>'}).join('')||'<tr><td colspan="5" class="muted">No matching coins.</td></tr>'}
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function updateChartHeader(c){$('chartTitle').textContent=c.name+' ('+c.symbol.toUpperCase()+')';$('chartPrice').textContent=shortNum(c.current_price);const n=Number(c.price_change_percentage_24h);$('chartChange').textContent=(n>=0?'+':'')+(Number.isFinite(n)?n.toFixed(2)+'%':'—')+' · 24h';$('chartChange').className='chart-change '+(n>=0?'positive':'negative')}
+async function selectCoin(c){state.selected=c;renderCoins();updateChartHeader(c);await loadChart()}
+async function loadChart(){const c=state.selected;if(!c)return;$('chart').innerHTML='<div class="chart-empty">Loading '+safe(c.name)+' chart…</div>';try{const data=await getJSON('https://api.coingecko.com/api/v3/coins/'+encodeURIComponent(c.id)+'/market_chart?vs_currency=usd&days='+state.days);const points=(data.prices||[]).map(p=>p[1]).filter(Number.isFinite);if(points.length<2)throw new Error('Not enough chart data');drawChart(points);const first=new Date(data.prices[0][0]),last=new Date(data.prices[data.prices.length-1][0]);$('chartStart').textContent=state.days===1?first.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):first.toLocaleDateString();$('chartEnd').textContent=state.days===1?'Now':last.toLocaleDateString()}catch(e){$('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Try another time range later.</div>'}}
+function drawChart(values){const w=700,h=190,pad=8,min=Math.min(...values),max=Math.max(...values),range=max-min||Math.max(max*.01,.0000001);const coords=values.map((v,i)=>[pad+i/(values.length-1)*(w-2*pad),h-pad-(v-min)/range*(h-2*pad)]);const line=coords.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');const area=line+' L '+(w-pad)+' '+(h-pad)+' L '+pad+' '+(h-pad)+' Z';$('chart').innerHTML='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Live price chart"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a66aff" stop-opacity=".38"/><stop offset="1" stop-color="#a66aff" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#chartFill)"/><path d="'+line+'" fill="none" stroke="#b77aff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>'}
+$('coinSearch').addEventListener('input',renderCoins);$('coinRows').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const c=state.coins.find(x=>x.id===tr.dataset.id);if(c)selectCoin(c);$('market').scrollIntoView({behavior:'smooth',block:'nearest'})});$('refreshBtn').addEventListener('click',loadMarket);
+document.querySelectorAll('[data-days]').forEach(b=>b.addEventListener('click',()=>{state.days=Number(b.dataset.days);document.querySelectorAll('[data-days]').forEach(x=>x.classList.toggle('active',x===b));loadChart()}));
+const amount=$('amount'),rate=$('rate');function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.min(100,Math.max(0,Number(rate.value)||0)),f=a*r/100;$('feeResult').textContent=money(f);$('netResult').textContent='Net amount: '+money(a-f)}amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
+async function connectWallet(){const status=$('walletStatus');status.textContent='Looking for an installed wallet…';try{
+ if(window.ethereum){state.provider=window.ethereum;const accounts=await window.ethereum.request({method:'eth_requestAccounts'});if(!accounts?.length)throw new Error('No account was shared.');state.account=accounts[0];state.chainId=await window.ethereum.request({method:'eth_chainId'});state.kind='EVM';window.ethereum.on?.('accountsChanged',a=>{if(a?.length){state.account=a[0];renderWallet()}else clearWallet()});window.ethereum.on?.('chainChanged',id=>{state.chainId=id;renderWallet()});renderWallet();status.textContent='Wallet connected in read-only dashboard mode.';return}
+ if(window.solana?.isPhantom){const resp=await window.solana.connect();state.provider=window.solana;state.account=resp.publicKey.toString();state.chainId='Solana';state.kind='Solana';renderWallet();status.textContent='Phantom connected in read-only dashboard mode.';return}
+ throw new Error('No compatible wallet found. Install MetaMask, Rabby or Phantom, then reload this page.');
+ }catch(e){status.textContent=e.code===4001?'Connection request rejected.':e.message||'Could not connect wallet.';status.className='status error'}}
+function renderWallet(){const addr=state.account||'';const short=addr.length>18?addr.slice(0,8)+'…'+addr.slice(-6):addr;$('walletInfo').innerHTML='<strong>'+safe(state.kind)+' wallet connected</strong><span>'+safe(short)+'</span><span class="muted">Network: '+safe(state.chainId||'Unknown')+'</span>'; $('connectBtn').textContent=short;$('disconnectBtn').hidden=false}
+function clearWallet(){state.account=null;state.provider=null;state.chainId=null;state.kind=null;$('walletInfo').innerHTML='<strong>Not connected</strong><span class="muted">No wallet connected in this session.</span>';$('connectBtn').textContent='Connect wallet';$('disconnectBtn').hidden=true}
+$('connectBtn').addEventListener('click',connectWallet);$('disconnectBtn').addEventListener('click',()=>{clearWallet();$('walletStatus').textContent='Wallet hidden in FeeFlow. If your wallet offers a disconnect option, use it there too.'});
+loadMarket();setInterval(loadMarket,60000);
 </script>
 </body>
 </html>
