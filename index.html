@@ -611,7 +611,7 @@ async function checkTokenRisk(){
 }
 $('riskCheckBtn').addEventListener('click',checkTokenRisk);$('riskAddress').addEventListener('keydown',e=>{if(e.key==='Enter')checkTokenRisk()});
 function updateChartHeader(c){$('chartTitle').textContent=c.name+' ('+c.symbol.toUpperCase()+')';$('chartPrice').textContent=shortNum(c.current_price);const n=Number(c.price_change_percentage_24h);$('chartChange').textContent=(n>=0?'+':'')+(Number.isFinite(n)?n.toFixed(2)+'%':'—')+' · 24h';$('chartChange').className='chart-change '+(n>=0?'positive':'negative')}
-async async function selectCoin(c){state.selected=c;updateChartHeader(c);$('chart').scrollIntoView({behavior:'smooth',block:'center'});await loadChart()}
+async function selectCoin(c){state.selected=c;updateChartHeader(c);$('chart').scrollIntoView({behavior:'smooth',block:'center'});await loadChart()}
 function geckoNetwork(chain){return ({ethereum:'eth',solana:'solana',base:'base',bsc:'bsc',polygon:'polygon_pos',arbitrum:'arbitrum',optimism:'optimism',avalanche:'avax',cronos:'cronos',fantom:'ftm',zksync:'zksync',linea:'linea',scroll:'scroll',mantle:'mantle',sui:'sui',ton:'ton'})[String(chain||'').toLowerCase()]||null}
 async function loadChart(){const c=state.selected;if(!c)return;$('chart').innerHTML='<div class="chart-empty">Loading '+safe(c.name)+' chart…</div>';try{
  let points=[],timestamps=[];
