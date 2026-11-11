@@ -254,31 +254,46 @@ async function getResponse(url,options={},timeoutMs=9000){
  }
 }
 async function getJSON(url,options={}){const res=await getResponse(url,options);if(!res.ok)throw new Error(res.status===429?'API-Rate-Limit erreicht — bitte kurz warten.':'Datenanbieter antwortet mit HTTP '+res.status);return res.json()}
-async function loadMarket(){if(state.refreshing)return;state.refreshing=true;$('refreshBtn').disabled=true;$('marketStatus').textContent='UPDATING…';try{
- let stats,source;
+async function loadMarket(){
+ if(state.refreshing)return;
+ state.refreshing=true;
+ $('refreshBtn').disabled=true;
+ $('marketStatus').textContent='UPDATING…';
+ const providers=[
+  {name:'CoinPaprika',url:'https://api.coinpaprika.com/v1/global',parse:g=>({cap:Number(g.market_cap_usd),volume:Number(g.volume_24h_usd),change:Number(g.market_cap_change_24h||0)})},
+  {name:'CoinGecko',url:'https://api.coingecko.com/api/v3/global',parse:g=>{const d=g.data||{};return {cap:Number(d.total_market_cap?.usd),volume:Number(d.total_volume?.usd),change:Number(d.market_cap_change_percentage_24h||0)}}}
+ ];
+ const errors=[];
  try{
-  const global=await getJSON('https://api.coingecko.com/api/v3/global');
-  const g=global.data||{};
-  if(!Number(g.total_market_cap?.usd)||!Number(g.total_volume?.usd))throw new Error('CoinGecko data incomplete');
-  stats={cap:Number(g.total_market_cap.usd),volume:Number(g.total_volume.usd),change:Number(g.market_cap_change_percentage_24h||0)};source='CoinGecko';
- }catch(primaryError){
-  const g=await getJSON('https://api.coinpaprika.com/v1/global');
-  if(!Number(g.market_cap_usd)||!Number(g.volume_24h_usd))throw primaryError;
-  stats={cap:Number(g.market_cap_usd),volume:Number(g.volume_24h_usd),change:Number(g.market_cap_change_24h||0)};source='CoinPaprika';
- }
- $('marketCap').textContent='$'+compact(stats.cap);
- $('marketVolume').textContent='$'+compact(stats.volume);
- $('marketCapChange').textContent=(stats.change>=0?'+':'')+stats.change.toFixed(2)+'% · 24h · '+source;
- $('marketStatus').textContent='● LIVE';$('marketStatus').style.color='var(--green)';
- if(!state.searchMode){$('searchResults').hidden=true;$('loadMoreBtn').hidden=true}
- $('dataNote').textContent='Globale Marktdaten aktualisiert '+new Date().toLocaleTimeString()+' · '+source;
+  let stats=null,source='';
+  for(const provider of providers){
+   try{
+    const data=await getJSON(provider.url);
+    const parsed=provider.parse(data);
+    if(!Number.isFinite(parsed.cap)||parsed.cap<=0||!Number.isFinite(parsed.volume)||parsed.volume<=0)throw new Error('Unvollständige Marktdaten');
+    stats=parsed;source=provider.name;break;
+   }catch(error){errors.push(provider.name+': '+(error?.message||'unbekannter Fehler'))}
+  }
+  if(!stats)throw new Error(errors.join(' | ')||'Keine Datenquelle erreichbar');
+  $('marketCap').textContent='$'+compact(stats.cap);
+  $('marketVolume').textContent='$'+compact(stats.volume);
+  $('marketCapChange').textContent=(stats.change>=0?'+':'')+stats.change.toFixed(2)+'% · 24h · '+source;
+  $('marketStatus').textContent='● LIVE';
+  $('marketStatus').style.color='var(--green)';
+  if(!state.searchMode){$('searchResults').hidden=true;$('loadMoreBtn').hidden=true}
+  $('dataNote').textContent='Globale Marktdaten aktualisiert '+new Date().toLocaleTimeString()+' · '+source;
  }catch(err){
-  $('marketCap').textContent='Unavailable';$('marketVolume').textContent='Unavailable';
+  $('marketCap').textContent='Unavailable';
+  $('marketVolume').textContent='Unavailable';
   $('marketCapChange').textContent='Marktdaten gerade nicht erreichbar';
-  $('marketStatus').textContent='DATA UNAVAILABLE';$('marketStatus').style.color='var(--red)';
-  $('dataNote').textContent='Globale Marktdaten konnten nicht geladen werden. Bitte später erneut versuchen.';
+  $('marketStatus').textContent='DATA UNAVAILABLE';
+  $('marketStatus').style.color='var(--red)';
+  $('dataNote').textContent='Marktdaten-Fehler: '+(err?.message||'Unbekannter Fehler');
+ }finally{
+  state.refreshing=false;
+  $('refreshBtn').disabled=false;
  }
- finally{state.refreshing=false;$('refreshBtn').disabled=false}}
+}
 async function loadMoreCoins(){return}
 function trendKey(x){return String(x.pair.chainId||'')+':'+String(x.pair.baseToken?.address||'')}
 function renderTrendRows(){
