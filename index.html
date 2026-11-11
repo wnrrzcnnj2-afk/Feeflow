@@ -202,9 +202,10 @@ async function checkTokenRisk(){
    }else if(bubbleMap?.nodes?.length){
     const nodes=bubbleMap.nodes,clusters=bubbleMap.clusters||[];
     const top10=nodes.slice().sort((a,b)=>Number(b.share||0)-Number(a.share||0)).slice(0,10).reduce((a,n)=>a+Number(n.share||0),0)*100;
+    const biggestCluster=clusters.reduce((m,c)=>Math.max(m,Number(c.share||0)*100),0);
     metrics.push('Bubble-Map Wallets: '+nodes.length);
-    if(top10>0)bubbleDetails.push('Top-10 Wallets: '+top10.toFixed(1)+'%');
-    if(clusters.length)bubbleDetails.push('Wallet-Cluster: '+clusters.length);
+    if(top10>0){bubbleDetails.push('Top-10 Wallets: '+top10.toFixed(1)+'%');bubbleRisk=Math.max(bubbleRisk||0,top10>=90?90:top10>=75?75:top10>=60?60:top10>=45?40:top10>=30?25:0)}
+    if(clusters.length){bubbleDetails.push('Wallet-Cluster: '+clusters.length);if(biggestCluster>0){bubbleDetails.push('Größter Cluster: '+biggestCluster.toFixed(1)+'%');bubbleRisk=Math.max(bubbleRisk||0,biggestCluster>=60?90:biggestCluster>=40?75:biggestCluster>=25?55:biggestCluster>=15?35:0)}}
    }
    if(bubbleMap?.nodes?.length)metrics.push('Bubble-Map Wallets: '+bubbleMap.nodes.length);
    if(bubbleMap?.links?.length)metrics.push('Wallet-Verbindungen: '+bubbleMap.links.length);
