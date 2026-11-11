@@ -161,7 +161,7 @@ img,svg,canvas{max-width:100%}
       <div class="chart" id="chart"><div class="chart-empty">Wähle einen Coin aus der Trending-Liste oder Suche, um den Chart zu laden.</div></div>
       <div class="chart-labels"><span id="chartStart">—</span><span id="chartEnd">Now</span></div>
       <div class="chart-type-row"><span class="muted">CHARTTYP</span><div class="chart-controls chart-style"><button type="button" data-chart-mode="candles" class="active">Kerzen</button><button type="button" data-chart-mode="line">Linie</button></div></div>
-      <div class="chart-zoom-row"><span id="chartInteractionHint">Chart ziehen oder zoomen</span><div><button type="button" id="chartZoomOut" aria-label="Zoom heraus">−</button><button type="button" id="chartZoomIn" aria-label="Zoom hinein">+</button><button type="button" id="chartZoomReset">Reset</button></div></div>\n      <div class="token-actions" id="tokenActions" hidden><span class="token-address" id="tokenAddressLabel">Wähle einen Coin aus</span><button type="button" id="copyTokenAddress">Adresse kopieren</button><a id="openDexPair" href="#" target="_blank" rel="noopener noreferrer">Pair ansehen ↗</a><a id="tradeLink" href="#" target="_blank" rel="noopener noreferrer">Jetzt handeln ↗</a></div>
+      <div class="chart-zoom-row"><span id="chartInteractionHint">Chart ziehen oder zoomen</span><div><button type="button" id="chartZoomOut" aria-label="Zoom heraus">−</button><button type="button" id="chartZoomIn" aria-label="Zoom hinein">+</button><button type="button" id="chartZoomReset">Reset</button></div></div>\n      <div class="token-actions" id="tokenActions" hidden><span class="token-address" id="tokenAddressLabel">Wähle einen Coin aus</span><button type="button" id="copyTokenAddress">Adresse kopieren</button><a id="openDexPair" href="#" target="_blank" rel="noopener noreferrer">Pair ansehen ↗</a><a id="tradeLink" href="https://fomo.family/discover" target="_blank" rel="noopener noreferrer">Auf FOMO kaufen ↗</a></div>
 
       <div id="swapPanel" hidden style="margin-top:16px;padding:14px;border:1px solid #49316d;border-radius:13px;background:linear-gradient(145deg,#211735,#11101a)"><div class="panel-head"><h3 style="margin:0;font-size:15px">Direkt handeln</h3><span class="pill">SOLANA SWAP</span></div><p class="notice" style="margin-top:0">Tausche SOL gegen diesen Token oder verkaufe zurück. Verbinde deine Wallet im Jupiter-Fenster und prüfe Netzwerk, Token-Adresse, Kurs und Gebühren vor jeder Bestätigung.</p><div id="swapTerminal" style="min-height:120px"><div class="chart-empty">Jupiter wird vorbereitet…</div></div><p class="notice">FeeFlow verwahrt keine Coins. Jeder Swap wird von Jupiter vorbereitet und muss von deiner Wallet bestätigt werden.</p></div>
       <p class="notice">Wähle einen Coin aus, um den Chart zu laden.</p>
@@ -338,8 +338,9 @@ function updateTokenActions(c){
  const pairUrl='https://dexscreener.com/'+encodeURIComponent(c.chainId||'solana')+'/'+encodeURIComponent(c.pairAddress);
  $('openDexPair').href=pairUrl;
  const solana=String(c.chainId||'').toLowerCase()==='solana';
- $('tradeLink').href=solana?'https://jup.ag/swap/SOL-'+encodeURIComponent(addr):pairUrl;
- $('tradeLink').textContent=solana?'Mit Jupiter handeln ↗':'Auf DEX Screener handeln ↗';
+ $('tradeLink').href='https://fomo.family/discover';
+ $('tradeLink').textContent='Auf FOMO kaufen ↗';
+ $('tradeLink').title='Öffnet FOMO Discover. Kopiere vorher die Token-Adresse und füge sie dort in die Suche ein.';
 }
 $('copyTokenAddress')?.addEventListener('click',async()=>{
  const addr=state.selected?.tokenAddress;if(!addr){toast('Für diesen Coin gibt es keine Contract-Adresse zum Kopieren.');return}
