@@ -224,14 +224,7 @@ function renderTrendRows(){
   scored.sort((a,b)=>b.score-a.score);
   state.trendCoins=scored.slice(0,20);
   renderTrendRows();
-/*TREND_ROWS_REMOVED*/
-   const p=x.pair,t=p.baseToken||{},age=x.ageMin===null?'Alter n/a':x.ageMin<60?Math.max(1,Math.floor(x.ageMin))+'m':x.ageMin<1440?Math.floor(x.ageMin/60)+'h':Math.floor(x.ageMin/1440)+'d';
-   const signal=x.ageMin!==null&&x.ageMin<45?'✦ NEW':x.buyRatio>=.65&&x.trades>=5?'↗ BUY FLOW':x.vol1>=1000?'⚡ ACTIVE':'TRENDING';
-   const image=p.info?.imageUrl?'<img src="'+safe(p.info.imageUrl)+'" alt="" loading="lazy">':'<span class="coin-icon">🪙</span>';
-   const mcLabel=x.mc===null?'—':'$'+compact(x.mc);
-   const change=Number.isFinite(x.h1)?x.h1:0;
-   return '<tr class="trend-result" data-dexchain="'+safe(p.chainId||'')+'" data-pair="'+safe(p.pairAddress||'')+'" data-token="'+safe(t.address||'')+'" data-name="'+safe(t.name||'Unknown')+'" data-symbol="'+safe(t.symbol||'—')+'" data-price="'+safe(p.priceUsd||'0')+'" data-change="'+safe(p.priceChange?.h24??'')+'" data-mcap="'+(x.mc===null?'':String(x.mc))+'" data-image="'+safe(p.info?.imageUrl||'')+'" tabindex="0" role="button" aria-label="Chart für '+safe(t.name||'Coin')+' öffnen"><td class="trend-rank">'+String(i+1).padStart(2,'0')+'</td><td class="trend-asset"><div class="coin">'+image+'<span>'+safe(t.name||'Unknown')+'<small>'+safe(t.symbol||'—')+' · '+safe(p.chainId||'')+'</small><small class="trend-mc">MC <b>'+mcLabel+'</b></small></span></div></td><td class="trend-signal"><span class="trend-badge '+(signal.includes('NEW')?'is-hot':'')+'">'+signal+'</span><strong class="'+(change>=0?'positive':'negative')+'">'+(change>=0?'+':'')+change.toFixed(1)+'% <small>1H</small></strong><small class="trend-age">'+age+' · '+x.trades+' Trades/h</small></td><td class="trend-volume"><strong>$'+compact(x.vol24)+'</strong><small>24H VOLUME</small></td></tr>';
-/*TREND_ROWS_END*/
+
   const top=state.trendCoins[0];
   $('topCoin').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'—';
   $('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · 1h Momentum':'Keine aktiven Coins';
