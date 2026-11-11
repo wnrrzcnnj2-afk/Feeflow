@@ -55,6 +55,16 @@ header{position:sticky;top:0;z-index:30;background:rgba(9,8,18,.92);backdrop-fil
 .token-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px;padding:12px;border:1px solid #ffffff12;border-radius:11px;background:#ffffff05}.token-actions .token-address{min-width:0;flex:1;color:#bcb2d0;font:11px ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.token-actions button,.token-actions a{border:1px solid #ffffff1a;background:#211a30;color:#e7dcf7;border-radius:8px;padding:8px 10px;font-size:10px;font-weight:750;text-decoration:none;cursor:pointer}.token-actions button:hover,.token-actions a:hover{border-color:#a66aff;color:white}
 @media(max-width:800px){.pulse-panel{padding:16px;margin-bottom:15px}.pulse-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pulse-grid article{padding:11px}.pulse-grid strong{font-size:16px}.pulse-head h2{font-size:21px}}
 @media(max-width:390px){.pulse-indicator{font-size:8px;padding:7px}.pulse-grid small{font-size:7px}.token-actions .token-address{flex-basis:100%}}
+
+/* FeeFlow finishing touches: reading progress, back-to-top, gentle section reveal */
+#ffReadingProgress{position:fixed;z-index:80;top:0;left:0;width:0;height:3px;background:linear-gradient(90deg,#8d4df0,#d2a4ff,#36d69a);box-shadow:0 0 12px #a66aff88;pointer-events:none;transition:width .08s linear}
+#ffBackTop{position:fixed;z-index:45;right:22px;bottom:22px;width:44px;height:44px;border:1px solid #ffffff25;border-radius:14px;background:rgba(25,20,39,.92);color:#eadcff;font-size:20px;box-shadow:0 8px 26px #0007;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s}
+#ffBackTop.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
+#ffBackTop:hover{border-color:#a66aff;background:#2a1b40}
+.ff-reveal-ready .ff-reveal{opacity:0;transform:translateY(12px);transition:opacity .42s ease,transform .42s ease}
+.ff-reveal-ready .ff-reveal.ff-visible{opacity:1;transform:none}
+@media(max-width:800px){#ffBackTop{right:17px;bottom:calc(88px + env(safe-area-inset-bottom));width:40px;height:40px}}
+@media(prefers-reduced-motion:reduce){#ffBackTop,.ff-reveal-ready .ff-reveal{transition:none;transform:none}}
 </style>
 </head>
 <body>
@@ -541,5 +551,35 @@ if('IntersectionObserver' in window){const dockObserver=new IntersectionObserver
 
 applyLanguage('de');$('searchResults').hidden=true;renderMarketPulse();renderIntel();loadMarket();loadTrendingBoard();setInterval(()=>{if(!document.hidden)loadMarket()},180000);setInterval(()=>{if(!document.hidden)loadTrendingBoard()},120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadMarket();loadTrendingBoard()}});
 </script>
-</body>
+<div id="ffReadingProgress" aria-hidden="true"></div>
+<button id="ffBackTop" type="button" aria-label="Zurück nach oben" title="Zurück nach oben">↑</button>
+<script>
+(()=> {
+ const bar=document.getElementById('ffReadingProgress');
+ const top=document.getElementById('ffBackTop');
+ if(!bar||!top)return;
+ let ticking=false;
+ const update=()=>{
+  const root=document.documentElement;
+  const max=root.scrollHeight-root.clientHeight;
+  const pct=max>0?Math.min(100,Math.max(0,window.scrollY/max*100)):0;
+  bar.style.width=pct+'%';
+  top.classList.toggle('is-visible',window.scrollY>520);
+  ticking=false;
+ };
+ window.addEventListener('scroll',()=>{if(!ticking){ticking=true;window.requestAnimationFrame(update)}},{passive:true});
+ window.addEventListener('resize',update,{passive:true});
+ top.addEventListener('click',()=>window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+ if('IntersectionObserver'in window&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const targets=[...document.querySelectorAll('.stat,.pulse-panel,.panel,.intel-panel,.launch-panel')];
+  targets.forEach(el=>el.classList.add('ff-reveal'));
+  document.documentElement.classList.add('ff-reveal-ready');
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+   if(entry.isIntersecting){entry.target.classList.add('ff-visible');observer.unobserve(entry.target)}
+  }),{threshold:.08,rootMargin:'0px 0px -24px 0px'});
+  targets.forEach(el=>observer.observe(el));
+ }
+ update();
+})();
+</script></body>
 </html>
