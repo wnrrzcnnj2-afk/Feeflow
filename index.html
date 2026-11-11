@@ -46,6 +46,15 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Asset</th><th>Price</th><th>24h</th><th>Market cap</th></tr></thead><tbody id="coinRows"><tr><td colspan="5" class="muted">Loading live coin data…</td></tr></tbody></table></div><button class="secondary-btn" id="loadMoreBtn" style="width:100%;margin-top:14px">Load more coins</button>
       <p class="notice" id="dataNote">Prices are supplied by CoinGecko and may be delayed or rate-limited.</p>
     </div>
+    <div class="panel" id="rugcheck">
+      <div class="panel-head"><h2>Rug / Scam Check</h2><span class="pill">TOKEN SAFETY</span></div>
+      <p class="notice" style="margin-top:0">Füge die Contract- oder Mint-Adresse ein. FeeFlow prüft bekannte On-Chain-Risiken für Solana und EVM-Token.</p>
+      <label for="riskChain" style="display:block;color:var(--muted);font-size:12px;margin:12px 0 6px">Blockchain</label>
+      <select id="riskChain" class="search" style="margin-bottom:10px"><option value="solana">Solana</option><option value="1">Ethereum</option><option value="8453">Base</option><option value="56">BNB Chain</option><option value="137">Polygon</option><option value="42161">Arbitrum</option><option value="10">Optimism</option><option value="43114">Avalanche</option></select>
+      <div class="search-row"><input class="search" id="riskAddress" placeholder="Token-Adresse / Mint-Adresse einfügen" autocomplete="off" spellcheck="false"><button class="btn" id="riskCheckBtn">Check</button></div>
+      <div id="riskResult" class="wallet-info" aria-live="polite"><strong>Bereit zum Prüfen</strong><span class="muted">Noch keine Adresse geprüft.</span></div>
+      <p class="notice">Wichtig: Ein niedriger Risikoscore bedeutet nicht garantiert sicher. Neue oder unbekannte Token können unvollständige Daten haben. Keine Prüfung kann einen Rug zu 100 % ausschließen.</p>
+    </div>
     <div class="panel" id="market">
       <div class="panel-head"><h2 id="chartTitle">Market chart</h2><span class="pill">LIVE</span></div>
       <div class="chart-meta"><div><div class="muted">Selected coin · USD</div><div class="chart-price" id="chartPrice">—</div><div class="chart-change" id="chartChange">Choose a coin from the list</div></div><div class="chart-controls"><button data-days="1" class="active">24H</button><button data-days="7">7D</button><button data-days="30">30D</button></div></div>
@@ -120,6 +129,45 @@ function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 
 function renderLaunches(){const rows=state.launches.slice(0,100);$('launchRows').innerHTML=rows.map(t=>{const mint=t.mint||t.tokenAddress||t.address||'';const name=t.name||'Unknown token',symbol=t.symbol||'—',creator=t.traderPublicKey||t.creator||t.creatorAddress||'';const buy=Number(t.initialBuy||t.initial_buy||0);const time=t.createdAt||t.timestamp||t.blockTime||Date.now();const date=typeof time==='number'?new Date(time<1e12?time*1000:time):new Date(time);const age=Number.isNaN(date.getTime())?'now':date.toLocaleTimeString();const link=mint?'https://pump.fun/coin/'+encodeURIComponent(mint):'https://pump.fun/';return '<tr><td>'+safe(age)+'</td><td><div class="coin"><span class="coin-icon">🪙</span><span>'+safe(name)+'<small>'+safe(symbol)+'</small></span></div><div class="muted" style="font-size:10px">'+safe(mint.slice(0,8))+(mint?'…':'')+'</div></td><td>'+safe(creator?creator.slice(0,6)+'…'+creator.slice(-4):'—')+'</td><td>'+(buy?buy.toFixed(3)+' SOL':'—')+'</td><td><a class="secondary-btn" style="display:inline-block;text-decoration:none" href="'+link+'" target="_blank" rel="noopener noreferrer">Pump.fun ↗</a></td></tr>'}).join('')||'<tr><td colspan="5" class="muted">Warte auf den nächsten neuen Coin…</td></tr>'}
 function connectLaunchStream(){if(state.launchSocket&&(state.launchSocket.readyState===WebSocket.OPEN||state.launchSocket.readyState===WebSocket.CONNECTING))return;try{const ws=new WebSocket('wss://pumpportal.fun/api/data');state.launchSocket=ws;ws.onopen=()=>{state.launchRetry=1500;ws.send(JSON.stringify({method:'subscribeNewToken'}));$('launchStatus').textContent='● LIVE';$('launchStatus').style.color='var(--green)';$('launchNote').textContent='Live verbunden · Neue Pump.fun Token erscheinen automatisch, sobald der Stream sie meldet.'};ws.onmessage=event=>{try{const raw=JSON.parse(event.data);const t=raw.data&&typeof raw.data==='object'?raw.data:raw;const mint=t.mint||t.tokenAddress||t.address;if(!mint)return;if(state.launches.some(x=>(x.mint||x.tokenAddress||x.address)===mint))return;state.launches.unshift({...t,mint,createdAt:t.createdAt||t.timestamp||Date.now()});state.launches=state.launches.slice(0,100);renderLaunches()}catch(e){}};ws.onerror=()=>{ $('launchStatus').textContent='RECONNECTING…';$('launchStatus').style.color='var(--red)'};ws.onclose=()=>{$('launchStatus').textContent='RECONNECTING…';$('launchStatus').style.color='var(--red)';const wait=state.launchRetry;state.launchRetry=Math.min(state.launchRetry*1.7,30000);setTimeout(connectLaunchStream,wait)}}catch(e){$('launchStatus').textContent='STREAM UNAVAILABLE';$('launchNote').textContent='Der Launch-Stream konnte nicht gestartet werden. Bitte Seite neu laden.'}}
+async function checkTokenRisk(){
+ const address=$('riskAddress').value.trim(),chain=$('riskChain').value,box=$('riskResult'),button=$('riskCheckBtn');
+ if(!address){box.innerHTML='<strong>Adresse fehlt</strong><span class="muted">Bitte zuerst eine Token-Adresse einfügen.</span>';return}
+ if(address.length<30){box.innerHTML='<strong class="negative">Ungültige Adresse</strong><span class="muted">Die Adresse sieht zu kurz aus. Bitte prüfe sie.</span>';return}
+ button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">Rufe Sicherheitsdaten ab.</span>';
+ try{
+  let report={},risks=[],score=null,metrics=[],bad=[];
+  if(chain==='solana'){
+   const res=await fetch('https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address)+'/report/summary',{headers:{accept:'application/json'}});
+   if(!res.ok)throw new Error(res.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+res.status);
+   report=await res.json();risks=Array.isArray(report.risks)?report.risks:[];
+   score=Number.isFinite(Number(report.score_normalised))?Number(report.score_normalised):null;
+   if(report.lpLockedPct!==undefined)metrics.push('LP gesperrt: '+Number(report.lpLockedPct).toFixed(1)+'%');
+   if(report.tokenProgram)metrics.push('Token-Programm erkannt');
+  }else{
+   const url='https://api.gopluslabs.io/api/v1/token_security/'+chain+'?contract_addresses='+encodeURIComponent(address.toLowerCase());
+   const res=await fetch(url,{headers:{accept:'application/json'}});
+   if(!res.ok)throw new Error(res.status===429?'GoPlus Rate-Limit erreicht. Bitte später erneut versuchen.':'GoPlus antwortet mit HTTP '+res.status);
+   const data=await res.json();if(String(data.code)!=='1')throw new Error(data.message||'Keine Sicherheitsdaten erhalten.');
+   report=Object.values(data.result||{})[0]||{};if(!Object.keys(report).length)throw new Error('Token wurde nicht gefunden oder es liegen keine Daten vor.');
+   const flags=[['is_honeypot','Honeypot möglich'],['cannot_sell_all','Verkauf möglicherweise eingeschränkt'],['hidden_owner','Versteckter Owner'],['is_mintable','Neue Token können gemintet werden'],['is_blacklisted','Blacklist-Funktion vorhanden'],['selfdestruct','Self-destruct-Funktion'],['owner_change_balance','Owner kann Guthaben verändern']];
+   for(const [key,label] of flags)if(String(report[key])==='1')bad.push(label);
+   for(const key of ['buy_tax','sell_tax'])if(report[key]!==undefined&&Number(report[key])>0.1)bad.push((key==='buy_tax'?'Kaufsteuer: ':'Verkaufssteuer: ')+(Number(report[key])*100).toFixed(2)+'%');
+   if(report.holder_count)metrics.push('Holder: '+report.holder_count);
+   if(report.is_open_source==='0')bad.push('Quellcode nicht verifiziert / nicht offen');
+   risks=bad.map(name=>({name,level:'danger',description:'GoPlus hat dieses Risiko-Flag gemeldet.'}));
+   if(report.is_honeypot==='1'||report.cannot_sell_all==='1'||report.hidden_owner==='1')score=90;
+   else if(bad.length>=3)score=75;else if(bad.length)score=45;else score=15;
+   if(report.is_open_source==='1')metrics.push('Quellcode offen');
+  }
+  const riskList=risks.map(r=>{const level=String(r.level||'').toLowerCase(),cls=level==='danger'||level==='high'?'negative':level==='warn'||level==='medium'?'':'positive';return '<li class="'+cls+'"><strong>'+safe(r.name||'Risiko')+'</strong>'+(r.value?' · '+safe(r.value):'')+'<div class="muted">'+safe(r.description||'')+'</div></li>'}).join('');
+  const dangerous=risks.some(r=>['danger','high'].includes(String(r.level||'').toLowerCase()))||bad.length>0;
+  const verdict=dangerous?'Risiken gefunden':(risks.length?'Achtung – prüfen':'Keine bekannten Warnungen');
+  const color=dangerous?'negative':risks.length?'':'positive';
+  box.innerHTML='<strong class="'+color+'">'+verdict+'</strong><span class="muted">Risiko-Score: '+(score===null?'Nicht verfügbar':score+'/100')+' · '+(chain==='solana'?'RugCheck':'GoPlus')+'</span>'+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Der Anbieter hat keine konkreten Warnungen zurückgegeben. Das ist keine Sicherheitsgarantie.</p>')+'<div class="muted" style="margin-top:10px">Geprüft: '+new Date().toLocaleString()+'</div>';
+ }catch(e){box.innerHTML='<strong class="negative">Prüfung nicht möglich</strong><span class="muted">'+safe(e.message)+'</span><div class="muted" style="margin-top:8px">Versuche es später erneut oder prüfe die Adresse direkt beim jeweiligen Sicherheitsanbieter.</div>'}
+ finally{button.disabled=false;button.textContent='Check'}
+}
+$('riskCheckBtn').addEventListener('click',checkTokenRisk);$('riskAddress').addEventListener('keydown',e=>{if(e.key==='Enter')checkTokenRisk()});
 function updateChartHeader(c){$('chartTitle').textContent=c.name+' ('+c.symbol.toUpperCase()+')';$('chartPrice').textContent=shortNum(c.current_price);const n=Number(c.price_change_percentage_24h);$('chartChange').textContent=(n>=0?'+':'')+(Number.isFinite(n)?n.toFixed(2)+'%':'—')+' · 24h';$('chartChange').className='chart-change '+(n>=0?'positive':'negative')}
 async function selectCoin(c){state.selected=c;renderCoins();updateChartHeader(c);await loadChart()}
 async function loadChart(){const c=state.selected;if(!c)return;$('chart').innerHTML='<div class="chart-empty">Loading '+safe(c.name)+' chart…</div>';try{const data=await getJSON('https://api.coingecko.com/api/v3/coins/'+encodeURIComponent(c.id)+'/market_chart?vs_currency=usd&days='+state.days);const points=(data.prices||[]).map(p=>p[1]).filter(Number.isFinite);if(points.length<2)throw new Error('Not enough chart data');drawChart(points);const first=new Date(data.prices[0][0]),last=new Date(data.prices[data.prices.length-1][0]);$('chartStart').textContent=state.days===1?first.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):first.toLocaleDateString();$('chartEnd').textContent=state.days===1?'Now':last.toLocaleDateString()}catch(e){$('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Try another time range later.</div>'}}
