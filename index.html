@@ -135,15 +135,28 @@ async function checkTokenRisk(){
  if(address.length<30){box.innerHTML='<strong class="negative">Ungültige Adresse</strong><span class="muted">Die Adresse sieht zu kurz aus. Bitte prüfe sie.</span>';return}
  button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">Rufe Sicherheitsdaten ab.</span>';
  try{
-  let report={},risks=[],score=null,metrics=[],bad=[];
+  let report={},full={},risks=[],score=null,rawScore=null,metrics=[],bad=[],isRugged=false,provider='';
   if(chain==='solana'){
-   const res=await fetch('https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address)+'/report/summary',{headers:{accept:'application/json'}});
-   if(!res.ok)throw new Error(res.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+res.status);
-   report=await res.json();risks=Array.isArray(report.risks)?report.risks:[];
+   provider='RugCheck';
+   const base='https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address);
+   const results=await Promise.allSettled([
+    fetch(base+'/report/summary',{headers:{accept:'application/json'}}),
+    fetch(base+'/report',{headers:{accept:'application/json'}})
+   ]);
+   if(results[0].status!=='fulfilled'||!results[0].value.ok)throw new Error(results[0].status==='fulfilled'?(results[0].value.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+results[0].value.status):'RugCheck ist nicht erreichbar.');
+   report=await results[0].value.json();
+   if(results[1].status==='fulfilled'&&results[1].value.ok){try{full=await results[1].value.json()}catch(e){}}
+   risks=Array.isArray(report.risks)?report.risks:(Array.isArray(full.risks)?full.risks:[]);
    score=Number.isFinite(Number(report.score_normalised))?Number(report.score_normalised):null;
+   rawScore=Number.isFinite(Number(report.score))?Number(report.score):null;
+   isRugged=report.rugged===true||full.rugged===true||report.isRugged===true||full.isRugged===true;
+   const token=full.token||{};
+   if(token.mintAuthority!==undefined)metrics.push('Mint Authority: '+(token.mintAuthority?'aktiv':'keine'));
+   if(token.freezeAuthority!==undefined)metrics.push('Freeze Authority: '+(token.freezeAuthority?'aktiv':'keine'));
    if(report.lpLockedPct!==undefined)metrics.push('LP gesperrt: '+Number(report.lpLockedPct).toFixed(1)+'%');
-   if(report.tokenProgram)metrics.push('Token-Programm erkannt');
+   if(full.topHolders?.length)metrics.push('Top-Holders geprüft: '+full.topHolders.length);
   }else{
+   provider='GoPlus';
    const url='https://api.gopluslabs.io/api/v1/token_security/'+chain+'?contract_addresses='+encodeURIComponent(address.toLowerCase());
    const res=await fetch(url,{headers:{accept:'application/json'}});
    if(!res.ok)throw new Error(res.status===429?'GoPlus Rate-Limit erreicht. Bitte später erneut versuchen.':'GoPlus antwortet mit HTTP '+res.status);
@@ -159,11 +172,14 @@ async function checkTokenRisk(){
    else if(bad.length>=3)score=75;else if(bad.length)score=45;else score=15;
    if(report.is_open_source==='1')metrics.push('Quellcode offen');
   }
-  const riskList=risks.map(r=>{const level=String(r.level||'').toLowerCase(),cls=level==='danger'||level==='high'?'negative':level==='warn'||level==='medium'?'':'positive';return '<li class="'+cls+'"><strong>'+safe(r.name||'Risiko')+'</strong>'+(r.value?' · '+safe(r.value):'')+'<div class="muted">'+safe(r.description||'')+'</div></li>'}).join('');
-  const dangerous=risks.some(r=>['danger','high'].includes(String(r.level||'').toLowerCase()))||bad.length>0;
-  const verdict=dangerous?'Risiken gefunden':(risks.length?'Achtung – prüfen':'Keine bekannten Warnungen');
-  const color=dangerous?'negative':risks.length?'':'positive';
-  box.innerHTML='<strong class="'+color+'">'+verdict+'</strong><span class="muted">Risiko-Score: '+(score===null?'Nicht verfügbar':score+'/100')+' · '+(chain==='solana'?'RugCheck':'GoPlus')+'</span>'+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Der Anbieter hat keine konkreten Warnungen zurückgegeben. Das ist keine Sicherheitsgarantie.</p>')+'<div class="muted" style="margin-top:10px">Geprüft: '+new Date().toLocaleString()+'</div>';
+  const riskList=risks.map(r=>{const level=String(r.level||'').toLowerCase(),cls=['danger','high','critical'].includes(level)?'negative':['warn','medium','warning'].includes(level)?'':'positive';return '<li class="'+cls+'"><strong>'+safe(r.name||'Risiko')+' · '+safe(level||'level unbekannt')+'</strong>'+(r.value?' · '+safe(r.value):'')+'<div class="muted">'+safe(r.description||'')+'</div></li>'}).join('');
+  const dangerCount=risks.filter(r=>['danger','high','critical'].includes(String(r.level||'').toLowerCase())).length;
+  const warnCount=risks.filter(r=>['warn','warning','medium'].includes(String(r.level||'').toLowerCase())).length;
+  const dangerous=isRugged||dangerCount>0||bad.length>0;
+  const verdict=isRugged?'RUG PULL VOM ANBIETER ERKANNT':dangerous?'KRITISCHE RISIKEN GEFUNDEN':warnCount?'WARNUNGEN GEFUNDEN':'KEINE BEKANNTEN WARNUNGEN – NICHT ALS SICHER BESTÄTIGT';
+  const color=dangerous?'negative':warnCount?'':'positive';
+  const scoreText=chain==='solana'?'RugCheck-Anzeigewert: '+(score===null?'nicht verfügbar':score+'/100')+(rawScore===null?'':' · Rohwert: '+rawScore):'FeeFlow-Risikoeinschätzung: '+(score===null?'nicht verfügbar':score+'/100');
+  box.innerHTML='<strong class="'+color+'">'+verdict+'</strong><span class="muted">'+scoreText+'</span>'+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Der Anbieter hat in dieser Abfrage keine konkreten Warnungen zurückgegeben. Das bedeutet NICHT, dass der Coin sicher ist oder nicht bereits geruggt wurde.</p>')+'<p class="muted">Es wurden '+risks.length+' Risiko-Einträge gefunden ('+dangerCount+' kritisch, '+warnCount+' Warnungen). Ein Score von 1/100 ist keine Wahrscheinlichkeit und keine Garantie.</p><div class="muted" style="margin-top:10px">Quelle: '+provider+' · Geprüft: '+new Date().toLocaleString()+'</div>';
  }catch(e){box.innerHTML='<strong class="negative">Prüfung nicht möglich</strong><span class="muted">'+safe(e.message)+'</span><div class="muted" style="margin-top:8px">Versuche es später erneut oder prüfe die Adresse direkt beim jeweiligen Sicherheitsanbieter.</div>'}
  finally{button.disabled=false;button.textContent='Check'}
 }
