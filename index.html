@@ -150,35 +150,84 @@ async function loadMoreCoins(){return}
 async function loadTrendingBoard(){
  if(state.trendRefreshing)return;state.trendRefreshing=true;$('trendStatus').textContent='SCANNING…';
  try{
-  const feeds=await Promise.allSettled([getJSON('https://api.dexscreener.com/token-boosts/latest/v1'),getJSON('https://api.dexscreener.com/token-boosts/top/v1'),getJSON('https://api.dexscreener.com/token-profiles/latest/v1')]);
+  const feeds=await Promise.allSettled([
+   getJSON('https://api.dexscreener.com/token-profiles/latest/v1'),
+   getJSON('https://api.dexscreener.com/token-boosts/latest/v1'),
+   getJSON('https://api.dexscreener.com/token-boosts/top/v1')
+  ]);
   const candidates=new Map();
-  for(const item of feeds.flatMap(r=>r.status==='fulfilled'&&Array.isArray(r.value)?r.value:[])){
-   if(!item?.chainId||!item?.tokenAddress)continue;const key=item.chainId+':'+item.tokenAddress;if(!candidates.has(key))candidates.set(key,item);
+  for(const result of feeds){
+   if(result.status!=='fulfilled'||!Array.isArray(result.value))continue;
+   for(const item of result.value){
+    if(!item?.chainId||!item?.tokenAddress)continue;
+    const key=item.chainId+':'+item.tokenAddress;
+    if(!candidates.has(key))candidates.set(key,item);
+   }
   }
-  const groups=new Map();for(const item of candidates.values()){if(!groups.has(item.chainId))groups.set(item.chainId,[]);groups.get(item.chainId).push(item.tokenAddress)}
-  const calls=[...groups.entries()].sort((a,b)=>b[1].length-a[1].length).slice(0,4).map(([chain,addresses])=>getJSON('https://api.dexscreener.com/tokens/v1/'+encodeURIComponent(chain)+'/'+addresses.slice(0,10).map(encodeURIComponent).join(',')));
-  const results=await Promise.allSettled(calls),pairs=[];for(const result of results)if(result.status==='fulfilled'&&Array.isArray(result.value))pairs.push(...result.value);
-  const best=new Map();for(const p of pairs){const address=p.baseToken?.address;if(!address)continue;const key=p.chainId+':'+address,liq=Number(p.liquidity?.usd||0),prev=best.get(key);if(!prev||liq>Number(prev.liquidity?.usd||0))best.set(key,p)}
-  if(!candidates.size){$('trendRows').innerHTML='<tr><td colspan="3" class="muted">Trend-Daten sind gerade nicht verfügbar. Bitte später erneut versuchen.</td></tr>';$('trendStatus').textContent='NO FEED DATA';$('trendStatus').style.color='var(--red)';$('coinCount').textContent='—';$('topCoin').textContent='—';$('topCoinChange').textContent='Keine Trenddaten';$('dataNote').textContent='DEX Screener hat aktuell keine Trend-Kandidaten geliefert.';return}
+  if(!candidates.size)throw new Error('Der öffentliche Scanner-Feed liefert gerade keine Token.');
+  const groups=new Map();
+  for(const item of candidates.values()){
+   if(!groups.has(item.chainId))groups.set(item.chainId,[]);
+   groups.get(item.chainId).push(item.tokenAddress);
+  }
+  const selectedGroups=[...groups.entries()].sort((a,b)=>b[1].length-a[1].length).slice(0,8);
+  const requests=selectedGroups.map(([chain,addresses])=>
+   getJSON('https://api.dexscreener.com/tokens/v1/'+encodeURIComponent(chain)+'/'+addresses.slice(0,30).map(encodeURIComponent).join(','))
+  );
+  const results=await Promise.allSettled(requests),pairs=[];
+  for(const result of results)if(result.status==='fulfilled'&&Array.isArray(result.value))pairs.push(...result.value);
+  const best=new Map();
+  for(const p of pairs){
+   const token=p.baseToken||{},address=token.address;
+   if(!address||!p.pairAddress)continue;
+   const key=(p.chainId||'')+':'+address;
+   const liquidity=Number(p.liquidity?.usd||0),volume=Number(p.volume?.h24||0),volume1=Number(p.volume?.h1||0);
+   const pairQuality=volume+volume1*5+liquidity*.12;
+   const previous=best.get(key);
+   if(!previous||pairQuality>previous.pairQuality)best.set(key,{pair:p,pairQuality});
+  }
   const now=Date.now(),scored=[];
-  for(const p of best.values()){
-   const mc=Number(p.marketCap||0),liq=Number(p.liquidity?.usd||0),created=Number(p.pairCreatedAt||0),ageMs=created?Math.max(0,now-created):Infinity,ageMin=ageMs/60000;
-   const h1=Number(p.priceChange?.h1||0),m5=Number(p.priceChange?.m5||0),h6=Number(p.priceChange?.h6||0),h24=Number(p.priceChange?.h24||0),vol1=Number(p.volume?.h1||0),vol24=Number(p.volume?.h24||0),buys=Number(p.txns?.h1?.buys||0),sells=Number(p.txns?.h1?.sells||0);
-   const hype=ageMin<=30&&mc>=150000;if(mc<50000||liq<8000||(!hype&&vol24<10000))continue;
-   const flowRatio=vol1/Math.max(liq,1),buyRatio=buys/Math.max(buys+sells,1),momentum=Math.max(-30,Math.min(50,m5*1.2+h1*.8+h6*.18));
-   const score=(hype?100:0)+momentum+Math.min(30,flowRatio*18)+Math.min(12,Math.log10(Math.max(vol1,1))*2)+(buyRatio-.5)*16+Math.min(8,Math.log10(Math.max(liq,1))*1.5);
-   scored.push({pair:p,mc,liq,ageMin,h1,m5,h6,h24,vol1,buys,sells,hype,score});
+  for(const {pair:p} of best.values()){
+   const liq=Number(p.liquidity?.usd||0),vol24=Number(p.volume?.h24||0),vol1=Number(p.volume?.h1||0);
+   const buys=Number(p.txns?.h1?.buys||0),sells=Number(p.txns?.h1?.sells||0),trades=buys+sells;
+   if(liq<5000&&vol24<5000&&vol1<500)continue;
+   if(trades<3&&vol1<250&&vol24<1500)continue;
+   const created=Number(p.pairCreatedAt||0),ageMin=created?Math.max(0,(now-created)/60000):null;
+   const m5=Number(p.priceChange?.m5||0),h1=Number(p.priceChange?.h1||0),h6=Number(p.priceChange?.h6||0);
+   const buyRatio=trades?buys/trades:.5,flow=vol1/Math.max(liq,1);
+   const score=Math.log10(vol1+1)*5+Math.log10(vol24+1)*3+Math.log10(trades+1)*4+
+    Math.min(14,flow*12)+(buyRatio-.5)*12+
+    Math.max(-18,Math.min(24,m5))*.65+Math.max(-30,Math.min(40,h1))*.3+
+    Math.max(-30,Math.min(40,h6))*.08+
+    (ageMin!==null&&ageMin<45?Math.max(0,8-ageMin/6):0);
+   const rawMc=p.marketCap;
+   const mc=rawMc!==null&&rawMc!==undefined&&rawMc!==''&&Number.isFinite(Number(rawMc))&&Number(rawMc)>0?Number(rawMc):null;
+   scored.push({pair:p,mc,liq,vol24,vol1,buys,sells,trades,buyRatio,ageMin,m5,h1,h6,score});
   }
-  scored.sort((a,b)=>b.score-a.score);state.trendCoins=scored.slice(0,10);
+  scored.sort((a,b)=>b.score-a.score);
+  state.trendCoins=scored.slice(0,20);
   $('trendRows').innerHTML=state.trendCoins.map((x,i)=>{
-   const p=x.pair,t=p.baseToken||{},change=x.h1,age=x.ageMin<60?Math.max(1,Math.floor(x.ageMin))+' min':x.ageMin<1440?Math.floor(x.ageMin/60)+' h':x.ageMin===Infinity?'—':Math.floor(x.ageMin/1440)+' d';
-   const signal=x.hype?'<span class="pill" style="background:#193b32;color:#64e6b1">NEW HYPE</span>':'<span class="pill">MOMENTUM</span>',image=p.info?.imageUrl?'<img src="'+safe(p.info.imageUrl)+'" alt="" loading="lazy">':'<span class="coin-icon">🪙</span>';
-   return '<tr class="trend-result" data-dexchain="'+safe(p.chainId||'')+'" data-pair="'+safe(p.pairAddress||'')+'" data-token="'+safe(t.address||'')+'" data-name="'+safe(t.name||'Unknown')+'" data-symbol="'+safe(t.symbol||'—')+'" data-price="'+safe(p.priceUsd||'0')+'" data-change="'+safe(p.priceChange?.h24??'')+'" data-mcap="'+safe(p.marketCap||x.mc||'0')+'" data-image="'+safe(p.info?.imageUrl||'')+'" tabindex="0" role="button" aria-label="Chart für '+safe(t.name||'Coin')+' öffnen"><td class="trend-rank">'+String(i+1).padStart(2,'0')+'</td><td class="trend-asset"><div class="coin">'+image+'<span>'+safe(t.name||'Unknown')+'<small>'+safe(t.symbol||'—')+' <i>·</i> '+safe(p.chainId)+'</small><small class="trend-mc">MC <b>$'+compact(x.mc)+'</b></small></span></div></td><td class="trend-signal"><span class="trend-badge '+(x.hype?'is-hot':'')+'">'+(x.hype?'✦ NEW':'↗ MOMENTUM')+'</span><strong class="'+(change>=0?'positive':'negative')+'">'+(change>=0?'+':'')+change.toFixed(1)+'% <small>1H</small></strong><small class="trend-age">'+age+' alt</small></td><td class="trend-volume"><strong>$'+compact(x.vol24)+'</strong><small>24H VOLUME</small></td></tr>';
-  }).join('')||'<tr><td colspan="3" class="muted">Aktuell keine passenden Trend-Kandidaten gefunden. Feed wird automatisch erneut geprüft.</td></tr>';
-  const top=state.trendCoins[0];$('topCoin').textContent=top?(top.pair.baseToken?.symbol||'—').toUpperCase():'—';$('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · 1h Momentum':'No data';
-  $('coinCount').textContent=String(state.trendCoins.length)+' trending';$('trendCount').textContent=String(state.trendCoins.length)+' Coins im Radar';$('trendLead').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'Keine Daten';$('trendStatus').textContent='● LIVE';$('trendStatus').style.color='var(--green)';
-  $('dataNote').textContent='FeeFlow-Momentum-Ranking aus DEX-Screener-Profilen und Boosts. Pair-Alter ist nur ein Näherungswert für das Token-Alter; Market Cap kann bei neuen Token fehlen.';
- }catch(e){$('trendStatus').textContent='FEED UNAVAILABLE';$('trendStatus').style.color='var(--red)';$('trendRows').innerHTML='<tr><td colspan="3" class="muted">'+safe(e.message)+'</td></tr>'}
+   const p=x.pair,t=p.baseToken||{},age=x.ageMin===null?'Alter n/a':x.ageMin<60?Math.max(1,Math.floor(x.ageMin))+'m':x.ageMin<1440?Math.floor(x.ageMin/60)+'h':Math.floor(x.ageMin/1440)+'d';
+   const signal=x.ageMin!==null&&x.ageMin<45?'✦ NEW':x.buyRatio>=.65&&x.trades>=5?'↗ BUY FLOW':x.vol1>=1000?'⚡ ACTIVE':'TRENDING';
+   const image=p.info?.imageUrl?'<img src="'+safe(p.info.imageUrl)+'" alt="" loading="lazy">':'<span class="coin-icon">🪙</span>';
+   const mcLabel=x.mc===null?'—':'$'+compact(x.mc);
+   const change=Number.isFinite(x.h1)?x.h1:0;
+   return '<tr class="trend-result" data-dexchain="'+safe(p.chainId||'')+'" data-pair="'+safe(p.pairAddress||'')+'" data-token="'+safe(t.address||'')+'" data-name="'+safe(t.name||'Unknown')+'" data-symbol="'+safe(t.symbol||'—')+'" data-price="'+safe(p.priceUsd||'0')+'" data-change="'+safe(p.priceChange?.h24??'')+'" data-mcap="'+(x.mc===null?'':String(x.mc))+'" data-image="'+safe(p.info?.imageUrl||'')+'" tabindex="0" role="button" aria-label="Chart für '+safe(t.name||'Coin')+' öffnen"><td class="trend-rank">'+String(i+1).padStart(2,'0')+'</td><td class="trend-asset"><div class="coin">'+image+'<span>'+safe(t.name||'Unknown')+'<small>'+safe(t.symbol||'—')+' · '+safe(p.chainId||'')+'</small><small class="trend-mc">MC <b>'+mcLabel+'</b></small></span></div></td><td class="trend-signal"><span class="trend-badge '+(signal.includes('NEW')?'is-hot':'')+'">'+signal+'</span><strong class="'+(change>=0?'positive':'negative')+'">'+(change>=0?'+':'')+change.toFixed(1)+'% <small>1H</small></strong><small class="trend-age">'+age+' · '+x.trades+' Trades/h</small></td><td class="trend-volume"><strong>$'+compact(x.vol24)+'</strong><small>24H VOLUME</small></td></tr>';
+  }).join('')||'<tr><td colspan="4" class="muted">Gerade keine ausreichend aktiven Token gefunden. Der Scanner prüft automatisch erneut.</td></tr>';
+  const top=state.trendCoins[0];
+  $('topCoin').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'—';
+  $('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · 1h Momentum':'Keine aktiven Coins';
+  $('coinCount').textContent=state.trendCoins.length+' trending';
+  $('trendCount').textContent=state.trendCoins.length+' Coins · DEX Scanner';
+  $('trendLead').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'Wartet auf Aktivität';
+  $('trendStatus').textContent=feeds.every(r=>r.status==='fulfilled')?'● LIVE SCAN':'● PARTIAL SCAN';
+  $('trendStatus').style.color='var(--green)';
+  $('dataNote').textContent='Öffentlicher DEX-Scanner: neue Profile, aktuelle und Top-Boosts. Ranking nach Handelsvolumen, Trades und Kaufdruck. Market Cap wird nur angezeigt, wenn der Anbieter einen echten MC-Wert liefert – FDV wird nicht ersatzweise verwendet.';
+ }catch(e){
+  $('trendStatus').textContent='SCAN PAUSED';$('trendStatus').style.color='var(--red)';
+  $('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';
+  $('trendCount').textContent='Datenquelle nicht erreichbar';
+ }
  finally{state.trendRefreshing=false}
 }
 async function searchAllCoins(){
