@@ -39,6 +39,8 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
 .trend-result:hover,.trend-result:focus-visible{background:linear-gradient(90deg,#a66aff16,#ffffff03);outline:none}.trend-result:active{background:#a66aff25}.trend-result:focus-visible{box-shadow:inset 0 0 0 1px #a66aff}
 @media(max-width:520px){.trend-hero h2{font-size:24px!important}.trend-table tbody tr{grid-template-columns:24px minmax(0,1fr) 88px;gap:6px;padding:10px 8px}.trend-volume{display:none}.trend-list-head{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px}.trend-list-head span:last-child{display:none}.trend-asset .coin{gap:7px}.trend-asset .coin img,.trend-asset .coin-icon{width:32px;height:32px;flex-basis:32px}.trend-asset .coin small{font-size:9px}.trend-signal{align-items:flex-end}.trend-badge{font-size:7px}.trend-overview{padding:10px 11px}.trend-live{padding:7px 8px;font-size:8px}}
 @media(prefers-reduced-motion:reduce){.trend-live-dot{animation:none}}
+
+.intel-panel{margin:0 0 24px;background:linear-gradient(145deg,#171525,#100f19);border:1px solid var(--line);border-radius:16px;padding:22px}.intel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.intel-card{min-width:0;padding:15px;border:1px solid #ffffff12;border-radius:13px;background:#0d0c16}.intel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.intel-title strong{font-size:14px}.intel-list{display:grid;gap:8px;min-width:0}.intel-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 9px;background:#ffffff06;border-radius:8px;font-size:12px;min-width:0}.intel-row span:first-child{overflow:hidden;text-overflow:ellipsis}.intel-form{display:grid;gap:8px}.intel-form .search{min-height:38px;padding:8px 10px;font-size:12px}.intel-form .btn,.intel-form .secondary-btn{min-height:36px;padding:7px 10px;font-size:12px}.heatmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.heat-cell{padding:10px 5px;border-radius:8px;text-align:center;min-width:0;background:#252039;border:1px solid #ffffff10}.heat-cell strong,.heat-cell small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.heat-cell strong{font-size:11px}.heat-cell small{font-size:10px;margin-top:3px}.intel-row button{background:none;border:0;color:#d4b8ff;cursor:pointer}.intel-empty{font-size:11px;color:var(--muted)}@media(max-width:800px){.intel-panel{padding:16px}.intel-grid{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -105,6 +107,21 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
       <p class="notice">Wallet access uses your browser wallet (EIP-1193 / Phantom). This dashboard only requests the public account address. It does not sign transactions, move funds, or store secret keys. Wallet state is kept only in this page session.</p>
     </div>
   </section>
+
+  <section class="panel intel-panel" id="market-intel">
+   <div class="panel-head"><div><h2>Market Intelligence</h2><p class="notice" style="margin:4px 0 0">Zusätzliche Markt-Tools – kompakt in einem Bereich.</p></div><span class="pill">EXTRAS</span></div>
+   <div class="intel-grid">
+    <article class="intel-card"><div class="intel-title"><strong>🚀 New Coin Radar</strong><span class="muted">Neue Paare</span></div><div id="newCoinList" class="intel-list"><span class="muted">Warte auf Live-Scan…</span></div></article>
+    <article class="intel-card"><div class="intel-title"><strong>📈 Gainers &amp; Losers</strong><span class="muted">1h Veränderung</span></div><div id="moverList" class="intel-list"><span class="muted">Warte auf Live-Scan…</span></div></article>
+    <article class="intel-card"><div class="intel-title"><strong>🗺️ Market Heatmap</strong><span class="muted">Trending MC / Bewegung</span></div><div id="heatmap" class="heatmap"><span class="muted">Warte auf Live-Scan…</span></div></article>
+    <article class="intel-card"><div class="intel-title"><strong>🐳 Whale Tracker</strong><span class="muted">Große Trades des gewählten Coins</span></div><div id="whaleList" class="intel-list"><span class="muted">Wähle oben einen Coin aus.</span></div></article>
+    <article class="intel-card"><div class="intel-title"><strong>🔔 Price Alerts</strong><span class="muted">Lokal in diesem Browser</span></div><div class="intel-form"><input id="alertSymbol" class="search" placeholder="Coin-Symbol, z. B. BONK"><input id="alertPrice" class="search" type="number" min="0" step="any" placeholder="Zielpreis in USD"><select id="alertDirection" class="search"><option value="above">Alarm bei Anstieg über</option><option value="below">Alarm bei Fall unter</option></select><button id="addAlert" class="btn">Alarm speichern</button></div><div id="alertList" class="intel-list"></div></article>
+    <article class="intel-card"><div class="intel-title"><strong>💼 Mini-Portfolio</strong><span class="muted">Manuell · Schätzwert</span></div><div class="intel-form"><input id="portfolioAddress" class="search" placeholder="Token Contract-Adresse"><input id="portfolioQty" class="search" type="number" min="0" step="any" placeholder="Deine Token-Menge"><button id="addPosition" class="btn">Position hinzufügen</button></div><div id="portfolioList" class="intel-list"></div></article>
+    <article class="intel-card"><div class="intel-title"><strong>🧠 Smart Money Watch</strong><span class="muted">Wallet-Adressen merken</span></div><div class="intel-form"><input id="smartWallet" class="search" placeholder="Öffentliche Wallet-Adresse"><button id="addSmartWallet" class="btn">Wallet speichern</button></div><div id="smartWalletList" class="intel-list"></div><p class="notice">Wallet-Liste zum Beobachten. Ohne spezialisierten Datenanbieter werden hier keine Käufe/Verkäufe dieser Wallets behauptet.</p></article>
+    <article class="intel-card"><div class="intel-title"><strong>🫧 Holder Scanner</strong><span class="muted">Wallet-Konzentration</span></div><p class="notice" style="margin:0 0 10px">Nutze den Rug Check und öffne bei Solana zusätzlich die Bubble-Map, um Holder-Cluster und Verbindungen anzusehen.</p><button id="openHolderScan" class="secondary-btn">Zum Rug / Holder Check ↓</button></article>
+   </div>
+   <p class="notice">Hinweis: Preisalarme laufen nur, solange FeeFlow in diesem Browser geöffnet ist. Portfolio-Werte sind Schätzungen anhand öffentlicher DEX-Daten. Kein Modul führt Trades aus.</p>
+  </section>
   <p class="disclaimer">Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by CoinGecko. No swaps, deposits, withdrawals or trades are performed here.</p>
 </main>
 <footer><span>© 2026 FeeFlow · Follow the flow.</span><span>Marktdaten: CoinGecko &amp; DEX Screener · Wallet bleibt im Browser</span></footer>
@@ -113,7 +130,8 @@ header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-const state={coins:[],selected:null,days:1,provider:null,account:null,chainId:null,kind:null,refreshing:false,searchMode:false,trendCoins:[],trendRefreshing:false,searchRequest:0,chartRequest:0,trendSort:'momentum',watchOnly:false,watchlist:new Set()};
+const state={coins:[],selected:null,days:1,provider:null,account:null,chainId:null,kind:null,refreshing:false,searchMode:false,trendCoins:[],trendRefreshing:false,searchRequest:0,chartRequest:0,trendSort:'momentum',watchOnly:false,watchlist:new Set(),alerts:[],positions:[],smartWallets:[]};
+for(const [k,p] of [['alerts','feeflow_alerts'],['positions','feeflow_positions'],['smartWallets','feeflow_smart_wallets']]){try{state[k]=JSON.parse(localStorage.getItem(p)||'[]')}catch(e){state[k]=[]}}
 try{state.watchlist=new Set(JSON.parse(localStorage.getItem('feeflow_watchlist')||'[]'))}catch(e){}
 
 let language='de';
