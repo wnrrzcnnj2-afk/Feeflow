@@ -585,7 +585,7 @@ async function loadTrendingBoard(){
     if(!candidates.has(key))candidates.set(key,item);
    }
   }
-  if(!candidates.size)throw new Error('Der öffentliche Scanner-Feed liefert gerade keine Token.');
+  if(!candidates.size)throw new Error(language==='en'?'The public scanner feed currently returns no tokens.':'Der öffentliche Scanner-Feed liefert gerade keine Token.');
   // Include notable established Solana runners that may no longer appear in the latest-boost feeds.
   const niHaoAddress='4CxjZyMNoF1p6eXHXHv1TWpS2X47CuUmLwtGe18spump';
   candidates.set('solana:'+niHaoAddress,{chainId:'solana',tokenAddress:niHaoAddress});
@@ -642,7 +642,7 @@ async function loadTrendingBoard(){
   $('trendLead').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():(language==='en'?'Waiting for activity':'Wartet auf Aktivität');
   $('trendStatus').textContent=feeds.every(r=>r.status==='fulfilled')?'● LIVE SCAN':'● PARTIAL SCAN';
   $('trendStatus').style.color='var(--green)';
-  $('dataNote').textContent='Öffentlicher DEX-Scanner: neue Profile, aktuelle und Top-Boosts. Ranking nach Handelsvolumen, Trades und Kaufdruck. Market Cap wird nur angezeigt, wenn der Anbieter einen echten MC-Wert liefert – FDV wird nicht ersatzweise verwendet.';
+  $('dataNote').textContent=language==='en'?'Public DEX scanner: new profiles, latest and top boosts. Ranked by trading volume, trades and buy pressure. Market cap is shown only when the provider supplies a real MC value; FDV is not used as a substitute.':'Öffentlicher DEX-Scanner: neue Profile, aktuelle und Top-Boosts. Ranking nach Handelsvolumen, Trades und Kaufdruck. Market Cap wird nur angezeigt, wenn der Anbieter einen echten MC-Wert liefert – FDV wird nicht ersatzweise verwendet.';
  }catch(e){
   $('trendStatus').textContent='SCAN PAUSED';$('trendStatus').style.color='var(--red)';
   $('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';
@@ -651,8 +651,8 @@ async function loadTrendingBoard(){
  finally{state.trendRefreshing=false}
 }
 async function searchAllCoins(){
- const q=$('coinSearch').value.trim();if(!q){state.searchMode=false;$('searchResults').hidden=true;return}
- const request=++state.searchRequest;$('searchAllBtn').disabled=true;$('searchAllBtn').textContent='…';$('searchResults').hidden=false;$('coinRows').innerHTML='<tr><td colspan="5" class="muted">Suche läuft…</td></tr>';$('dataNote').textContent='Suche CoinGecko und DEX Screener…';
+ const en=language==='en';const q=$('coinSearch').value.trim();if(!q){state.searchMode=false;$('searchResults').hidden=true;return}
+ const request=++state.searchRequest;$('searchAllBtn').disabled=true;$('searchAllBtn').textContent='…';$('searchResults').hidden=false;$('coinRows').innerHTML='<tr><td colspan="5" class="muted">'+(en?'Searching…':'Suche läuft…')+'</td></tr>';$('dataNote').textContent=en?'Searching CoinGecko and DEX Screener…':'Suche CoinGecko und DEX Screener…';
  try{
   const [cgResult,dexResult]=await Promise.allSettled([getJSON('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(q)),getJSON('https://api.dexscreener.com/latest/dex/search?q='+encodeURIComponent(q))]);
   let markets=[];if(cgResult.status==='fulfilled'){const found=(cgResult.value.coins||[]).slice(0,20);if(found.length){const ids=found.map(c=>c.id).join(',');try{markets=await getJSON('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+encodeURIComponent(ids)+'&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h')}catch(e){if(dexResult.status!=='fulfilled')throw e}}}
@@ -662,9 +662,9 @@ async function searchAllCoins(){
   state.searchMode=true;
   const cgRows=markets.map(c=>{const chg=Number(c.price_change_percentage_24h);return '<tr data-id="'+safe(c.id)+'"><td class="rank">CG</td><td><div class="coin"><img src="'+safe(c.image)+'" alt="" loading="lazy"><span>'+safe(c.name)+'<small>'+safe(c.symbol.toUpperCase())+' · CoinGecko</small></span></div></td><td>'+shortNum(c.current_price)+'</td><td class="'+(chg>=0?'positive':'negative')+'">'+(chg>=0?'+':'')+(Number.isFinite(chg)?chg.toFixed(2)+'%':'—')+'</td><td>$'+compact(c.market_cap)+'</td></tr>'});
   const dexRows=dexPairs.map(p=>{const t=p.baseToken||{},chg=Number(p.priceChange?.h24);return '<tr class="dex-result" tabindex="0" role="button" data-dexchain="'+safe(p.chainId||'')+'" data-pair="'+safe(p.pairAddress||'')+'" data-token="'+safe(t.address||'')+'" data-name="'+safe(t.name||'Unknown token')+'" data-symbol="'+safe(t.symbol||'—')+'" data-price="'+safe(p.priceUsd||'0')+'" data-change="'+safe(p.priceChange?.h24??'')+'" data-mcap="'+safe(p.marketCap||'0')+'" data-image="'+safe(p.info?.imageUrl||'')+'"><td class="rank">DEX</td><td><div class="coin">'+(p.info?.imageUrl?'<img src="'+safe(p.info.imageUrl)+'" alt="" loading="lazy">':'<span class="coin-icon">🪙</span>')+'<span>'+safe(t.name||'Unknown token')+'<small>'+safe(t.symbol||'—')+' · '+safe(p.chainId||'')+'</small></span></div></td><td>'+shortNum(p.priceUsd)+'</td><td class="'+(chg>=0?'positive':'negative')+'">'+(Number.isFinite(chg)?(chg>=0?'+':'')+chg.toFixed(2)+'%':'—')+'</td><td>'+(p.marketCap&&Number(p.marketCap)>0?'$'+compact(p.marketCap):'—')+'</td></tr>'});
-  $('coinRows').innerHTML=(cgRows.length||dexRows.length)?cgRows.concat(dexRows).join(''):'<tr><td colspan="5" class="muted">Keine Treffer gefunden. Prüfe Name, Kürzel oder Contract-Adresse.</td></tr>';
-  $('dataNote').textContent='Maximal 50 Suchtreffer · '+markets.length+' CoinGecko + '+dexPairs.length+' DEX-Paare.'+(cgResult.status==='rejected'?' CoinGecko nicht erreichbar.':'')+(dexResult.status==='rejected'?' DEX Screener nicht erreichbar.':'');
- }catch(e){if(request===state.searchRequest){$('coinRows').innerHTML='<tr><td colspan="5" class="muted">'+safe(e.message)+'</td></tr>';$('dataNote').textContent=e.message+' Bitte kurz warten und erneut suchen.'}}
+  $('coinRows').innerHTML=(cgRows.length||dexRows.length)?cgRows.concat(dexRows).join(''):'<tr><td colspan="5" class="muted">'+(en?'No results found. Check the name, ticker or contract address.':'Keine Treffer gefunden. Prüfe Name, Kürzel oder Contract-Adresse.')+'</td></tr>';
+  $('dataNote').textContent=(en?'Up to 50 results · ':'Maximal 50 Suchtreffer · ')+markets.length+' CoinGecko + '+dexPairs.length+(en?' DEX pairs.':' DEX-Paare.')+(cgResult.status==='rejected'?(en?' CoinGecko unavailable.':' CoinGecko nicht erreichbar.'):'')+(dexResult.status==='rejected'?(en?' DEX Screener unavailable.':' DEX Screener nicht erreichbar.':'');
+ }catch(e){if(request===state.searchRequest){$('coinRows').innerHTML='<tr><td colspan="5" class="muted">'+safe(e.message)+'</td></tr>';$('dataNote').textContent=e.message+(en?' Please wait and search again.':' Bitte kurz warten und erneut suchen.')}}
  finally{if(request===state.searchRequest){$('searchAllBtn').disabled=false;$('searchAllBtn').textContent='⌕'}}
 }
 function renderCoins(){const q=$('coinSearch').value.trim().toLowerCase();const list=state.coins.filter(c=>c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q));$('coinRows').innerHTML=list.map(c=>{const i=state.coins.indexOf(c)+1,chg=Number(c.price_change_percentage_24h),cls=chg>=0?'positive':'negative',active=state.selected?.id===c.id?' style="background:#ffffff0c"':'';return '<tr data-id="'+safe(c.id)+'"'+active+'><td class="rank">'+i+'</td><td><div class="coin"><img src="'+safe(c.image)+'" alt="" loading="lazy"><span>'+safe(c.name)+'<small>'+safe(c.symbol.toUpperCase())+'</small></span></div></td><td>'+shortNum(c.current_price)+'</td><td class="'+cls+'">'+(chg>=0?'+':'')+(Number.isFinite(chg)?chg.toFixed(2)+'%':'—')+'</td><td>$'+compact(c.market_cap)+'</td></tr>'}).join('')||'<tr><td colspan="5" class="muted">No matching coins.</td></tr>'}
