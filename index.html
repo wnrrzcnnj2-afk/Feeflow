@@ -634,6 +634,7 @@ async function loadChart(){
  const c=state.selected;if(!c)return;
  const request=++state.chartRequest,interval=state.interval||'24h';
  $('chart').innerHTML='<div class="chart-empty">Lade '+(interval==='1s'?'1-Sekunden-Livechart':interval+'-Chart')+' für '+safe(c.name)+'…</div>';
+ $('chart').style.height='190px';$('chart').style.background='';
  try{
   let points=[],timestamps=[],ohlc=[];
   if(interval==='1s'){
@@ -694,10 +695,17 @@ async function loadChart(){
   $('chartEnd').textContent=shortInterval?last.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):last.toLocaleDateString();
  }catch(e){
   if(request===state.chartRequest){
-   const solana=String(c.chainId||'').toLowerCase()==='solana'&&c.tokenAddress;
-   const fallback=solana?'https://pump.fun/coin/'+encodeURIComponent(c.tokenAddress):(c.dexPair&&c.pairAddress?'https://dexscreener.com/'+encodeURIComponent(c.chainId||'')+'/'+encodeURIComponent(c.pairAddress):'');
-   const label=solana?'Pump.fun Chart öffnen ↗':'DEX-Chart öffnen ↗';
-   $('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Der FeeFlow-Chart konnte für dieses Handelspaar keine Daten laden.'+(fallback?'<br><a href="'+safe(fallback)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;margin-top:12px;padding:9px 13px;border:1px solid #8052b6;border-radius:9px;color:#d8b8ff;text-decoration:none;font-weight:700">'+label+'</a>':'')+'</div>';
+   const pairAddress=c.pairAddress||'';
+   const chain=String(c.chainId||'').toLowerCase();
+   if(c.dexPair&&pairAddress){
+    const embedUrl='https://dexscreener.com/'+encodeURIComponent(chain)+'/'+encodeURIComponent(pairAddress)+'?embed=1&theme=dark&trades=0&info=0';
+    $('chart').style.height='320px';
+    $('chart').style.background='transparent';
+    $('chart').innerHTML='<iframe title="FeeFlow eingebetteter Live-Chart" src="'+safe(embedUrl)+'" style="display:block;width:100%;height:320px;border:0;border-radius:10px;background:#0b0a12" loading="lazy" referrerpolicy="no-referrer" allow="clipboard-read; clipboard-write"></iframe><div style="position:absolute;left:8px;bottom:5px;font-size:9px;color:#aaa;pointer-events:none">Chart direkt in FeeFlow · Datenquelle DexScreener</div>';
+   }else{
+    $('chart').style.height='190px';
+    $('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Für dieses Handelspaar ist gerade kein eingebetteter Chart verfügbar. Bitte später erneut versuchen.</div>';
+   }
   }
  }
 }
