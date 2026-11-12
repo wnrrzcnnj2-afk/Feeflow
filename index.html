@@ -653,11 +653,11 @@ async function loadTrendingBoard(){
   $('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';
   $('trendCount').textContent=language==='en'?'Data source unavailable':'Datenquelle nicht erreichbar';
   $('trendLead').textContent=language==='en'?'Scan unavailable':'Scan nicht verfügbar';
-  $('topCoin').textContent='—';$('coinCount').textContent='—';
+  $('topCoin').textContent='—';$('topCoinChange').textContent=language==='en'?'No scan data':'Keine Scan-Daten';
   $('pulseMover').textContent=language==='en'?'Scan unavailable':'Scan nicht verfügbar';
   $('pulseMoverMeta').textContent=language==='en'?'Data provider did not respond':'Datenanbieter antwortet nicht';
   $('pulseFoot').textContent=language==='en'?'The scanner will retry automatically.':'Der Scanner versucht es automatisch erneut.';
-  renderMarketPulse();
+  $('pulseVolume').textContent='—';$('pulseBuy').textContent='—';$('pulseWatch').textContent=state.watchlist.size+' Coins';
  }
  finally{state.trendRefreshing=false}
 }
