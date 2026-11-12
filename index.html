@@ -132,6 +132,26 @@ img,svg,canvas{max-width:100%}
 .chart-grid{stroke:#29263b;stroke-width:1;stroke-dasharray:3 5}
 .chart-axis{fill:#9994ad;font:11px ui-sans-serif,system-ui,sans-serif}
 @media(max-width:520px){.chart-tools{width:100%;align-items:stretch}.chart-meta{align-items:flex-start;flex-direction:column}.chart-controls{width:100%}.chart-controls button{flex:1}.chart{height:230px}.chart-type-row{margin-top:14px}.chart-type-row .chart-controls{width:auto;flex:1}.chart-type-row button{min-width:0}}
+
+/* Refined chart and risk panel presentation */
+#market,#rugcheck{background:linear-gradient(155deg,#171525 0%,#100f19 78%);border-color:#302943;box-shadow:0 16px 42px #0003}
+#market .panel-head,#rugcheck .panel-head{padding-bottom:13px;border-bottom:1px solid #ffffff0c}
+#market .panel-head h2,#rugcheck .panel-head h2{font-size:18px;letter-spacing:-.45px}
+#market .chart{height:250px;margin-top:8px;padding:0 2px;background:linear-gradient(180deg,#17132455,#0d0c1455);border:1px solid #ffffff0b;border-radius:12px;overflow:hidden}
+#market .chart svg{display:block;width:100%;height:100%}
+#market .chart-labels{padding:0 5px;margin:9px 2px 12px;color:#827b94}
+#market .chart-price{font-size:clamp(23px,2.5vw,30px);letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+#market .chart-type-row{margin-top:13px;background:#151221;border-color:#332746;box-shadow:none}
+#market .chart-zoom-row{padding:2px 2px 5px}
+#market .chart-zoom-row button{background:#1b1828;border-color:#393149;transition:background .18s,border-color .18s}
+#market .chart-zoom-row button:hover{background:#30213f;border-color:#9860d6}
+#rugcheck .search,#rugcheck select{background:#0c0b14;border-color:#302a40}
+#rugcheck .wallet-info{background:#0d0c15;border-color:#302a40;border-radius:12px;padding:16px}
+#rugcheck .notice{max-width:58ch;color:#918ba2}
+#rugcheck .search-row{gap:8px}
+#rugcheck .search-row .btn{box-shadow:0 5px 16px #9b5cff25}
+@media(max-width:800px){#market .chart{height:230px}#market .chart-meta{gap:12px}}
+@media(max-width:520px){#market .chart{height:215px}#market .chart-type-row{padding:10px 11px}#market .chart-type-row button{min-width:0;flex:1}}
 </style>
 </head>
 <body>
@@ -887,8 +907,22 @@ function drawCandles(data){
  svg+='</svg>';$('chart').innerHTML=svg;
 }
 function drawChart(values){
- const w=700,h=260,pad=8,min=Math.min(...values),max=Math.max(...values),range=max-min||Math.max(max*.01,.0000001),coords=values.map((v,i)=>[pad+i/(values.length-1)*(w-2*pad),h-pad-(v-min)/range*(h-2*pad)]),line=coords.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' '),area=line+' L '+(w-pad)+' '+(h-pad)+' L '+pad+' '+(h-pad)+' Z';
- $('chart').innerHTML='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Live price line chart"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a66aff" stop-opacity=".38"/><stop offset="1" stop-color="#a66aff" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#chartFill)"/><path d="'+line+'" fill="none" stroke="#b77aff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>';
+ const w=760,h=260,left=12,right=68,top=16,bottom=18,plotW=w-left-right,plotH=h-top-bottom;
+ const min=Math.min(...values),max=Math.max(...values),pad=(max-min)*.12||Math.max(Math.abs(max)*.012,1e-10),lo=min-pad,hi=max+pad,range=hi-lo;
+ const coords=values.map((v,i)=>[left+(values.length<2?.5:i/(values.length-1))*plotW,top+(hi-v)/range*plotH]);
+ let line='';
+ if(coords.length===1)line='M'+coords[0][0]+' '+coords[0][1];
+ else{
+  line='M'+coords[0][0].toFixed(2)+' '+coords[0][1].toFixed(2);
+  for(let i=0;i<coords.length-1;i++){
+   const p0=coords[Math.max(0,i-1)],p1=coords[i],p2=coords[i+1],p3=coords[Math.min(coords.length-1,i+2)];
+   const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+   line+=' C'+c1[0].toFixed(2)+' '+c1[1].toFixed(2)+','+c2[0].toFixed(2)+' '+c2[1].toFixed(2)+','+p2[0].toFixed(2)+' '+p2[1].toFixed(2);
+  }
+ }
+ const last=coords[coords.length-1],area=line+' L '+last[0]+' '+(h-bottom)+' L '+coords[0][0]+' '+(h-bottom)+' Z';
+ let grid='';for(let i=0;i<5;i++){const y=top+i*plotH/4;grid+='<line x1="'+left+'" y1="'+y+'" x2="'+(w-right+4)+'" y2="'+y+'" class="chart-grid"/>'}
+ $('chart').innerHTML='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Live price line chart"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a66aff" stop-opacity=".30"/><stop offset="1" stop-color="#a66aff" stop-opacity=".015"/></linearGradient><filter id="chartGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+grid+'<path d="'+area+'" fill="url(#chartFill)"/><path d="'+line+'" fill="none" stroke="#b77aff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" filter="url(#chartGlow)"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="4" fill="#d9b8ff" stroke="#9b5cff" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
 }
 function zoomChart(factor,anchor=.5){
  const total=state.chartData.length;if(total<3)return;const old=Math.max(2,state.chartViewEnd-state.chartViewStart),next=Math.max(2,Math.min(total,Math.round(old*factor))),at=state.chartViewStart+old*Math.max(0,Math.min(1,anchor));
