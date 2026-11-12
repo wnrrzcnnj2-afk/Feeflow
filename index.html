@@ -993,7 +993,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadMarke
 })();
 </script></body>
 </html>
-+safe(c.symbol)+')</strong><small>'+safe(c.mint.slice(0,7)+'…'+c.mint.slice(-6))+' · '+safe(new Date(c.createdAt).toLocaleDateString())+'</small><a target="_blank" rel="noopener noreferrer" href="https://pump.fun/coin/'+encodeURIComponent(c.mint)+'">Pump.fun ↗</a> · <a target="_blank" rel="noopener noreferrer" href="https://solscan.io/tx/'+encodeURIComponent(c.signature)+'">Solscan ↗</a></div><span class="launch-coin-status '+(c.status==='confirmed'?'':'pending')+'">'+(c.status==='confirmed'?(en?'Confirmed':'Bestätigt'):(en?'Pending':'Ausstehend'))+'</span></article>').join('');
++safe(c.symbol)+')</strong><small>'+safe(c.mint.slice(0,7)+'…'+c.mint.slice(-6))+' · '+safe(new Date(c.createdAt).toLocaleDateString())+'</small><a target="_blank" rel="noopener noreferrer" href="https://pump.fun/coin/'+encodeURIComponent(c.mint)+'">Pump.fun ↗</a> · <a target="_blank" rel="noopener noreferrer" href="https://solscan.io/tx/'+encodeURIComponent(c.signature)+'">Solscan ↗</a></div><span class="launch-coin-status '+(c.status==='confirmed'?'':'pending')+'">'+(c.status==='confirmed'?(en?'Confirmed':'Bestätigt'):c.status==='failed'?(en?'Failed':'Fehlgeschlagen'):(en?'Pending':'Ausstehend'))+'</span></article>').join('');
 }
 async function refreshLaunchHistory(){
  const items=getLaunchHistory(),pending=items.filter(c=>c.status==='pending').slice(0,8);
@@ -1010,10 +1010,12 @@ async function refreshLaunchHistory(){
 }
 async function waitForLaunchConfirmation(signature){
  for(let i=0;i<20;i++){
-  const r=await fetch('https://api.mainnet-beta.solana.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getSignatureStatuses',params:[[signature],{searchTransactionHistory:true}]})});
-  const j=await r.json(),v=j.result?.value?.[0];
-  if(v?.err)throw new Error('Die Blockchain hat die Transaktion abgelehnt. Prüfe die Signatur auf Solscan.');
-  if(v?.confirmationStatus==='confirmed'||v?.confirmationStatus==='finalized')return true;
+  try{
+   const r=await fetch('https://api.mainnet-beta.solana.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getSignatureStatuses',params:[[signature],{searchTransactionHistory:true}]})});
+   const j=await r.json(),v=j.result?.value?.[0];
+   if(v?.err)throw new Error('Die Blockchain hat die Transaktion abgelehnt. Prüfe die Signatur auf Solscan.');
+   if(v?.confirmationStatus==='confirmed'||v?.confirmationStatus==='finalized')return true;
+  }catch(e){if(e.message.includes('Blockchain hat die Transaktion abgelehnt'))throw e}
   await new Promise(resolve=>setTimeout(resolve,2000));
  }
  return false;
