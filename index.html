@@ -643,7 +643,14 @@ async function loadChart(){
   const first=new Date(timestamps[0]),last=new Date(timestamps[timestamps.length-1]);
   $('chartStart').textContent=state.days===1?first.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):first.toLocaleDateString();
   $('chartEnd').textContent=state.days===1?'Letzter Scan '+last.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):last.toLocaleDateString();
- }catch(e){if(request===state.chartRequest)$('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Neue Handelspaare haben möglicherweise noch keine Kerzendaten.</div>'}
+ }catch(e){
+  if(request===state.chartRequest){
+   const solana=String(c.chainId||'').toLowerCase()==='solana'&&c.tokenAddress;
+   const fallback=solana?'https://pump.fun/coin/'+encodeURIComponent(c.tokenAddress):(c.dexPair&&c.pairAddress?'https://dexscreener.com/'+encodeURIComponent(c.chainId||'')+'/'+encodeURIComponent(c.pairAddress):'');
+   const label=solana?'Pump.fun Chart öffnen ↗':'DEX-Chart öffnen ↗';
+   $('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Der FeeFlow-Chart konnte für dieses Handelspaar keine Daten laden.'+(fallback?'<br><a href="'+safe(fallback)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;margin-top:12px;padding:9px 13px;border:1px solid #8052b6;border-radius:9px;color:#d8b8ff;text-decoration:none;font-weight:700">'+label+'</a>':'')+'</div>';
+  }
+ }
 }
 function renderChartView(){
  const data=state.chartData;if(!data.length)return;
