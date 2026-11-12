@@ -2,749 +2,133 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#090812">
-<meta name="description" content="FeeFlow — Live Meme Coin Market Dashboard, Trending Tokens und Fee Calculator.">
-<title>FeeFlow — Live Crypto Dashboard</title>
+<title>FeeFlow — Meme Coin Analytics</title>
 <style>
-:root{color-scheme:dark;--bg:#090812;--panel:#12111d;--panel2:#191727;--line:#29263b;--text:#f5f3ff;--muted:#9994ad;--purple:#a66aff;--green:#36d69a;--red:#ff7188}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#29134c 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input{font:inherit}.wrap{max-width:1220px;margin:auto;padding:0 22px}
-header{min-height:76px;border-bottom:1px solid #211d31;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:11px;font-weight:850;font-size:23px;letter-spacing:-1px;white-space:nowrap}.brand span{color:#b987ff}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(140deg,#c18aff,#702ce0);display:grid;place-items:center;box-shadow:0 0 28px #8b4cf455;font-weight:900}.nav{display:flex;gap:25px;color:var(--muted);font-size:14px}.nav a{color:inherit;text-decoration:none}.nav a.active,.nav a:hover{color:white}.top-actions{display:flex;align-items:center;gap:10px}.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px}.network{border:1px solid var(--line);padding:8px 12px;border-radius:10px;color:#c8b6e8;font-size:12px;white-space:nowrap}.connect,.btn{background:linear-gradient(120deg,#a96aff,#7139db);border:0;color:white;border-radius:10px;padding:10px 15px;font-weight:750;cursor:pointer}.connect:hover,.btn:hover{filter:brightness(1.12)}button:disabled{opacity:.55;cursor:wait}
-.hero{padding:52px 0 25px}.eyebrow{color:#bd91ff;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.06;letter-spacing:-2.5px;margin:12px 0}.hero h1 em{font-style:normal;color:#b17aff}.hero p{color:var(--muted);max-width:650px;margin:0 0 22px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap}.primary,.secondary{padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:#9654f4;color:white}.secondary{border:1px solid var(--line);color:#ddd5ed}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 24px}.stat,.panel{background:linear-gradient(145deg,#171525,#100f19);border:1px solid var(--line);border-radius:16px}.stat{padding:17px;min-width:0}.stat small{color:var(--muted)}.stat strong{display:block;font-size:clamp(19px,2.5vw,25px);margin:7px 0 2px;letter-spacing:-.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.positive{color:var(--green)}.negative{color:var(--red)}.muted{color:var(--muted);font-size:12px}
-.content{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);grid-template-areas:"trending trending" "market rug" "fees wallet";gap:20px;margin:22px 0 38px;align-items:stretch}.content>.panel{min-width:0;padding:22px;box-shadow:0 12px 34px #0002}.content>#trending{grid-area:trending}.content>#market{grid-area:market}.content>#rugcheck{grid-area:rug}.content>#fees{grid-area:fees}.content>#walletPanel{grid-area:wallet}.content>.panel h2{font-size:18px;letter-spacing:-.3px}.content .panel-head{margin-bottom:18px}.content .notice{line-height:1.65}.content .wallet-info{min-height:62px}.content .search-row{align-items:stretch}.content .search{min-height:44px}.content .btn,.content .secondary-btn,.content .refresh{min-height:42px}.panel{padding:20px;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}.panel h2{font-size:17px;margin:0}.pill{background:#241a39;color:#c69bff;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:750;white-space:nowrap}.search-row{display:flex;gap:9px;margin-bottom:12px}.search{width:100%;min-width:0;background:#0c0b14;border:1px solid var(--line);border-radius:10px;color:white;padding:11px 13px;outline:none}.search:focus,input:focus{border-color:var(--purple)}.refresh{border:1px solid var(--line);background:#1b1828;color:#e9defc;border-radius:10px;padding:0 13px;cursor:pointer}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{color:var(--muted);font-size:11px;font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}td{padding:13px 8px;border-bottom:1px solid #211e2d;font-size:13px}tr:last-child td{border:0}tbody tr{cursor:pointer}tbody tr:hover{background:#ffffff08}.coin{display:flex;align-items:center;gap:9px;font-weight:700}.coin img{width:30px;height:30px;border-radius:50%;background:#302044}.coin small{display:block;color:var(--muted);font-weight:400;font-size:11px}.rank{color:var(--muted);font-size:11px;width:24px}
-.chart-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:9px}.chart-price{font-size:25px;font-weight:800;letter-spacing:-1px}.chart-change{font-size:12px}.chart{height:190px;position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent 46px,#242033 47px);border-bottom:1px solid var(--line)}.chart svg{width:100%;height:100%;overflow:visible}.chart-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:8px}.chart-empty{height:100%;display:grid;place-items:center;color:var(--muted);font-size:12px;text-align:center;padding:20px}.chart-controls{display:flex;gap:6px}.chart-controls button{background:#171525;border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:5px 9px;font-size:11px;cursor:pointer}.chart-controls button.active{color:white;border-color:#8652c9;background:#2a1b40}
-.calculator label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}.calculator input{width:100%;background:#0c0b14;border:1px solid var(--line);border-radius:9px;padding:11px;color:white;outline:none}.result{background:#211735;border:1px solid #49316d;border-radius:12px;padding:14px;margin-top:16px}.result strong{display:block;font-size:25px;color:#c59aff}.wallet-info{background:#0c0b14;border:1px solid var(--line);padding:13px;border-radius:11px;margin-top:14px;overflow-wrap:anywhere}.wallet-info strong{display:block;color:#c59aff;margin-bottom:3px}.wallet-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.secondary-btn{background:#1b1828;border:1px solid var(--line);color:#e9defc;border-radius:9px;padding:9px 12px;cursor:pointer}.notice{font-size:11px;color:var(--muted);line-height:1.5;margin-top:12px}.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:8px}.error{color:var(--red)}.disclaimer{color:#827c95;font-size:11px;margin:22px 0 30px}footer{border-top:1px solid #211d31;padding:22px 0 34px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#211735;border:1px solid #67429a;color:white;padding:12px 17px;border-radius:12px;display:none;box-shadow:0 10px 40px #0008;z-index:5;max-width:90%;text-align:center}
-@media(max-width:800px){.content{grid-template-columns:minmax(0,1fr);grid-template-areas:"trending" "market" "rug" "fees" "wallet";gap:14px}.content>.panel{padding:17px}.wrap{padding:0 15px}header{padding:14px 0;flex-wrap:wrap}.nav{order:3;width:100%;justify-content:space-between;gap:8px;font-size:12px}.network{display:none}.hero{padding-top:37px}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:14px}.content{grid-template-columns:1fr}.panel{padding:15px}}
-@media(max-width:390px){.content{gap:12px}.content>.panel{padding:14px}.brand{font-size:20px}.connect{padding:9px 10px;font-size:12px}.nav{font-size:11px}.stats{gap:8px}.stat strong{font-size:18px}}
-.trend-result{cursor:pointer}.trend-result:hover,.trend-result:focus{background:#ffffff0c;outline:1px solid #a66aff}.trend-result:active{background:#a66aff22}.trend-mc{color:#c7a4ff!important;font-weight:700;margin-top:3px}
-.coin-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#302044;flex:0 0 30px}.trend-result td,.dex-result td{vertical-align:middle}.trend-result:focus-visible,.dex-result:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--purple);outline-offset:3px}.trend-mc{white-space:normal}.panel-head h2{line-height:1.25}.chart-empty{max-width:100%;overflow-wrap:anywhere}button:disabled{cursor:not-allowed}.search-row .btn{flex:0 0 auto}@media(max-width:520px){.hero h1{letter-spacing:-1.5px}.chart-meta{align-items:flex-start;flex-direction:column}.chart-controls{width:100%}.chart-controls button{flex:1}.table-wrap{margin-right:-2px}th,td{padding-left:7px;padding-right:7px}.coin{gap:7px}.coin img{width:27px;height:27px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}\n/* FeeFlow premium trending radar */
-#trending{position:relative;overflow:hidden;background:radial-gradient(ellipse at 95% 0%,#38205a55,transparent 38%),linear-gradient(145deg,#171426,#100f19 72%)}
-.trend-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:2px 0 20px;border-bottom:1px solid #ffffff10}
-.trend-kicker{font-size:9px;letter-spacing:2.2px;font-weight:850;color:#bd91ff;margin-bottom:7px}
-.trend-hero h2{font-size:27px!important;letter-spacing:-1.1px!important;margin:0!important}.trend-hero h2 span{color:#b17aff}.trend-hero p{font-size:12px;color:var(--muted);margin:5px 0 0}
-.trend-live{display:flex;align-items:center;gap:8px;border:1px solid #36d69a33;background:#36d69a0c;border-radius:30px;padding:8px 11px;color:#8cebc6;font-size:9px;font-weight:800;letter-spacing:.8px;white-space:nowrap}
-.trend-live-dot{width:7px;height:7px;background:#36d69a;border-radius:50%;box-shadow:0 0 12px #36d69a;animation:trendPulse 1.8s infinite}
-@keyframes trendPulse{50%{opacity:.4;box-shadow:0 0 3px #36d69a}}
-.trend-overview{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:15px 0 12px;padding:12px 14px;border:1px solid #a66aff26;border-radius:12px;background:linear-gradient(100deg,#a66aff13,#ffffff03)}
-.trend-overview-label{display:block;color:#a99abf;font-size:9px;letter-spacing:1.5px;font-weight:800}.trend-overview strong{display:block;font-size:18px;letter-spacing:-.4px;margin-top:3px}.trend-overview-right{text-align:right}.trend-overview-right>span{display:block;color:#8cebc6;font-size:9px;font-weight:800;letter-spacing:1px}.trend-overview-right small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
-.trend-list-head{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;padding:9px 11px;color:#817b95;font-size:8px;font-weight:800;letter-spacing:1.1px}
-.trend-table-wrap{border:1px solid #ffffff0d;border-radius:13px;overflow:hidden}.trend-table{border-collapse:collapse;white-space:normal}
-.trend-table tbody tr{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(105px,auto) minmax(92px,auto);align-items:center;gap:7px;padding:11px 12px;border-bottom:1px solid #ffffff0b;transition:background .16s,border-color .16s;cursor:pointer}
-.trend-table tbody tr:last-child{border-bottom:0}.trend-table td{border:0;padding:0;min-width:0}.trend-rank{font-size:11px;font-weight:850;color:#777188;font-variant-numeric:tabular-nums}
-.trend-asset .coin{gap:10px;min-width:0}.trend-asset .coin img,.trend-asset .coin-icon{width:36px;height:36px;flex:0 0 36px}.trend-asset .coin>span{min-width:0;overflow:hidden}.trend-asset .coin small{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trend-asset .coin small.trend-mc{font-size:10px;color:#aa91d2!important}.trend-mc b{color:#d9c2ff;font-weight:800}
-.trend-signal{display:flex;flex-direction:column;align-items:flex-start;gap:3px}.trend-badge{font-size:8px;letter-spacing:.65px;font-weight:850;color:#b7a5d4;background:#ffffff0b;border:1px solid #ffffff10;border-radius:5px;padding:3px 6px;white-space:nowrap}.trend-badge.is-hot{color:#ffc77d;background:#ffb64d12;border-color:#ffb64d30}
-.trend-signal>strong{font-size:12px;font-variant-numeric:tabular-nums}.trend-signal>strong small{font-size:8px;color:#8b849b;font-weight:700}.trend-age{font-size:9px;color:#898398}
-.trend-volume{text-align:right}.trend-volume strong{display:block;font-size:12px;font-variant-numeric:tabular-nums}.trend-volume small{display:block;font-size:8px;color:#898398;letter-spacing:.7px;margin-top:2px}
-.trend-result:hover,.trend-result:focus-visible{background:linear-gradient(90deg,#a66aff16,#ffffff03);outline:none}.trend-result:active{background:#a66aff25}.trend-result:focus-visible{box-shadow:inset 0 0 0 1px #a66aff}
-@media(max-width:520px){.trend-hero h2{font-size:24px!important}.trend-table tbody tr{grid-template-columns:24px minmax(0,1fr) 88px;gap:6px;padding:10px 8px}.trend-volume{display:none}.trend-list-head{grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px}.trend-list-head span:last-child{display:none}.trend-asset .coin{gap:7px}.trend-asset .coin img,.trend-asset .coin-icon{width:32px;height:32px;flex-basis:32px}.trend-asset .coin small{font-size:9px}.trend-signal{align-items:flex-end}.trend-badge{font-size:7px}.trend-overview{padding:10px 11px}.trend-live{padding:7px 8px;font-size:8px}}
-@media(prefers-reduced-motion:reduce){.trend-live-dot{animation:none}}
-
-.intel-panel{margin:0 0 24px;background:linear-gradient(145deg,#171525,#100f19);border:1px solid var(--line);border-radius:16px;padding:22px}.intel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.intel-card{min-width:0;padding:15px;border:1px solid #ffffff12;border-radius:13px;background:#0d0c16}.intel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.intel-title strong{font-size:14px}.intel-list{display:grid;gap:8px;min-width:0}.intel-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 9px;background:#ffffff06;border-radius:8px;font-size:12px;min-width:0}.intel-row span:first-child{overflow:hidden;text-overflow:ellipsis}.intel-form{display:grid;gap:8px}.intel-form .search{min-height:38px;padding:8px 10px;font-size:12px}.intel-form .btn,.intel-form .secondary-btn{min-height:36px;padding:7px 10px;font-size:12px}.heatmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.heat-cell{padding:10px 5px;border-radius:8px;text-align:center;min-width:0;background:#252039;border:1px solid #ffffff10}.heat-cell strong,.heat-cell small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.heat-cell strong{font-size:11px}.heat-cell small{font-size:10px;margin-top:3px}.intel-row button{background:none;border:0;color:#d4b8ff;cursor:pointer}.intel-empty{font-size:11px;color:var(--muted)}@media(max-width:800px){.intel-panel{padding:16px}.intel-grid{grid-template-columns:1fr}.heatmap{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.launch-panel{margin:0 0 24px;padding:22px;border:1px solid #443064;border-radius:16px;background:linear-gradient(145deg,#1b1230,#100e19)}.launch-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:18px}.launch-form{display:grid;grid-template-columns:1fr 1fr;gap:11px}.launch-field{display:grid;gap:5px}.launch-field.full{grid-column:1/-1}.launch-field label{font-size:12px;color:var(--muted)}.launch-field input,.launch-field textarea{width:100%;min-width:0;background:#0d0b16;border:1px solid #38304d;color:var(--text);border-radius:9px;padding:11px;font:inherit}.launch-field textarea{min-height:76px;resize:vertical}.launch-side{padding:15px;border:1px solid #ffffff14;border-radius:12px;background:#0c0a14}.launch-status{font-size:12px;color:var(--muted);line-height:1.55;overflow-wrap:anywhere}.launch-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.launch-actions button{cursor:pointer}.launch-warning{margin-top:12px;padding:11px;border-radius:9px;background:#f4ad3512;border:1px solid #f4ad3533;color:#eacb92;font-size:11px;line-height:1.55}.launch-result{margin-top:12px;font-size:12px;overflow-wrap:anywhere}@media(max-width:800px){.launch-grid{grid-template-columns:1fr}.launch-panel{padding:16px}}@media(max-width:520px){.launch-form{grid-template-columns:1fr}.launch-field.full{grid-column:auto}}
-.sentiment-panel{display:grid;gap:8px}.sentiment-score{font-size:30px;font-weight:850;letter-spacing:-1px}.sentiment-track{height:9px;background:#302b3b;border-radius:9px;overflow:hidden}.sentiment-track span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#ff7188,#e7bd60,#36d69a)}.sentiment-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.perf-change{font-weight:800;font-variant-numeric:tabular-nums}
-
-/* FeeFlow mobile app polish */
-header{position:sticky;top:0;z-index:30;background:rgba(9,8,18,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.mobile-dock{display:none}
-@media(max-width:800px){body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}.mobile-dock{position:fixed;z-index:50;left:10px;right:10px;bottom:calc(9px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:7px;border:1px solid #ffffff1c;border-radius:17px;background:rgba(19,16,30,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 40px #0009}.mobile-dock a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:48px;border-radius:11px;color:#aaa2bd;text-decoration:none;font-size:10px;font-weight:750;transition:background .18s,color .18s}.mobile-dock a span:first-child{font-size:17px;line-height:1.2}.mobile-dock a.active,.mobile-dock a:focus-visible{background:#a66aff22;color:#e5d2ff;outline:1px solid #a66aff66}}
-
-/* FeeFlow 30x dashboard refinement */
-.pulse-panel{margin:0 0 22px;padding:22px;border:1px solid #3b2b55;border-radius:18px;background:radial-gradient(ellipse at 90% 0%,#7043a52b,transparent 42%),linear-gradient(145deg,#171426,#100f19);box-shadow:0 16px 42px #0003;position:relative;overflow:hidden}
-.pulse-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding-bottom:16px;border-bottom:1px solid #ffffff12}.pulse-head h2{margin:0;font-size:23px;letter-spacing:-.8px}.pulse-head h2 span{color:#a99abf;font-size:13px;font-weight:600;letter-spacing:0}.pulse-head p{margin:5px 0 0;color:var(--muted);font-size:11px}.pulse-indicator{display:flex;align-items:center;gap:7px;color:#8cebc6;font-size:9px;font-weight:850;letter-spacing:1px;white-space:nowrap;border:1px solid #36d69a30;background:#36d69a0c;padding:8px 10px;border-radius:30px}.pulse-indicator i{width:6px;height:6px;border-radius:50%;background:#36d69a;box-shadow:0 0 10px #36d69a}.pulse-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.pulse-grid article{min-width:0;padding:13px;border:1px solid #ffffff10;border-radius:12px;background:#ffffff05}.pulse-grid small{display:block;color:#9288a5;font-size:8px;font-weight:850;letter-spacing:1px}.pulse-grid strong{display:block;margin:8px 0 3px;font-size:18px;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pulse-grid span{display:block;color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pulse-foot{margin-top:12px;color:#777188;font-size:9px}
-.token-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:13px;padding:12px;border:1px solid #ffffff12;border-radius:11px;background:#ffffff05}.token-actions .token-address{min-width:0;flex:1;color:#bcb2d0;font:11px ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.token-actions button,.token-actions a{border:1px solid #ffffff1a;background:#211a30;color:#e7dcf7;border-radius:8px;padding:8px 10px;font-size:10px;font-weight:750;text-decoration:none;cursor:pointer}.token-actions button:hover,.token-actions a:hover{border-color:#a66aff;color:white}
-@media(max-width:800px){.pulse-panel{padding:16px;margin-bottom:15px}.pulse-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pulse-grid article{padding:11px}.pulse-grid strong{font-size:16px}.pulse-head h2{font-size:21px}}
-@media(max-width:390px){.pulse-indicator{font-size:8px;padding:7px}.pulse-grid small{font-size:7px}.token-actions .token-address{flex-basis:100%}}
-
-/* FeeFlow finishing touches: reading progress, back-to-top, gentle section reveal */
-#ffReadingProgress{position:fixed;z-index:80;top:0;left:0;width:0;height:3px;background:linear-gradient(90deg,#8d4df0,#d2a4ff,#36d69a);box-shadow:0 0 12px #a66aff88;pointer-events:none;transition:width .08s linear}
-#ffBackTop{position:fixed;z-index:45;right:22px;bottom:22px;width:44px;height:44px;border:1px solid #ffffff25;border-radius:14px;background:rgba(25,20,39,.92);color:#eadcff;font-size:20px;box-shadow:0 8px 26px #0007;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s}
-#ffBackTop.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
-#ffBackTop:hover{border-color:#a66aff;background:#2a1b40}
-.ff-reveal-ready .ff-reveal{opacity:0;transform:translateY(12px);transition:opacity .42s ease,transform .42s ease}
-.ff-reveal-ready .ff-reveal.ff-visible{opacity:1;transform:none}
-@media(max-width:800px){#ffBackTop{right:17px;bottom:calc(88px + env(safe-area-inset-bottom));width:40px;height:40px}}
-@media(prefers-reduced-motion:reduce){#ffBackTop,.ff-reveal-ready .ff-reveal{transition:none;transform:none}}
-
-/* iPhone / iOS Safari compatibility */
-html{ -webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:92px; }
-body{ min-width:320px;overflow-x:hidden;overscroll-behavior-x:none; }
-button,a,select,input{ -webkit-tap-highlight-color:transparent; }
-button,.btn,.connect,.secondary-btn,.refresh,.chart-controls button,.mobile-dock a{touch-action:manipulation; -webkit-appearance:none;}
-input,select,textarea{font-size:16px!important;}
-.table-wrap,.trend-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x pan-y;}
-.chart{min-width:0;overflow:hidden}
-img,svg,canvas{max-width:100%}
-@supports(padding:max(0px)){
- body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
-}
-@media(max-width:800px){
- header{top:0;padding-top:max(12px,env(safe-area-inset-top));}
- body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
- .wrap{padding-left: max(13px,env(safe-area-inset-left));padding-right:max(13px,env(safe-area-inset-right))}
- .content>.panel,.panel{min-width:0}
- .search-row{min-width:0}
- .search-row .btn{min-height:44px;white-space:nowrap}
- .wallet-actions button,.wallet-actions a,.hero-actions a{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
- .mobile-dock{bottom:calc(9px + env(safe-area-inset-bottom));}
- .trend-table-wrap,.table-wrap{border-radius:11px}
-}
-@media(max-width:390px){
- .nav{overflow-x:auto;justify-content:flex-start;gap:16px;padding:3px 0 7px;white-space:nowrap;-webkit-overflow-scrolling:touch}
- .nav a{flex:0 0 auto}
- .top-actions{gap:6px}
- #languageSelect{max-width:92px}
- .trend-hero{gap:8px}
- .trend-live{font-size:8px;padding:7px 8px}
- .pulse-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-
-.chart-tools{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
-.chart-period button,.chart-style button{min-height:34px}
-.chart-style button{font-size:12px;padding:7px 16px}.chart-type-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 4px;padding:13px 14px;background:linear-gradient(100deg,#241638,#171525);border:1px solid #8052b6;border-radius:12px;box-shadow:0 0 18px #a66aff18}.chart-type-row>.muted{font-size:11px;letter-spacing:1px;font-weight:800;color:#d5b8ff}.chart-type-row .chart-controls{width:auto}.chart-type-row button{min-width:100px;min-height:40px;font-size:13px;font-weight:800}.chart-type-row button.active{color:#fff;border-color:#b987ff;background:linear-gradient(120deg,#8c4de0,#6332aa);box-shadow:0 0 12px #a66aff44}
-.chart{height:260px;touch-action:pan-y}
-.chart svg{display:block;width:100%;height:100%;overflow:hidden}
-.chart-candle-up{fill:#36d69a;stroke:#36d69a}
-.chart-candle-down{fill:#ff7188;stroke:#ff7188}.chart{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.chart.is-dragging{cursor:grabbing}.chart-zoom-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;color:var(--muted);font-size:10px}.chart-zoom-row>div{display:flex;gap:6px}.chart-zoom-row button{min-width:38px;min-height:34px;border:1px solid var(--line);border-radius:8px;background:#171525;color:#e8dcfa;font-weight:800;cursor:pointer}.chart-zoom-row button:last-child{padding:0 11px;font-size:11px}.chart-zoom-row button:active{background:#57358a}
-.chart-grid{stroke:#29263b;stroke-width:1;stroke-dasharray:3 5}
-.chart-axis{fill:#9994ad;font:11px ui-sans-serif,system-ui,sans-serif}
-@media(max-width:520px){.chart-tools{width:100%;align-items:stretch}.chart-meta{align-items:flex-start;flex-direction:column}.chart-controls{width:100%}.chart-controls button{flex:1}.chart{height:230px}.chart-type-row{margin-top:14px}.chart-type-row .chart-controls{width:auto;flex:1}.chart-type-row button{min-width:0}}
+:root{--bg:#090812;--panel:#12111d;--panel2:#191727;--line:#29263b;--text:#f5f3ff;--muted:#9994ad;--purple:#9b5cff;--purple2:#6d35d8;--green:#36d69a;--red:#ff6b83}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#29134c 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input{font:inherit}.wrap{max-width:1180px;margin:auto;padding:0 22px}
+header{height:76px;border-bottom:1px solid #211d31;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:23px;letter-spacing:-1px}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(140deg,#c18aff,#702ce0);display:grid;place-items:center;box-shadow:0 0 28px #8b4cf455;font-weight:900}
+.brand span{color:#b987ff}.nav{display:flex;gap:26px;color:var(--muted);font-size:14px}.nav a{color:inherit;text-decoration:none}.nav a.active,.nav a:hover{color:white}
+.top-actions{display:flex;align-items:center;gap:10px}.network{border:1px solid var(--line);padding:8px 12px;border-radius:10px;color:#c8b6e8;font-size:12px}.connect{background:linear-gradient(120deg,#a96aff,#7139db);border:0;color:white;border-radius:10px;padding:10px 15px;font-weight:700;cursor:pointer}
+.hero{padding:55px 0 30px}.eyebrow{color:#bd91ff;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800}.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.06;letter-spacing:-2.5px;margin:12px 0}.hero h1 em{font-style:normal;color:#b17aff}.hero p{color:var(--muted);max-width:600px;margin:0 0 23px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap}.primary,.secondary{padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:#9654f4;color:white}.secondary{border:1px solid var(--line);color:#ddd5ed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0 30px}.stat,.panel{background:linear-gradient(145deg,#171525,#100f19);border:1px solid var(--line);border-radius:16px}.stat{padding:17px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:25px;margin:7px 0 2px;letter-spacing:-.7px}.positive{color:var(--green);font-size:12px}.muted{color:var(--muted);font-size:12px}
+.content{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:40px}.panel{padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.panel h2{font-size:17px;margin:0}.pill{background:#241a39;color:#c69bff;padding:5px 9px;border-radius:20px;font-size:11px}
+.search{width:100%;background:#0c0b14;border:1px solid var(--line);border-radius:10px;color:white;padding:11px 13px;margin-bottom:13px;outline:none}.search:focus,input:focus{border-color:var(--purple)}
+table{width:100%;border-collapse:collapse;text-align:left}th{color:var(--muted);font-size:11px;font-weight:600;padding:10px 8px;border-bottom:1px solid var(--line)}td{padding:14px 8px;border-bottom:1px solid #211e2d;font-size:13px}tr:last-child td{border:0}.coin{display:flex;align-items:center;gap:9px;font-weight:700}.coin-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#302044;color:#d5b7ff}.coin small{display:block;color:var(--muted);font-weight:400;font-size:11px}.change{color:var(--green)}.negative{color:var(--red)}
+.chart{height:155px;position:relative;margin-top:8px;border-bottom:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 37px,#242033 38px)}.chart svg{width:100%;height:100%;overflow:visible}.chart-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:8px}
+.calculator label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}.calculator input{width:100%;background:#0c0b14;border:1px solid var(--line);border-radius:9px;padding:11px;color:white;outline:none}.result{background:#211735;border:1px solid #49316d;border-radius:12px;padding:14px;margin-top:16px}.result strong{display:block;font-size:25px;color:#c59aff}
+.disclaimer{color:#827c95;font-size:11px;margin:22px 0 30px}footer{border-top:1px solid #211d31;padding:22px 0 34px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#211735;border:1px solid #67429a;color:white;padding:12px 17px;border-radius:12px;display:none;box-shadow:0 10px 40px #0008}
+@media(max-width:760px){.wrap{padding:0 15px}header{height:auto;padding:14px 0;gap:12px;flex-wrap:wrap}.nav{order:3;width:100%;justify-content:space-between;gap:10px;font-size:12px}.network{display:none}.hero{padding-top:38px}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:14px}.stat strong{font-size:21px}.content{grid-template-columns:1fr}.panel{padding:15px}.table-wrap{overflow-x:auto}table{min-width:440px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <a class="brand" href="#overview" style="text-decoration:none;color:inherit"><div class="logo">F</div>Fee<span>Flow</span></a>
-  <nav class="nav"><a class="active" href="#overview">Overview</a><a href="#trending">Trending</a><a href="#market">Charts</a><a href="#fees">Fee calculator</a><a href="#createCoin">Coin erstellen</a></nav>
-  <div class="top-actions"><select id="languageSelect" aria-label="Language" style="background:#171525;color:#eee;border:1px solid var(--line);border-radius:9px;padding:9px"><option value="de">Deutsch</option><option value="en">English</option></select><span class="network"><i class="live-dot"></i>Live market</span><button class="connect" id="connectBtn">Connect wallet</button></div>
+  <div class="brand"><div class="logo">F</div>Fee<span>Flow</span></div>
+  <nav class="nav"><a class="active" href="#overview">Overview</a><a href="#trending">Trending</a><a href="#fees">Fee calculator</a><a href="#rewards">Rewards</a><a href="#about">About</a></nav>
+  <div class="top-actions"><span class="network">● Demo mode</span><button class="connect" id="connectBtn">Connect wallet</button></div>
 </header>
 <main id="overview">
   <section class="hero">
     <div class="eyebrow">Meme coin insights, made simple</div>
     <h1>Follow the flow.<br><em>Understand the market.</em></h1>
-    <p>Live-Krypto-Trends, Charts und On-Chain-Checks – alles an einem Ort.</p>
-    <div class="hero-actions"><a class="primary" href="#trending">Explore trending ↗</a><a class="secondary" href="#fees">Calculate fees</a></div>
+    <p>Dein übersichtliches Dashboard für Meme-Coin-Trends, Marktbewegungen und Gebühren. Alle Werte auf dieser Vorschau sind Beispieldaten.</p>
+    <div class="hero-actions"><a class="primary" href="#trending">Explore market ↗</a><a class="secondary" href="#fees">Calculate fees</a></div>
   </section>
-  <section class="stats" aria-label="Live market overview">
-    <div class="stat"><small>Global market cap</small><strong id="marketCap">Loading…</strong><span class="muted" id="marketCapChange">Live data from CoinGecko</span></div>
-    <div class="stat"><small>24h market volume</small><strong id="marketVolume">Loading…</strong><span class="muted">USD · global market</span></div>
-    <div class="stat"><small>Top coin today</small><strong id="topCoin">Loading…</strong><span class="positive" id="topCoinChange">24h performance</span></div>
-    <div class="stat"><small>Tracked coins</small><strong id="coinCount">—</strong><span class="muted">Live market list</span></div>
+  <section class="stats" aria-label="Market overview">
+    <div class="stat"><small>Market sentiment</small><strong> Bullish</strong><span class="positive">Demo snapshot</span></div>
+    <div class="stat"><small>Coins tracked</small><strong>1,284</strong><span class="muted">Example metric</span></div>
+    <div class="stat"><small>24h volume</small><strong>$8.42M</strong><span class="positive">+12.8% · sample</span></div>
+    <div class="stat"><small>Average fee</small><strong>0.85%</strong><span class="muted">Illustrative only</span></div>
   </section>
-
-  <section class="pulse-panel" id="marketPulse" aria-live="polite"><div class="pulse-head"><div><div class="trend-kicker">FEFLOW INTELLIGENCE</div><h2>Market pulse <span>· live scan</span></h2><p>Live-Überblick der aktuell erkannten DEX-Paare.</p></div><span class="pulse-indicator"><i></i> AUTO UPDATE</span></div><div class="pulse-grid"><article><small>STÄRKSTER 1H MOVE</small><strong id="pulseMover">Warte auf Scan…</strong><span id="pulseMoverMeta">Noch keine Daten</span></article><article><small>HÖCHSTES 24H VOLUMEN</small><strong id="pulseVolume">—</strong><span id="pulseVolumeMeta">Im aktuellen Radar</span></article><article><small>KAUFDruck IM RADAR</small><strong id="pulseBuy">—</strong><span id="pulseBuyMeta">Aus verfügbaren Trades</span></article><article><small>WATCHLIST</small><strong id="pulseWatch">0 Coins</strong><span>Auf diesem Gerät gespeichert</span></article></div><div class="pulse-foot" id="pulseFoot">Werte werden mit dem nächsten erfolgreichen Scan aktualisiert.</div></section>
   <section class="content">
     <div class="panel" id="trending">
-      <div class="trend-hero"><div><div class="trend-kicker">FEFLOW MARKET RADAR</div><h2>Trending <span>now</span></h2><p>Coins mit starkem Momentum – automatisch aktualisiert.</p></div><div class="trend-live"><span class="trend-live-dot"></span><span id="trendStatus">SCANNING…</span></div></div>
-      <div class="trend-overview"><div><span class="trend-overview-label">TOP MOMENTUM</span><strong id="trendLead">Wird gesucht…</strong></div><div class="trend-overview-right"><span id="marketStatus">CONNECTING…</span><small id="trendCount">20 Plätze im Radar</small></div></div>
-      <div class="trend-tools" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0"><label class="muted" for="trendSort">Sortieren:</label><select id="trendSort" class="search" style="width:auto;min-width:145px;padding:9px 12px"><option value="momentum">Momentum</option><option value="volume">24h Volumen</option><option value="marketcap">Market Cap</option><option value="buys">Kaufdruck</option></select><label style="display:flex;gap:7px;align-items:center;color:var(--muted);font-size:12px"><input id="watchOnly" type="checkbox" style="accent-color:#b77aff"> Nur Watchlist</label><span id="watchCount" class="muted" style="font-size:12px;margin-left:auto">0 gespeichert</span></div>
-      <div class="trend-list-head"><span>RANK / TOKEN</span><span>MARKET SIGNAL</span><span>24H VOLUME</span></div>
-      <div class="table-wrap trend-table-wrap"><table class="trend-table"><tbody id="trendRows"><tr><td colspan="4" class="muted">Live-Trends werden geladen…</td></tr></tbody></table></div>
-      <div class="search-row" style="margin-top:20px"><input class="search" id="coinSearch" placeholder="Coin oder Contract-Adresse suchen…" aria-label="Search coins"><button class="refresh" id="searchAllBtn" title="Search coins">⌕</button><button class="refresh" id="refreshBtn" title="Refresh market data" aria-label="Refresh">↻</button></div>
-      <div id="searchResults" hidden><div class="muted" style="margin:4px 0 8px">Suchergebnisse</div><div class="table-wrap"><table><thead><tr><th>#</th><th>Asset</th><th>Price</th><th>24h</th><th>Market cap</th></tr></thead><tbody id="coinRows"><tr><td colspan="5" class="muted">Tippe einen Namen, ein Kürzel oder eine Adresse ein.</td></tr></tbody></table></div></div>
-      <button id="loadMoreBtn" hidden></button><p class="notice" id="dataNote">Daten von DEX Screener und CoinGecko. Sortiert nach FeeFlow-Momentum.</p>
+      <div class="panel-head"><h2>Trending coins</h2><span class="pill">SAMPLE DATA</span></div>
+      <input class="search" id="coinSearch" placeholder="Search coin or ticker…" aria-label="Search coins">
+      <div class="table-wrap"><table><thead><tr><th>Asset</th><th>Price</th><th>24h</th><th>Volume</th></tr></thead><tbody id="coinRows">
+      <tr><td><div class="coin"><span class="coin-icon">🐸</span><span>Pepe<small>PEPE</small></span></div></td><td>$0.000012</td><td class="change">+8.42%</td><td>$1.24M</td></tr>
+      <tr><td><div class="coin"><span class="coin-icon">🐕</span><span>Bonk<small>BONK</small></span></div></td><td>$0.000021</td><td class="change">+4.16%</td><td>$842K</td></tr>
+      <tr><td><div class="coin"><span class="coin-icon">🐶</span><span>Dogwifhat<small>WIF</small></span></div></td><td>$0.72</td><td class="negative">−2.31%</td><td>$623K</td></tr>
+      <tr><td><div class="coin"><span class="coin-icon">🌙</span><span>MoonCat<small>MCAT</small></span></div></td><td>$0.0048</td><td class="change">+18.70%</td><td>$318K</td></tr>
+      </tbody></table></div>
     </div>
-    <div class="panel" id="rugcheck">
-      <div class="panel-head"><h2>Rug / Scam Check</h2><span class="pill">TOKEN SAFETY</span></div>
-      <p class="notice" style="margin-top:0">Füge die Contract- oder Mint-Adresse ein. FeeFlow prüft bekannte On-Chain-Risiken für Solana und EVM-Token.</p>
-      <label for="riskChain" style="display:block;color:var(--muted);font-size:12px;margin:12px 0 6px">Blockchain</label>
-      <select id="riskChain" class="search" style="margin-bottom:10px"><option value="solana">Solana</option><option value="1">Ethereum</option><option value="8453">Base</option><option value="56">BNB Chain</option><option value="137">Polygon</option><option value="42161">Arbitrum</option><option value="10">Optimism</option><option value="43114">Avalanche</option></select>
-      <div class="search-row"><input class="search" id="riskAddress" placeholder="Token-Adresse / Mint-Adresse einfügen" autocomplete="off" spellcheck="false"><button class="btn" id="riskCheckBtn">Check</button></div>
-      <div id="riskResult" class="wallet-info" aria-live="polite"><strong>Bereit zum Prüfen</strong><span class="muted">Noch keine Adresse geprüft.</span></div>
-      <p class="notice" id="riskSafetyNote">Wichtig: Diese Einschätzung ist nicht zu 100 % sicher und kann einen Rug übersehen. Prüfe den Coin immer selbst.</p>
-      <p class="notice">Hinweis: Kein Scanner kann einen Rug sicher ausschließen. Bei neuen Token können Daten fehlen.</p>
-    </div>
-    <div class="panel" id="market">
-      <div class="panel-head"><h2 id="chartTitle">Market chart</h2><span class="pill">LIVE</span></div>
-      <div class="chart-meta"><div><div class="muted">Selected coin · USD</div><div class="chart-price" id="chartPrice">—</div><div class="chart-change" id="chartChange">Choose a coin from the list</div></div><div class="chart-tools"><div class="chart-controls chart-period"><button data-days="1" class="active">24H</button><button data-days="7">7D</button><button data-days="30">30D</button></div></div></div>
-      <div class="chart" id="chart"><div class="chart-empty">Wähle einen Coin aus der Trending-Liste oder Suche, um den Chart zu laden.</div></div>
-      <div class="chart-labels"><span id="chartStart">—</span><span id="chartEnd">Now</span></div>
-      <div class="chart-type-row"><span class="muted">CHARTTYP</span><div class="chart-controls chart-style"><button type="button" data-chart-mode="candles" class="active">Kerzen</button><button type="button" data-chart-mode="line">Linie</button></div></div>
-      <div class="chart-zoom-row"><span id="chartInteractionHint">Chart ziehen oder zoomen</span><div><button type="button" id="chartZoomOut" aria-label="Zoom heraus">−</button><button type="button" id="chartZoomIn" aria-label="Zoom hinein">+</button><button type="button" id="chartZoomReset">Reset</button></div></div>\n      <div class="token-actions" id="tokenActions" hidden><span class="token-address" id="tokenAddressLabel">Wähle einen Coin aus</span><button type="button" id="copyTokenAddress">Adresse kopieren</button><a id="openDexPair" href="#" target="_blank" rel="noopener noreferrer">Pair ansehen ↗</a><a id="tradeLink" href="https://fomo.family/discover" target="_blank" rel="noopener noreferrer">Auf FOMO kaufen ↗</a></div>
-
-      <div id="swapPanel" hidden style="margin-top:16px;padding:14px;border:1px solid #49316d;border-radius:13px;background:linear-gradient(145deg,#211735,#11101a)"><div class="panel-head"><h3 style="margin:0;font-size:15px">Direkt handeln</h3><span class="pill">SOLANA SWAP</span></div><p class="notice" style="margin-top:0">Tausche SOL gegen diesen Token oder verkaufe zurück. Verbinde deine Wallet im Jupiter-Fenster und prüfe Netzwerk, Token-Adresse, Kurs und Gebühren vor jeder Bestätigung.</p><div id="swapTerminal" style="min-height:120px"><div class="chart-empty">Jupiter wird vorbereitet…</div></div><p class="notice">FeeFlow verwahrt keine Coins. Jeder Swap wird von Jupiter vorbereitet und muss von deiner Wallet bestätigt werden.</p></div>
-      <p class="notice">Wähle einen Coin aus, um den Chart zu laden.</p>
+    <div class="panel">
+      <div class="panel-head"><h2>Market activity</h2><span class="pill">ILLUSTRATIVE</span></div>
+      <div class="chart"><svg viewBox="0 0 500 155" preserveAspectRatio="none" role="img" aria-label="Illustrative upward market chart"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a66aff" stop-opacity=".38"/><stop offset="1" stop-color="#a66aff" stop-opacity="0"/></linearGradient></defs><path d="M0 125 C25 120 32 95 58 105 S92 119 116 87 S153 94 176 78 S211 91 239 59 S278 77 301 54 S340 62 365 34 S404 53 427 26 S470 37 500 10 L500 155 L0 155Z" fill="url(#fill)"/><path d="M0 125 C25 120 32 95 58 105 S92 119 116 87 S153 94 176 78 S211 91 239 59 S278 77 301 54 S340 62 365 34 S404 53 427 26 S470 37 500 10" fill="none" stroke="#b77aff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg></div>
+      <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span></div>
+      <p class="muted" style="margin:18px 0 0">Example chart — no live market feed connected.</p>
     </div>
     <div class="panel calculator" id="fees">
-      <div class="panel-head"><h2>Gebührenrechner</h2><span class="pill">SOFORT</span></div>
-      <label for="amount">Handelsbetrag (USD)</label><input id="amount" type="number" min="0" step="any" value="1000">
-      <label for="rate">Gebührensatz (%)</label><input id="rate" type="number" min="0" max="100" step="any" value="0.85">
-      <div class="result"><span class="muted">Geschätzte Gebühr</span><strong id="feeResult">$8.50</strong><span class="muted" id="netResult">Net amount: $991.50</span></div>
-      <p class="notice">Nur eine Schätzung. Die tatsächliche Gebühr hängt vom verwendeten Dienst oder Netzwerk ab.</p>
+      <div class="panel-head"><h2>Fee calculator</h2><span class="pill">QUICK ESTIMATE</span></div>
+      <label for="amount">Trade amount (USD)</label><input id="amount" type="number" min="0" step="any" value="1000">
+      <label for="rate">Fee rate (%)</label><input id="rate" type="number" min="0" step="any" value="0.85">
+      <div class="result"><span class="muted">Estimated fee</span><strong id="feeResult">$8.50</strong><span class="muted" id="netResult">Net amount: $991.50</span></div>
     </div>
-    <div class="panel" id="walletPanel">
-      <div class="panel-head"><h2>Your wallet</h2><span class="pill">NON-CUSTODIAL</span></div>
-      <p style="color:#c4bfd2;margin-top:0">Verbinde eine installierte Wallet, um deine öffentliche Adresse und das Netzwerk anzuzeigen.</p>
-      <div class="wallet-info" id="walletInfo"><strong>Not connected</strong><span class="muted">No wallet connected in this session.</span></div>
-      <div class="wallet-actions"><button class="secondary-btn" id="disconnectBtn" hidden>Hide wallet</button></div>
-      <div class="status" id="walletStatus" role="status"></div>
-      <p class="notice">FeeFlow verwahrt keine Coins und fragt niemals nach deiner Seed Phrase. Trades werden vom jeweiligen DEX vorbereitet und müssen in deiner Wallet bestätigt werden.</p>
-    </div>
-  </section>
 
-  <section class="panel intel-panel" id="market-intel">
-   <div class="panel-head"><div><h2>Market Intelligence</h2><p class="notice" style="margin:4px 0 0">Weitere Markt-Tools.</p></div><span class="pill">EXTRAS</span></div>
-   <div class="intel-grid">
-    <article class="intel-card"><div class="intel-title"><strong>🌡️ Market Sentiment</strong><span class="muted">Fear &amp; Greed · Live</span></div><div id="sentimentPanel" class="sentiment-panel"><strong>Marktstimmung wird geladen…</strong></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>📊 Coin Performance</strong><span class="muted">Seit erster Beobachtung</span></div><div id="performanceList" class="intel-list"><span class="muted">Wird mit neuen Scans aufgebaut…</span></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>🚀 New Coin Radar</strong><span class="muted">Neue Paare</span></div><div id="newCoinList" class="intel-list"><span class="muted">Warte auf Live-Scan…</span></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>📈 Gainers &amp; Losers</strong><span class="muted">1h Veränderung</span></div><div id="moverList" class="intel-list"><span class="muted">Warte auf Live-Scan…</span></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>🗺️ Market Heatmap</strong><span class="muted">Trending MC / Bewegung</span></div><div id="heatmap" class="heatmap"><span class="muted">Warte auf Live-Scan…</span></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>🐳 Whale Tracker</strong><span class="muted">Große Trades des gewählten Coins</span></div><div id="whaleList" class="intel-list"><span class="muted">Wähle oben einen Coin aus.</span></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>⚡ Smart Alerts</strong><span class="muted">Automatische Signale</span></div><div class="intel-form"><label style="display:flex;gap:9px;align-items:center;color:var(--text);font-size:12px"><input id="smartMomentum" type="checkbox"> 1h-Bewegung ab +15% melden</label><label style="display:flex;gap:9px;align-items:center;color:var(--text);font-size:12px"><input id="smartBuys" type="checkbox"> Starker Kaufdruck ab 75% und 20 Trades melden</label></div><p class="notice">Prüft die Trending-Daten bei jedem Scan. Browser-Mitteilungen sind optional; die Seite muss geöffnet sein.</p></article>
-    <article class="intel-card"><div class="intel-title"><strong>🔔 Price Alerts</strong><span class="muted">Lokal in diesem Browser</span></div><div class="intel-form"><input id="alertSymbol" class="search" placeholder="Coin-Symbol, z. B. BONK"><input id="alertPrice" class="search" type="number" min="0" step="any" placeholder="Zielpreis in USD"><select id="alertDirection" class="search"><option value="above">Alarm bei Anstieg über</option><option value="below">Alarm bei Fall unter</option></select><button id="addAlert" class="btn">Alarm speichern</button></div><div id="alertList" class="intel-list"></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>💼 Mini-Portfolio</strong><span class="muted">Manuell · Schätzwert</span></div><div class="intel-form"><input id="portfolioAddress" class="search" placeholder="Token Contract-Adresse"><input id="portfolioQty" class="search" type="number" min="0" step="any" placeholder="Deine Token-Menge"><button id="addPosition" class="btn">Position hinzufügen</button></div><div id="portfolioList" class="intel-list"></div></article>
-    <article class="intel-card"><div class="intel-title"><strong>🧠 Smart Money Watch</strong><span class="muted">Wallet-Adressen merken</span></div><div class="intel-form"><input id="smartWallet" class="search" placeholder="Öffentliche Wallet-Adresse"><button id="addSmartWallet" class="btn">Wallet speichern</button></div><div id="smartWalletList" class="intel-list"></div><p class="notice">Wallet-Liste zum Beobachten. Ohne spezialisierten Datenanbieter werden hier keine Käufe/Verkäufe dieser Wallets behauptet.</p></article>
-    <article class="intel-card"><div class="intel-title"><strong>🫧 Holder Scanner</strong><span class="muted">Wallet-Konzentration</span></div><p class="notice" style="margin:0 0 10px">Prüfe Holder-Risiken im Rug Check und in der Solana Bubble-Map.</p><button id="openHolderScan" class="secondary-btn">Zum Rug / Holder Check ↓</button></article>
-   </div>
-   <p class="notice">Preisalarme funktionieren nur bei geöffnetem FeeFlow. Portfolio-Werte sind Schätzungen.</p>
+    <div class="panel" id="rewards">
+      <div class="panel-head"><h2>FeeFlow Rewards</h2><span class="pill">POINTS DEMO</span></div>
+      <p style="color:#c4bfd2;margin-top:0">Sammle FeeFlow Points durch Research und Community-Aktivitäten. In dieser Vorschau sind Punkte nur Demo-Punkte und haben keinen Geld- oder Auszahlungswert.</p>
+      <div class="result" style="margin-top:12px">
+        <span class="muted">Dein Punktestand auf diesem Gerät</span>
+        <strong id="pointsBalance">250 FFP</strong>
+        <span class="muted">Demo-Startguthaben · lokal gespeichert</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+        <button class="connect" id="dailyReward" type="button">Daily check-in · +25</button>
+        <button class="secondary" id="analysisReward" type="button">Research loggen · +50</button>
+      </div>
+      <p class="muted" id="rewardMessage" aria-live="polite" style="margin-bottom:0">Ein täglicher Check-in ist einmal pro Kalendertag möglich. Research-Punkte sind in dieser Demo auf 3 pro Tag begrenzt.</p>
+      <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+        <strong style="font-size:13px">So funktioniert das spätere Rewards-System</strong>
+        <ul style="color:var(--muted);padding-left:18px;font-size:12px;margin-bottom:0">
+          <li>Punkte für echte, nachvollziehbare Aktivitäten</li>
+          <li>Klare Regeln und einsehbarer Punkteverlauf</li>
+          <li>Spätere Vorteile erst nach Finanzierung und rechtlicher Prüfung</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel" id="about">
+      <div class="panel-head"><h2>Built for the meme coin community</h2><span class="pill">FEEFLOW</span></div>
+      <p style="color:#c4bfd2;margin-top:0">Track what matters. Compare activity, review fee estimates and keep your research in one clean workspace.</p>
+      <ul style="color:var(--muted);padding-left:18px;font-size:13px"><li>Simple market overview</li><li>Searchable token watchlist</li><li>Transparent fee estimates</li><li>Room for your own analysis tools</li></ul>
+      <p class="muted">This is a front-end demo. Wallet connection, real-time prices, accounts and saved analyses are not active yet.</p>
+    </div>
   </section>
-<section class="launch-panel" id="createCoin"><div class="panel-head"><h2>🚀 Eigenen Coin erstellen</h2><span class="pill">SOLANA · PUMP.FUN</span></div><p class="notice" style="margin-top:0">Erstelle einen Solana-Token. Die Transaktion wird in Phantom von dir bestätigt.</p><div class="launch-grid"><div><div class="launch-form"><div class="launch-field"><label for="launchName">Token-Name *</label><input id="launchName" maxlength="32" placeholder="z. B. FeeFlow Coin"></div><div class="launch-field"><label for="launchSymbol">Ticker *</label><input id="launchSymbol" maxlength="10" placeholder="z. B. FEE"></div><div class="launch-field full"><label for="launchDescription">Beschreibung</label><textarea id="launchDescription" maxlength="500" placeholder="Worum geht es bei deinem Coin?"></textarea></div><div class="launch-field full"><label for="launchImage">Coin-Bild (PNG/JPG/WebP, max. 5 MB) *</label><input id="launchImage" type="file" accept="image/png,image/jpeg,image/webp"></div><div class="launch-field"><label for="launchWebsite">Website (optional)</label><input id="launchWebsite" placeholder="https://…"></div><div class="launch-field"><label for="launchTwitter">X / Twitter (optional)</label><input id="launchTwitter" placeholder="https://x.com/…"></div><div class="launch-field"><label for="launchTelegram">Telegram (optional)</label><input id="launchTelegram" placeholder="https://t.me/…"></div><div class="launch-field"><label for="launchBuy">Initialer Kauf in SOL</label><input id="launchBuy" type="number" min="0.0001" max="5" step="0.0001" value="0.0001"></div><div class="launch-field full"><label for="launchPinata">Pinata JWT (nur Upload-Rechte, kein Admin-Key) *</label><input id="launchPinata" type="password" autocomplete="off" placeholder="Upload-only JWT einfügen"></div></div><div class="launch-actions"><button class="btn" id="launchCreateBtn" type="button">🚀 Coin erstellen</button><button class="secondary-btn" id="launchConnectBtn" type="button">Phantom verbinden</button></div><div class="launch-result" id="launchStatus" role="status" aria-live="polite">Bereit. Für den IPFS-Upload wird ein eigener Pinata JWT benötigt.</div></div><aside class="launch-side"><strong>Vor dem Launch</strong><div class="launch-status">1. Pinata API-Key erstellen und JWT einfügen.<br><br>2. Token-Daten und Bild hochladen.<br><br>3. FeeFlow erstellt die Transaktion; Phantom zeigt sie zur Prüfung und Signatur an.<br><br>4. Danach erhältst du Mint-Adresse und Solscan-Link.</div><div class="launch-warning">Echter Mainnet-Launch: Du benötigst SOL für den initialen Kauf, Netzwerk-/Priority-Gebühren und mögliche Pump.fun-/Trading-Gebühren. Kosten und Ausführung können sich ändern. Prüfe jede Transaktion in Phantom. Verwende nur deinen eigenen Pinata JWT.</div><div class="launch-status" style="margin-top:10px">Nur einen eingeschränkten Upload-JWT verwenden – niemals einen Admin-Key. Der Schlüssel wird nach dem Versuch aus dem Formular gelöscht.</div></aside></div></section>
-  <p class="disclaimer">Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by CoinGecko. Trades are routed through linked third-party DEX services; FeeFlow never holds your funds.</p>
+  <p class="disclaimer">Risk notice: Meme coins are highly volatile and can result in a total loss. FeeFlow is an informational demo, not financial advice. Token names and market figures shown here are examples, not live prices or recommendations.</p>
 </main>
-<footer><span>© 2026 FeeFlow · Follow the flow.</span><span>Marktdaten: CoinGecko &amp; DEX Screener · Wallet bleibt im Browser</span></footer>
+<footer><span>© 2026 FeeFlow. Follow the flow.</span><span>Dark mode · Purple edition</span></footer>
 </div>
-
-<nav class="mobile-dock" aria-label="Schnellnavigation"><a href="#overview" class="active"><span>⌂</span><span>Start</span></a><a href="#trending"><span>↗</span><span>Trending</span></a><a href="#market"><span>⌁</span><span>Charts</span></a><a href="#rugcheck"><span>盾</span><span>Rug Check</span></a></nav>
 <div class="toast" id="toast" role="status"></div>
-<script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.min.js"></script>
 <script>
-'use strict';
-const $=id=>document.getElementById(id);
-const state={coins:[],selected:null,days:1,chartMode:'candles',provider:null,account:null,chainId:null,kind:null,refreshing:false,searchMode:false,trendCoins:[],trendRefreshing:false,searchRequest:0,chartRequest:0,chartData:[],chartViewStart:0,chartViewEnd:0,chartPointers:new Map(),trendSort:'momentum',watchOnly:false,watchlist:new Set(),alerts:[],positions:[],smartWallets:[]};
-for(const [k,p] of [['alerts','feeflow_alerts'],['positions','feeflow_positions'],['smartWallets','feeflow_smart_wallets']]){try{state[k]=JSON.parse(localStorage.getItem(p)||'[]')}catch(e){state[k]=[]}}
-try{state.watchlist=new Set(JSON.parse(localStorage.getItem('feeflow_watchlist')||'[]'))}catch(e){}
+const amount=document.getElementById('amount'),rate=document.getElementById('rate'),feeResult=document.getElementById('feeResult'),netResult=document.getElementById('netResult');
+function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.max(0,Number(rate.value)||0),f=a*r/100;feeResult.textContent=f.toLocaleString('en-US',{style:'currency',currency:'USD'});netResult.textContent='Net amount: '+(a-f).toLocaleString('en-US',{style:'currency',currency:'USD'});}
+amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
+document.getElementById('coinSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase();document.querySelectorAll('#coinRows tr').forEach(row=>row.hidden=!row.textContent.toLowerCase().includes(q));});
+document.getElementById('connectBtn').addEventListener('click',()=>{const t=document.getElementById('toast');t.textContent='Wallet connection will be added in a future version.';t.style.display='block';setTimeout(()=>t.style.display='none',2600);});
 
-let language='de';
-const words={
-de:{nav:['Übersicht','Trending','Charts','Gebührenrechner'],connect:'Wallet verbinden',hero:'Dein Live-Dashboard für Krypto-Trends, Kursbewegungen und Gebühren. Verbinde eine Wallet nur zum Anzeigen deiner öffentlichen Adresse — FeeFlow fragt niemals nach deiner Seed Phrase oder deinem Private Key.',trend:'Trending-Coins',rug:'Rug-/Scam-Check',intro:'Füge die Contract- oder Mint-Adresse ein. FeeFlow prüft bekannte On-Chain-Risiken für Solana und EVM-Token.',chain:'Blockchain',address:'Token-Adresse / Mint-Adresse einfügen',check:'Prüfen',ready:'Bereit zum Prüfen',none:'Noch keine Adresse geprüft.',safety:'Wichtig: Diese Einschätzung ist NICHT zu 100 % sicher. Sie kann einen Rug übersehen. Auch 5 % bedeutet nicht risikofrei. Prüfe den Coin immer selbst.',chart:'Markt-Chart',fee:'Gebührenrechner',wallet:'Deine Wallet',disclaimer:'Risikohinweis: Krypto- und Meme-Coins sind sehr volatil; du kannst dein gesamtes Investment verlieren. FeeFlow dient nur der Information und ist keine Finanzberatung.',risk:'Geschätztes Rug-Risiko',rugged:'RUG PULL VOM ANBIETER ERKANNT',critical:'KRITISCHE RISIKEN GEFUNDEN',warning:'WARNUNGEN GEFUNDEN',clean:'KEINE BEKANNTEN WARNUNGEN – NICHT ALS SICHER BESTÄTIGT'},
-en:{nav:['Overview','Trending','Charts','Fee calculator'],connect:'Connect wallet',hero:'Your live dashboard for crypto trends, price movements and fees. Connect a wallet only to display your public address — FeeFlow never asks for your seed phrase or private key.',trend:'Trending coins',rug:'Rug / Scam Check',intro:'Enter the contract or mint address. FeeFlow checks known on-chain risks for Solana and EVM tokens.',chain:'Blockchain',address:'Enter token / mint address',check:'Check',ready:'Ready to check',none:'No address checked yet.',safety:'Important: This assessment is NOT 100% accurate. It can miss a rug. Even 5% does not mean risk-free. Always do your own research.',chart:'Market chart',fee:'Fee calculator',wallet:'Your wallet',disclaimer:'Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is informational only and is not financial advice.',risk:'Estimated rug risk',rugged:'RUG PULL REPORTED BY PROVIDER',critical:'CRITICAL RISKS FOUND',warning:'WARNINGS FOUND',clean:'NO KNOWN WARNINGS – NOT CONFIRMED SAFE'}
-};
-function setText(selector,value){const el=document.querySelector(selector);if(el)el.textContent=value}
-function applyLanguage(value){
- language=value==='en'?'en':'de';const t=words[language];document.documentElement.lang=language;
- document.querySelectorAll('.nav a').forEach((a,i)=>{if(t.nav[i])a.textContent=t.nav[i]});
- setText('#connectBtn',t.connect);setText('.hero p',t.hero);setText('#trending h2',t.trend);setText('#rugcheck h2',t.rug);setText('#rugcheck .notice',t.intro);
- const labels=document.querySelectorAll('#rugcheck label');if(labels[0])labels[0].textContent=t.chain;
- $('riskAddress').placeholder=t.address;$('riskCheckBtn').textContent=t.check;
- setText('#riskSafetyNote',t.safety);setText('#market h2',t.chart);setText('#fees h2',t.fee);setText('#walletPanel h2',t.wallet);setText('.disclaimer',t.disclaimer);
- if(!$('riskAddress').value)$('riskResult').innerHTML='<strong>'+t.ready+'</strong><span class="muted">'+t.none+'</span>';
-}
-$('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
-
-const money=(n,opts={})=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',...opts}).format(Number(n)):'—';
-const compact=n=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(Number(n)):'—';
-const shortNum=n=>{const v=Number(n);if(!Number.isFinite(v))return '—';if(v>=1)return money(v,{maximumFractionDigits:v<1?6:2});return '$'+v.toPrecision(4)};
-function toast(message){const el=$('toast');el.textContent=message;el.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display='none',3200)}
-async function getResponse(url,options={},timeoutMs=9000){
- const controller=new AbortController();
- let timer,settled=false;
- const clear=()=>{if(!settled){settled=true;clearTimeout(timer)}};
- timer=setTimeout(()=>controller.abort(),timeoutMs);
- try{
-  const res=await fetch(url,{...options,headers:{accept:'application/json',...(options.headers||{})},signal:controller.signal});
-  if(!res.ok){clear();return res}
-  const originalJson=res.json.bind(res);
-  res.json=async()=>{try{return await originalJson()}catch(e){if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');throw e}finally{clear()}};
-  return res;
- }catch(e){
-  clear();
-  if(e.name==='AbortError')throw new Error('Zeitüberschreitung beim Laden der Daten.');
-  throw e;
- }
-}
-async function getJSON(url,options={}){const res=await getResponse(url,options);if(!res.ok)throw new Error(res.status===429?'API-Rate-Limit erreicht — bitte kurz warten.':'Datenanbieter antwortet mit HTTP '+res.status);return res.json()}
-async function loadMarket(){
- if(state.refreshing)return;
- state.refreshing=true;
- $('refreshBtn').disabled=true;
- $('marketStatus').textContent='UPDATING…';
- const providers=[
-  {name:'CoinPaprika',url:'https://api.coinpaprika.com/v1/global',parse:g=>({cap:Number(g.market_cap_usd),volume:Number(g.volume_24h_usd),change:Number(g.market_cap_change_24h||0)})},
-  {name:'CoinGecko',url:'https://api.coingecko.com/api/v3/global',parse:g=>{const d=g.data||{};return {cap:Number(d.total_market_cap?.usd),volume:Number(d.total_volume?.usd),change:Number(d.market_cap_change_percentage_24h||0)}}}
- ];
- const errors=[];
- try{
-  let stats=null,source='';
-  for(const provider of providers){
-   try{
-    const data=await getJSON(provider.url);
-    const parsed=provider.parse(data);
-    if(!Number.isFinite(parsed.cap)||parsed.cap<=0||!Number.isFinite(parsed.volume)||parsed.volume<=0)throw new Error('Unvollständige Marktdaten');
-    stats=parsed;source=provider.name;break;
-   }catch(error){errors.push(provider.name+': '+(error?.message||'unbekannter Fehler'))}
-  }
-  if(!stats)throw new Error(errors.join(' | ')||'Keine Datenquelle erreichbar');
-  $('marketCap').textContent='$'+compact(stats.cap);
-  $('marketVolume').textContent='$'+compact(stats.volume);
-  $('marketCapChange').textContent=(stats.change>=0?'+':'')+stats.change.toFixed(2)+'% · 24h · '+source;
-  $('marketStatus').textContent='● LIVE';
-  $('marketStatus').style.color='var(--green)';
-  if(!state.searchMode){$('searchResults').hidden=true;$('loadMoreBtn').hidden=true}
-  $('dataNote').textContent='Globale Marktdaten aktualisiert '+new Date().toLocaleTimeString()+' · '+source;
- }catch(err){
-  $('marketCap').textContent='Unavailable';
-  $('marketVolume').textContent='Unavailable';
-  $('marketCapChange').textContent='Marktdaten gerade nicht erreichbar';
-  $('marketStatus').textContent='DATA UNAVAILABLE';
-  $('marketStatus').style.color='var(--red)';
-  $('dataNote').textContent='Marktdaten-Fehler: '+(err?.message||'Unbekannter Fehler');
- }finally{
-  state.refreshing=false;
-  $('refreshBtn').disabled=false;
- }
-}
-async function loadMoreCoins(){return}
-function trendKey(x){return String(x.pair.chainId||'')+':'+String(x.pair.baseToken?.address||'')}
-function renderTrendRows(){
- const rows=state.trendCoins.slice();
- const sorters={momentum:(a,b)=>b.score-a.score,volume:(a,b)=>b.vol24-a.vol24,marketcap:(a,b)=>(b.mc||0)-(a.mc||0),buys:(a,b)=>b.buyRatio*b.trades-a.buyRatio*a.trades};
- rows.sort(sorters[state.trendSort]||sorters.momentum);
- const visible=state.watchOnly?rows.filter(x=>state.watchlist.has(trendKey(x))):rows;
- $('watchCount').textContent=state.watchlist.size+' gespeichert';
- $('trendRows').innerHTML=visible.map((x,i)=>{
-  const p=x.pair,t=p.baseToken||{},age=x.ageMin===null?'Alter n/a':x.ageMin<60?Math.max(1,Math.floor(x.ageMin))+'m':x.ageMin<1440?Math.floor(x.ageMin/60)+'h':Math.floor(x.ageMin/1440)+'d';
-  const signal=x.ageMin!==null&&x.ageMin<45?'✦ NEW':x.buyRatio>=.65&&x.trades>=5?'↗ BUY FLOW':x.vol1>=1000?'⚡ ACTIVE':'TRENDING';
-  const image=p.info?.imageUrl?'<img src="'+safe(p.info.imageUrl)+'" alt="" loading="lazy">':'<span class="coin-icon">🪙</span>';
-  const mcLabel=x.mc===null?'—':'$'+compact(x.mc),change=Number.isFinite(x.h1)?x.h1:0,key=trendKey(x),saved=state.watchlist.has(key);
-  return '<tr class="trend-result" data-dexchain="'+safe(p.chainId||'')+'" data-pair="'+safe(p.pairAddress||'')+'" data-token="'+safe(t.address||'')+'" data-name="'+safe(t.name||'Unknown')+'" data-symbol="'+safe(t.symbol||'—')+'" data-price="'+safe(p.priceUsd||'0')+'" data-change="'+safe(p.priceChange?.h24??'')+'" data-mcap="'+(x.mc===null?'':String(x.mc))+'" data-image="'+safe(p.info?.imageUrl||'')+'" tabindex="0" role="button" aria-label="Chart für '+safe(t.name||'Coin')+' öffnen"><td class="trend-rank">'+String(i+1).padStart(2,'0')+'</td><td class="trend-asset"><div class="coin">'+image+'<span>'+safe(t.name||'Unknown')+'<small>'+safe(t.symbol||'—')+' · '+safe(p.chainId||'')+'</small><small class="trend-mc">MC <b>'+mcLabel+'</b></small></span></div></td><td class="trend-signal"><span class="trend-badge '+(signal.includes('NEW')?'is-hot':'')+'">'+signal+'</span><strong class="'+(change>=0?'positive':'negative')+'">'+(change>=0?'+':'')+change.toFixed(1)+'% <small>1H</small></strong><small class="trend-age">'+age+' · '+x.trades+' Trades/h</small></td><td class="trend-volume"><strong>$'+compact(x.vol24)+'</strong><small>24H VOLUME</small><button type="button" class="watch-star" data-watch="'+safe(key)+'" aria-label="'+(saved?'Aus Watchlist entfernen':'Zur Watchlist hinzufügen')+'" style="display:block;margin-top:6px;background:none;border:0;color:'+(saved?'#f5c85c':'var(--muted)')+';padding:2px;cursor:pointer;font-size:17px">'+(saved?'★':'☆')+'</button></td></tr>';
- }).join('')||'<tr><td colspan="4" class="muted">'+(state.watchOnly?'Deine Watchlist ist hier noch leer. Speichere Coins mit ☆.':'Gerade keine ausreichend aktiven Token gefunden. Der Scanner prüft automatisch erneut.')+'</td></tr>';
- renderMarketPulse();
-}
-
-function renderMarketPulse(){
- const a=state.trendCoins||[];
- const fmtPct=n=>(n>=0?'+':'')+Number(n||0).toFixed(1)+'%';
- const mover=a.slice().sort((x,y)=>(Number(y.h1)||0)-(Number(x.h1)||0))[0];
- const vol=a.slice().sort((x,y)=>(Number(y.vol24)||0)-(Number(x.vol24)||0))[0];
- const trades=a.reduce((n,x)=>n+(Number(x.trades)||0),0);
- const buys=a.reduce((n,x)=>n+(Number(x.buyRatio)||0)*(Number(x.trades)||0),0);
- const ratio=trades?Math.round(buys/trades*100):null;
- $('pulseMover').textContent=mover?(mover.pair.baseToken?.symbol||'Coin')+' '+fmtPct(mover.h1):'Warte auf Scan…';
- $('pulseMoverMeta').textContent=mover?(mover.pair.chainId||'')+' · 1 Stunde':'Noch keine Daten';
- $('pulseVolume').textContent=vol?'$'+compact(vol.vol24):'—';
- $('pulseVolumeMeta').textContent=vol?(vol.pair.baseToken?.symbol||'Coin')+' · 24h':'Im aktuellen Radar';
- $('pulseBuy').textContent=ratio===null?'—':ratio+'%';
- $('pulseBuyMeta').textContent=trades?trades+' erfasste Trades':'Keine Trade-Daten';
- $('pulseWatch').textContent=state.watchlist.size+' Coins';
- $('pulseFoot').textContent=a.length?'Basierend auf '+a.length+' erkannten Token · '+new Date().toLocaleTimeString():'Werte erscheinen nach dem nächsten erfolgreichen Scan.';
-}
-function updateTokenActions(c){
- const box=$('tokenActions');if(!box)return;
- const addr=c?.tokenAddress||'';
- if(!c?.dexPair||!addr||!c.pairAddress){box.hidden=true;return}
- box.hidden=false;$('tokenAddressLabel').textContent=addr;
- const pairUrl='https://dexscreener.com/'+encodeURIComponent(c.chainId||'solana')+'/'+encodeURIComponent(c.pairAddress);
- $('openDexPair').href=pairUrl;
- const solana=String(c.chainId||'').toLowerCase()==='solana';
- $('tradeLink').href='https://fomo.family/discover';
- $('tradeLink').textContent='Auf FOMO kaufen ↗';
- $('tradeLink').title='Öffnet FOMO Discover. Kopiere vorher die Token-Adresse und füge sie dort in die Suche ein.';
-}
-$('copyTokenAddress')?.addEventListener('click',async()=>{
- const addr=state.selected?.tokenAddress;if(!addr){toast('Für diesen Coin gibt es keine Contract-Adresse zum Kopieren.');return}
- let copied=false;
- try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(addr);copied=true}}catch(e){}
- if(!copied){const field=document.createElement('textarea');field.value=addr;field.setAttribute('readonly','');field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();try{copied=document.execCommand('copy')}catch(e){}field.remove()}
- if(copied){$('copyTokenAddress').textContent='Kopiert ✓';toast('Token-Adresse kopiert.');setTimeout(()=>$('copyTokenAddress').textContent='Adresse kopieren',1800)}
- else{$('tokenAddressLabel').textContent=addr+' · Kopieren nicht möglich – bitte manuell markieren';toast('Bitte Adresse markieren und kopieren.')}
+const pointsKey='feeflow_demo_points_v1';
+const dailyKey='feeflow_demo_daily_v1';
+const researchKey='feeflow_demo_research_v1';
+const readNum=(key,fallback)=>{const n=Number(localStorage.getItem(key));return Number.isFinite(n)&&n>=0?n:fallback;};
+let points=readNum(pointsKey,250);
+function savePoints(){localStorage.setItem(pointsKey,String(points));document.getElementById('pointsBalance').textContent=points.toLocaleString('en-US')+' FFP';}
+savePoints();
+document.getElementById('dailyReward').addEventListener('click',()=>{
+  const today=new Date().toISOString().slice(0,10),msg=document.getElementById('rewardMessage');
+  if(localStorage.getItem(dailyKey)===today){msg.textContent='Deinen Daily Check-in hast du heute bereits eingelöst.';return;}
+  points+=25;localStorage.setItem(dailyKey,today);savePoints();msg.textContent='Check-in erfolgreich: +25 Demo-Punkte. Morgen kannst du wieder einchecken.';
 });
-function saveLocal(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(e){}}
-try{state.performance=JSON.parse(localStorage.getItem('feeflow_performance')||'{}')}catch(e){state.performance={}}
-let sentimentLast=0;
-async function refreshMarketSentiment(){
- const box=$('sentimentPanel');if(!box)return;
- try{const d=await getJSON('https://api.alternative.me/fng/?limit=1');const x=d.data&&d.data[0];if(!x)throw new Error('No data');
- const n=Math.max(0,Math.min(100,Number(x.value)||0)),c=n<25?'var(--red)':n<45?'#e7bd60':n<56?'#d9d0a1':'var(--green)';
- box.innerHTML='<div class="sentiment-score" style="color:'+c+'">'+n+'/100</div><strong>'+safe(x.value_classification||'Unbekannt')+'</strong><div class="sentiment-track"><span style="width:'+n+'%"></span></div><div class="sentiment-meta"><span>Extreme Angst</span><span>Extreme Gier</span></div><small class="intel-empty">Fear &amp; Greed Index · Keine Kaufempfehlung.</small>';
- }catch(e){box.innerHTML='<span class="intel-empty">Stimmungsdaten gerade nicht verfügbar.</span>'}
-}
-function savePerformance(coins){
- const now=Date.now();for(const x of coins){const p=x.pair||{},t=p.baseToken||{},a=t.address||'',k=(p.chainId||'')+':'+a,v=Number(p.priceUsd);if(!a||!Number.isFinite(v)||v<=0)continue;
- if(!state.performance[k])state.performance[k]={symbol:t.symbol||'COIN',start:v,first:now,chain:p.chainId||''};state.performance[k].last=v;state.performance[k].updated=now;}
- const rows=Object.entries(state.performance).sort((a,b)=>(b[1].updated||0)-(a[1].updated||0)).slice(0,100);state.performance=Object.fromEntries(rows);try{localStorage.setItem('feeflow_performance',JSON.stringify(state.performance))}catch(e){}
-}
-function renderPerformance(){const a=Object.values(state.performance).filter(x=>x.start>0&&x.last>0).sort((x,y)=>(y.updated||0)-(x.updated||0)).slice(0,8);$('performanceList').innerHTML=a.map(x=>{const n=(x.last/x.start-1)*100;return '<div class="intel-row"><span><b>'+safe(x.symbol)+'</b><small style="display:block;color:var(--muted)">'+safe(x.chain)+' · seit erster Beobachtung</small></span><b class="perf-change '+(n>=0?'positive':'negative')+'">'+(n>=0?'+':'')+n.toFixed(2)+'%</b></div>'}).join('')||'<span class="intel-empty">Wird nach den ersten Scans gefüllt. Die Messung beginnt ab jetzt.</span>'}
-function renderIntel(){
- const coins=state.trendCoins||[];
- renderPerformance();if(Date.now()-sentimentLast>300000){sentimentLast=Date.now();refreshMarketSentiment()}
- const fresh=coins.filter(x=>x.ageMin!==null&&x.ageMin<1440).sort((a,b)=>a.ageMin-b.ageMin).slice(0,5);
- $('newCoinList').innerHTML=fresh.map(x=>'<div class="intel-row"><span><b>'+safe(x.pair.baseToken?.symbol||'—')+'</b> · '+(x.ageMin<60?Math.max(1,Math.floor(x.ageMin))+' min':Math.floor(x.ageMin/60)+' h')+'</span><span>$'+compact(x.mc||0)+' MC</span></div>').join('')||'<span class="intel-empty">Keine neuen Coins im aktuellen Scan.</span>';
- const sorted=coins.slice().sort((a,b)=>b.h1-a.h1);
- const movers=[...sorted.slice(0,3),...sorted.slice(-3).reverse()];
- $('moverList').innerHTML=movers.map(x=>'<div class="intel-row"><span>'+safe(x.pair.baseToken?.symbol||'—')+'</span><b class="'+(x.h1>=0?'positive':'negative')+'">'+(x.h1>=0?'+':'')+x.h1.toFixed(1)+'%</b></div>').join('')||'<span class="intel-empty">Noch keine Kursdaten.</span>';
- $('heatmap').innerHTML=coins.slice(0,12).map(x=>{const v=Number(x.h1)||0;const alpha=Math.min(.35,.10+Math.abs(v)/100);const bg=v>=0?'rgba(54,214,154,'+alpha+')':'rgba(255,113,136,'+alpha+')';return '<div class="heat-cell" style="background:'+bg+'"><strong>'+safe(x.pair.baseToken?.symbol||'—')+'</strong><small class="'+(v>=0?'positive':'negative')+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</small></div>'}).join('')||'<span class="intel-empty">Heatmap wird mit dem nächsten Scan gefüllt.</span>';
- $('alertList').innerHTML=state.alerts.map((a,i)=>'<div class="intel-row"><span>'+safe(a.symbol)+' '+(a.direction==='above'?'über':'unter')+' $'+a.price+'</span><button data-remove-alert="'+i+'">Entfernen</button></div>').join('')||'<span class="intel-empty">Noch keine Preisalarme gespeichert.</span>';
- $('portfolioList').innerHTML=state.positions.map((p,i)=>'<div class="intel-row"><span>'+safe(p.symbol||p.address.slice(0,8)+'…')+' · '+p.qty+' Token</span><span id="positionValue'+i+'">Wert wird geladen…</span><button data-remove-position="'+i+'">×</button></div>').join('')||'<span class="intel-empty">Füge eine Token-Adresse und Menge hinzu.</span>';
- $('smartWalletList').innerHTML=state.smartWallets.map((w,i)=>'<div class="intel-row"><span>'+safe(w.slice(0,8)+'…'+w.slice(-6))+'</span><button data-remove-wallet="'+i+'">Entfernen</button></div>').join('')||'<span class="intel-empty">Noch keine Wallet gespeichert.</span>';
-}
-function checkSmartSignals(){
- const momentum=$('smartMomentum').checked,buysOn=$('smartBuys').checked;if(!momentum&&!buysOn)return;
- let last={};try{last=JSON.parse(localStorage.getItem('feeflow_smart_signal_last')||'{}')}catch(e){}
- const now=Date.now();
- for(const x of state.trendCoins){const p=x.pair||{},t=p.baseToken||{},sym=t.symbol||'Coin',key=(p.chainId||'')+':'+(t.address||sym);
-  const signals=[];if(momentum&&Number(x.h1)>=15)signals.push('1h Momentum +'+Number(x.h1).toFixed(1)+'%');
-  if(buysOn&&Number(x.buyRatio)>=.75&&Number(x.trades)>=20&&Number(x.vol1)>=1000)signals.push('Kaufdruck '+Math.round(Number(x.buyRatio)*100)+'%');
-  for(const signal of signals){const id=key+':'+signal;if(now-(last[id]||0)<1800000)continue;last[id]=now;const message=sym+' · '+signal;toast('Smart Alert: '+message);if('Notification'in window&&Notification.permission==='granted')new Notification('FeeFlow Smart Alert',{body:message})}
- }
- try{localStorage.setItem('feeflow_smart_signal_last',JSON.stringify(last))}catch(e){}
-}
-function checkPriceAlerts(){let keep=[];for(const a of state.alerts){const coin=state.trendCoins.find(x=>(x.pair.baseToken?.symbol||'').toLowerCase()===a.symbol.toLowerCase());if(!coin){keep.push(a);continue}const price=Number(coin.pair.priceUsd);const hit=a.direction==='above'?price>=a.price:price<=a.price;if(hit){toast('Preisziel erreicht: '+a.symbol+' · $'+price);if('Notification'in window&&Notification.permission==='granted')new Notification('FeeFlow Preisalarm',{body:a.symbol+' · $'+price})}else keep.push(a)}if(keep.length!==state.alerts.length){state.alerts=keep;saveLocal('feeflow_alerts',keep);renderIntel()}}
-async function refreshPortfolio(){for(let i=0;i<state.positions.length;i++){const p=state.positions[i],el=$('positionValue'+i);if(!el)continue;try{const data=await getJSON('https://api.dexscreener.com/latest/dex/tokens/'+encodeURIComponent(p.address));const pair=(data.pairs||[]).sort((a,b)=>Number(b.liquidity?.usd||0)-Number(a.liquidity?.usd||0))[0];if(!pair)throw new Error('No pair');el.textContent='$'+compact(Number(pair.priceUsd)*p.qty)+' geschätzt'}catch(e){el.textContent='Kurs nicht verfügbar'}}}
-async function loadWhaleTrades(){const c=state.selected;if(!c?.dexPair){$('whaleList').innerHTML='<span class="intel-empty">Wähle einen DEX-Coin aus der Trending-Liste.</span>';return}const network=geckoNetwork(c.chainId);if(!network){$('whaleList').innerHTML='<span class="intel-empty">Für diese Chain ist kein Trade-Feed verfügbar.</span>';return}$('whaleList').innerHTML='<span class="intel-empty">Lade letzte Trades…</span>';try{const data=await getJSON('https://api.geckoterminal.com/api/v2/networks/'+encodeURIComponent(network)+'/pools/'+encodeURIComponent(c.pairAddress)+'/trades?page=1');const trades=data.data||[];const large=trades.map(t=>({a:t.attributes||{},usd:Number(t.attributes?.volume_in_usd||0)})).filter(t=>t.usd>=5000).sort((a,b)=>b.usd-a.usd).slice(0,6);$('whaleList').innerHTML=large.map(t=>'<div class="intel-row"><span>'+safe(t.a.kind||'Trade')+' · '+safe(String(t.a.tx_from_address||'Wallet').slice(0,8))+'…</span><b>$'+compact(t.usd)+'</b></div>').join('')||'<span class="intel-empty">Keine Trades über $5.000 im aktuellen Feed.</span>'}catch(e){$('whaleList').innerHTML='<span class="intel-empty">Trade-Feed nicht verfügbar: '+safe(e.message)+'</span>'}}
-$('smartMomentum').checked=localStorage.getItem('feeflow_smart_momentum')==='1';$('smartBuys').checked=localStorage.getItem('feeflow_smart_buys')==='1';$('smartMomentum').addEventListener('change',e=>{try{localStorage.setItem('feeflow_smart_momentum',e.target.checked?'1':'0')}catch(err){}});$('smartBuys').addEventListener('change',e=>{try{localStorage.setItem('feeflow_smart_buys',e.target.checked?'1':'0')}catch(err){}});
-$('addAlert').addEventListener('click',()=>{const symbol=$('alertSymbol').value.trim().toUpperCase(),price=Number($('alertPrice').value),direction=$('alertDirection').value;if(!symbol||!Number.isFinite(price)||price<=0){toast('Bitte Coin-Symbol und gültigen Zielpreis eingeben.');return}state.alerts.push({symbol,price,direction});saveLocal('feeflow_alerts',state.alerts);$('alertSymbol').value='';$('alertPrice').value='';renderIntel();if('Notification'in window&&Notification.permission==='default')Notification.requestPermission().catch(()=>{})});
-$('addPosition').addEventListener('click',()=>{const address=$('portfolioAddress').value.trim(),qty=Number($('portfolioQty').value);if(address.length<20||!Number.isFinite(qty)||qty<=0){toast('Bitte gültige Token-Adresse und Menge eingeben.');return}state.positions.push({address,qty,symbol:address.slice(0,7)});saveLocal('feeflow_positions',state.positions);$('portfolioAddress').value='';$('portfolioQty').value='';renderIntel();refreshPortfolio()});
-$('addSmartWallet').addEventListener('click',()=>{const w=$('smartWallet').value.trim();if(w.length<20){toast('Bitte eine öffentliche Wallet-Adresse eingeben.');return}if(!state.smartWallets.includes(w))state.smartWallets.push(w);saveLocal('feeflow_smart_wallets',state.smartWallets);$('smartWallet').value='';renderIntel()});
-document.querySelector('#market-intel').addEventListener('click',e=>{const a=e.target.closest('[data-remove-alert]'),p=e.target.closest('[data-remove-position]'),w=e.target.closest('[data-remove-wallet]');if(a){state.alerts.splice(Number(a.dataset.removeAlert),1);saveLocal('feeflow_alerts',state.alerts);renderIntel()}if(p){state.positions.splice(Number(p.dataset.removePosition),1);saveLocal('feeflow_positions',state.positions);renderIntel()}if(w){state.smartWallets.splice(Number(w.dataset.removeWallet),1);saveLocal('feeflow_smart_wallets',state.smartWallets);renderIntel()}});
-$('openHolderScan').addEventListener('click',()=>{$('rugcheck').scrollIntoView({behavior:'smooth',block:'start'});$('riskAddress').focus()});
-async function loadTrendingBoard(){
- if(state.trendRefreshing)return;state.trendRefreshing=true;$('trendStatus').textContent='SCANNING…';
- try{
-  const feeds=await Promise.allSettled([
-   getJSON('https://api.dexscreener.com/token-profiles/latest/v1'),
-   getJSON('https://api.dexscreener.com/token-boosts/latest/v1'),
-   getJSON('https://api.dexscreener.com/token-boosts/top/v1')
-  ]);
-  const candidates=new Map();
-  for(const result of feeds){
-   if(result.status!=='fulfilled'||!Array.isArray(result.value))continue;
-   for(const item of result.value){
-    if(!item?.chainId||!item?.tokenAddress)continue;
-    const key=item.chainId+':'+item.tokenAddress;
-    if(!candidates.has(key))candidates.set(key,item);
-   }
-  }
-  if(!candidates.size)throw new Error('Der öffentliche Scanner-Feed liefert gerade keine Token.');
-  // Include notable established Solana runners that may no longer appear in the latest-boost feeds.
-  const niHaoAddress='4CxjZyMNoF1p6eXHXHv1TWpS2X47CuUmLwtGe18spump';
-  candidates.set('solana:'+niHaoAddress,{chainId:'solana',tokenAddress:niHaoAddress});
-  const groups=new Map();
-  for(const item of candidates.values()){
-   if(!groups.has(item.chainId))groups.set(item.chainId,[]);
-   groups.get(item.chainId).push(item.tokenAddress);
-  }
-  if(groups.has('solana')){const sol=groups.get('solana');groups.set('solana',[niHaoAddress,...sol.filter(a=>a!==niHaoAddress)]);}
-  const selectedGroups=[...groups.entries()].sort((a,b)=>b[1].length-a[1].length).slice(0,8);
-  const requests=selectedGroups.map(([chain,addresses])=>
-   getJSON('https://api.dexscreener.com/tokens/v1/'+encodeURIComponent(chain)+'/'+addresses.slice(0,30).map(encodeURIComponent).join(','))
-  );
-  const results=await Promise.allSettled(requests),pairs=[];
-  for(const result of results)if(result.status==='fulfilled'&&Array.isArray(result.value))pairs.push(...result.value);
-  const best=new Map();
-  for(const p of pairs){
-   const token=p.baseToken||{},address=token.address;
-   if(!address||!p.pairAddress)continue;
-   const key=(p.chainId||'')+':'+address;
-   const liquidity=Number(p.liquidity?.usd||0),volume=Number(p.volume?.h24||0),volume1=Number(p.volume?.h1||0);
-   const pairQuality=volume+volume1*5+liquidity*.12;
-   const previous=best.get(key);
-   if(!previous||pairQuality>previous.pairQuality)best.set(key,{pair:p,pairQuality});
-  }
-  const now=Date.now(),scored=[];
-  for(const {pair:p} of best.values()){
-   const liq=Number(p.liquidity?.usd||0),vol24=Number(p.volume?.h24||0),vol1=Number(p.volume?.h1||0);
-   const buys=Number(p.txns?.h1?.buys||0),sells=Number(p.txns?.h1?.sells||0),trades=buys+sells;
-   if(liq<5000&&vol24<5000&&vol1<500)continue;
-   if(trades<3&&vol1<250&&vol24<1500)continue;
-   const created=Number(p.pairCreatedAt||0),ageMin=created?Math.max(0,(now-created)/60000):null;
-   const m5=Number(p.priceChange?.m5||0),h1=Number(p.priceChange?.h1||0),h6=Number(p.priceChange?.h6||0);
-   const buyRatio=trades?buys/trades:.5,flow=vol1/Math.max(liq,1);
-   const score=Math.log10(vol1+1)*5+Math.log10(vol24+1)*3+Math.log10(trades+1)*4+
-    Math.min(14,flow*12)+(buyRatio-.5)*12+
-    Math.max(-18,Math.min(24,m5))*.65+Math.max(-30,Math.min(40,h1))*.3+
-    Math.max(-30,Math.min(40,h6))*.08+
-    (ageMin!==null&&ageMin<45?Math.max(0,8-ageMin/6):0);
-   const rawMc=p.marketCap;
-   const mc=rawMc!==null&&rawMc!==undefined&&rawMc!==''&&Number.isFinite(Number(rawMc))&&Number(rawMc)>0?Number(rawMc):null;
-   scored.push({pair:p,mc,liq,vol24,vol1,buys,sells,trades,buyRatio,ageMin,m5,h1,h6,score});
-  }
-  scored.sort((a,b)=>b.score-a.score);
-  state.trendCoins=scored.slice(0,20);
-  savePerformance(state.trendCoins);
-  renderTrendRows();renderIntel();checkPriceAlerts();checkSmartSignals();if(state.positions.length)refreshPortfolio();
+document.getElementById('analysisReward').addEventListener('click',()=>{
+  const today=new Date().toISOString().slice(0,10),key=researchKey+'_'+today,used=readNum(key,0),msg=document.getElementById('rewardMessage');
+  if(used>=3){msg.textContent='Dein tägliches Demo-Limit für Research-Punkte ist erreicht.';return;}
+  points+=50;localStorage.setItem(key,String(used+1));savePoints();msg.textContent='Research-Aktivität gespeichert: +50 Demo-Punkte ('+(used+1)+'/3 heute).';
+});
 
-  const top=state.trendCoins[0];
-  $('topCoin').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'—';
-  $('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · 1h Momentum':'Keine aktiven Coins';
-  $('coinCount').textContent=state.trendCoins.length+' trending';
-  $('trendCount').textContent=state.trendCoins.length+' Coins · DEX Scanner';
-  $('trendLead').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'Wartet auf Aktivität';
-  $('trendStatus').textContent=feeds.every(r=>r.status==='fulfilled')?'● LIVE SCAN':'● PARTIAL SCAN';
-  $('trendStatus').style.color='var(--green)';
-  $('dataNote').textContent='Öffentlicher DEX-Scanner: neue Profile, aktuelle und Top-Boosts. Ranking nach Handelsvolumen, Trades und Kaufdruck. Market Cap wird nur angezeigt, wenn der Anbieter einen echten MC-Wert liefert – FDV wird nicht ersatzweise verwendet.';
- }catch(e){
-  $('trendStatus').textContent='SCAN PAUSED';$('trendStatus').style.color='var(--red)';
-  $('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';
-  $('trendCount').textContent='Datenquelle nicht erreichbar';
- }
- finally{state.trendRefreshing=false}
-}
-async function searchAllCoins(){
- const q=$('coinSearch').value.trim();if(!q){state.searchMode=false;$('searchResults').hidden=true;return}
- const request=++state.searchRequest;$('searchAllBtn').disabled=true;$('searchAllBtn').textContent='…';$('searchResults').hidden=false;$('coinRows').innerHTML='<tr><td colspan="5" class="muted">Suche läuft…</td></tr>';$('dataNote').textContent='Suche CoinGecko und DEX Screener…';
- try{
-  const [cgResult,dexResult]=await Promise.allSettled([getJSON('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(q)),getJSON('https://api.dexscreener.com/latest/dex/search?q='+encodeURIComponent(q))]);
-  let markets=[];if(cgResult.status==='fulfilled'){const found=(cgResult.value.coins||[]).slice(0,20);if(found.length){const ids=found.map(c=>c.id).join(',');try{markets=await getJSON('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids='+encodeURIComponent(ids)+'&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h')}catch(e){if(dexResult.status!=='fulfilled')throw e}}}
-  if(request!==state.searchRequest)return;
-  state.coins=markets;const pairs=dexResult.status==='fulfilled'?(dexResult.value.pairs||[]):[],unique=new Map();for(const p of pairs){const token=p.baseToken||{},key=(p.chainId||'')+':'+(token.address||'');if(token.address&&!unique.has(key))unique.set(key,p)}
-  const dexPairs=[...unique.values()].sort((a,b)=>Number(b.liquidity?.usd||0)-Number(a.liquidity?.usd||0)).slice(0,30);
-  state.searchMode=true;
-  const cgRows=markets.map(c=>{const chg=Number(c.price_change_percentage_24h);return '<tr data-id="'+safe(c.id)+'"><td class="rank">CG</td><td><div class="coin"><img src="'+safe(c.image)+'" alt="" loading="lazy"><span>'+safe(c.name)+'<small>'+safe(c.symbol.toUpperCase())+' · CoinGecko</small></span></div></td><td>'+shortNum(c.current_price)+'</td><td class="'+(chg>=0?'positive':'negative')+'">'+(chg>=0?'+':'')+(Number.isFinite(chg)?chg.toFixed(2)+'%':'—')+'</td><td>$'+compact(c.market_cap)+'</td></tr>'});
-  const dexRows=dexPairs.map(p=>{const t=p.baseToken||{},chg=Number(p.priceChange?.h24);return '<tr class="dex-result" tabindex="0" role="button" data-dexchain="'+safe(p.chainId||'')+'" data-pair="'+safe(p.pairAddress||'')+'" data-token="'+safe(t.address||'')+'" data-name="'+safe(t.name||'Unknown token')+'" data-symbol="'+safe(t.symbol||'—')+'" data-price="'+safe(p.priceUsd||'0')+'" data-change="'+safe(p.priceChange?.h24??'')+'" data-mcap="'+safe(p.marketCap||'0')+'" data-image="'+safe(p.info?.imageUrl||'')+'"><td class="rank">DEX</td><td><div class="coin">'+(p.info?.imageUrl?'<img src="'+safe(p.info.imageUrl)+'" alt="" loading="lazy">':'<span class="coin-icon">🪙</span>')+'<span>'+safe(t.name||'Unknown token')+'<small>'+safe(t.symbol||'—')+' · '+safe(p.chainId||'')+'</small></span></div></td><td>'+shortNum(p.priceUsd)+'</td><td class="'+(chg>=0?'positive':'negative')+'">'+(Number.isFinite(chg)?(chg>=0?'+':'')+chg.toFixed(2)+'%':'—')+'</td><td>'+(p.marketCap&&Number(p.marketCap)>0?'$'+compact(p.marketCap):'—')+'</td></tr>'});
-  $('coinRows').innerHTML=(cgRows.length||dexRows.length)?cgRows.concat(dexRows).join(''):'<tr><td colspan="5" class="muted">Keine Treffer gefunden. Prüfe Name, Kürzel oder Contract-Adresse.</td></tr>';
-  $('dataNote').textContent='Maximal 50 Suchtreffer · '+markets.length+' CoinGecko + '+dexPairs.length+' DEX-Paare.'+(cgResult.status==='rejected'?' CoinGecko nicht erreichbar.':'')+(dexResult.status==='rejected'?' DEX Screener nicht erreichbar.':'');
- }catch(e){if(request===state.searchRequest){$('coinRows').innerHTML='<tr><td colspan="5" class="muted">'+safe(e.message)+'</td></tr>';$('dataNote').textContent=e.message+' Bitte kurz warten und erneut suchen.'}}
- finally{if(request===state.searchRequest){$('searchAllBtn').disabled=false;$('searchAllBtn').textContent='⌕'}}
-}
-function renderCoins(){const q=$('coinSearch').value.trim().toLowerCase();const list=state.coins.filter(c=>c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q));$('coinRows').innerHTML=list.map(c=>{const i=state.coins.indexOf(c)+1,chg=Number(c.price_change_percentage_24h),cls=chg>=0?'positive':'negative',active=state.selected?.id===c.id?' style="background:#ffffff0c"':'';return '<tr data-id="'+safe(c.id)+'"'+active+'><td class="rank">'+i+'</td><td><div class="coin"><img src="'+safe(c.image)+'" alt="" loading="lazy"><span>'+safe(c.name)+'<small>'+safe(c.symbol.toUpperCase())+'</small></span></div></td><td>'+shortNum(c.current_price)+'</td><td class="'+cls+'">'+(chg>=0?'+':'')+(Number.isFinite(chg)?chg.toFixed(2)+'%':'—')+'</td><td>$'+compact(c.market_cap)+'</td></tr>'}).join('')||'<tr><td colspan="5" class="muted">No matching coins.</td></tr>'}
-function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-
-async function checkTokenRisk(){
- const address=$('riskAddress').value.trim(),chain=$('riskChain').value,box=$('riskResult'),button=$('riskCheckBtn');
- if(!address){box.innerHTML='<strong>Adresse fehlt</strong><span class="muted">Bitte zuerst eine Token-Adresse einfügen.</span>';return}
- if(address.length<30){box.innerHTML='<strong class="negative">Ungültige Adresse</strong><span class="muted">Die Adresse sieht zu kurz aus. Bitte prüfe sie.</span>';return}
- button.disabled=true;button.textContent='Prüfe…';box.innerHTML='<strong>Analyse läuft…</strong><span class="muted">RugCheck wird priorisiert. Holder- und Bubble-Map-Daten laufen parallel und werden bei Verzögerung übersprungen.</span>';
- try{
-  let report={},full={},risks=[],rugcheckRisk=null,metrics=[],bad=[],isRugged=false,provider='',bubble=null,bubbleMap=null,launch=null,bubbleRisk=null,bubbleDetails=[],bubblePending=false;
-  if(chain==='solana'){
-   provider='RugCheck + Bubbles';
-   const base='https://api.rugcheck.xyz/v1/tokens/'+encodeURIComponent(address);
-   const results=await Promise.allSettled([
-    getResponse(base+'/report/summary',{},7000),
-    getResponse(base+'/report',{},5000),
-    getResponse('https://bubblemaps.dev/api/map/'+encodeURIComponent(address),{},3500)
-   ]);
-   if(results[0].status!=='fulfilled'||!results[0].value.ok)throw new Error(results[0].status==='fulfilled'?(results[0].value.status===429?'RugCheck Rate-Limit erreicht. Bitte später erneut versuchen.':'RugCheck antwortet mit HTTP '+results[0].value.status):'RugCheck ist nicht erreichbar.');
-   report=await results[0].value.json();
-   if(results[1].status==='fulfilled'&&results[1].value.ok){try{full=await results[1].value.json()}catch(e){}}
-   if(results[2].status==='fulfilled'){
-    const br=results[2].value;
-    if(br.ok||br.status===202){try{bubble=await br.json();bubbleMap=bubble.map||null;launch=bubbleMap?.launch||null;bubblePending=br.status===202||['queued','running'].includes(String(bubble.job?.state||'').toLowerCase())}catch(e){}}
-   }
-   risks=Array.isArray(report.risks)?report.risks:(Array.isArray(full.risks)?full.risks:[]);
-   const sr=Number(report.score_normalised);
-   if(Number.isFinite(sr))rugcheckRisk=Math.max(0,Math.min(100,sr));
-   isRugged=report.rugged===true||full.rugged===true||report.isRugged===true||full.isRugged===true;
-   const token=full.token||{};
-   if(token.mintAuthority!==undefined)metrics.push('Mint Authority: '+(token.mintAuthority?'aktiv':'keine'));
-   if(token.freezeAuthority!==undefined)metrics.push('Freeze Authority: '+(token.freezeAuthority?'aktiv':'keine'));
-   if(report.lpLockedPct!==undefined)metrics.push('LP gesperrt: '+Number(report.lpLockedPct).toFixed(1)+'%');
-   if(Array.isArray(full.topHolders)&&full.topHolders.length){
-    const holders=full.topHolders.slice().sort((a,b)=>Number(b.pct||0)-Number(a.pct||0));
-    const top10=holders.slice(0,10).reduce((sum,h)=>sum+Number(h.pct||0),0);
-    metrics.push('RugCheck Top-Holders geprüft: '+holders.length);
-    if(top10>0)metrics.push('RugCheck Top-10: '+top10.toFixed(1)+'%');
-   }
-   if(launch){
-    const pct=v=>{const n=Number(v);return Number.isFinite(n)?(n<=1?n*100:n):null};
-    const top10=pct(launch.top10Share),topCluster=pct(launch.topClusterShare),dev=pct(launch.devClusterShare),bundle=pct(launch.bundleShare),sniper=pct(launch.sniperShare);
-    if(Number.isFinite(Number(launch.score)))bubbleRisk=Math.max(0,Math.min(100,100-Number(launch.score)));
-    const vals=[['Top-10 Holder',top10],['Größter Wallet-Cluster',topCluster],['Dev-Cluster',dev],['Bundle-Anteil',bundle],['Sniper-Anteil',sniper]];
-    vals.forEach(([name,v])=>{if(v!==null)bubbleDetails.push(name+': '+v.toFixed(1)+'%')});
-    let concentrationRisk=0;
-    if(top10!==null)concentrationRisk=Math.max(concentrationRisk,top10>=90?90:top10>=75?75:top10>=60?60:top10>=45?40:top10>=30?25:0);
-    if(topCluster!==null)concentrationRisk=Math.max(concentrationRisk,topCluster>=60?90:topCluster>=40?75:topCluster>=25?55:topCluster>=15?35:0);
-    if(dev!==null)concentrationRisk=Math.max(concentrationRisk,dev>=30?95:dev>=15?80:dev>=8?65:dev>=3?45:0);
-    if(bundle!==null)concentrationRisk=Math.max(concentrationRisk,bundle>=40?95:bundle>=20?80:bundle>=10?65:bundle>=5?45:0);
-    if(sniper!==null)concentrationRisk=Math.max(concentrationRisk,sniper>=40?85:sniper>=20?65:sniper>=10?45:0);
-    if(concentrationRisk>0){bubbleRisk=Math.max(bubbleRisk||0,concentrationRisk);bubbleDetails.push('FeeFlow-Cluster-/Launch-Risikohinweis: '+concentrationRisk+'/100')}
-    if(launch.status==='unknown')bubbleDetails.push('Launch-Analyse unbekannt; Konzentrationsdaten trotzdem berücksichtigen');
-    if(launch.status==='ok'&&Number.isFinite(Number(launch.score)))bubbleDetails.push('Bubbles Launch-Health-Score: '+Number(launch.score).toFixed(0)+'/100');
-   }else if(bubbleMap?.nodes?.length){
-    const nodes=bubbleMap.nodes,clusters=bubbleMap.clusters||[];
-    const top10=nodes.slice().sort((a,b)=>Number(b.share||0)-Number(a.share||0)).slice(0,10).reduce((a,n)=>a+Number(n.share||0),0)*100;
-    const biggestCluster=clusters.reduce((m,c)=>Math.max(m,Number(c.share||0)*100),0);
-    metrics.push('Bubble-Map Wallets: '+nodes.length);
-    if(top10>0){bubbleDetails.push('Top-10 Wallets: '+top10.toFixed(1)+'%');bubbleRisk=Math.max(bubbleRisk||0,top10>=90?90:top10>=75?75:top10>=60?60:top10>=45?40:top10>=30?25:0)}
-    if(clusters.length){bubbleDetails.push('Wallet-Cluster: '+clusters.length);if(biggestCluster>0){bubbleDetails.push('Größter Cluster: '+biggestCluster.toFixed(1)+'%');bubbleRisk=Math.max(bubbleRisk||0,biggestCluster>=60?90:biggestCluster>=40?75:biggestCluster>=25?55:biggestCluster>=15?35:0)}}
-   }
-   if(bubbleMap?.nodes?.length)metrics.push('Bubble-Map Wallets: '+bubbleMap.nodes.length);
-   if(bubbleMap?.links?.length)metrics.push('Wallet-Verbindungen: '+bubbleMap.links.length);
-   if(bubblePending)metrics.push('Bubble-Map wird noch berechnet');
-  }else{
-   provider='GoPlus';
-   const url='https://api.gopluslabs.io/api/v1/token_security/'+chain+'?contract_addresses='+encodeURIComponent(address.toLowerCase());
-   const res=await getResponse(url);
-   if(!res.ok)throw new Error(res.status===429?'GoPlus Rate-Limit erreicht. Bitte später erneut versuchen.':'GoPlus antwortet mit HTTP '+res.status);
-   const data=await res.json();if(String(data.code)!=='1')throw new Error(data.message||'Keine Sicherheitsdaten erhalten.');
-   report=Object.values(data.result||{})[0]||{};if(!Object.keys(report).length)throw new Error('Token wurde nicht gefunden oder es liegen keine Daten vor.');
-   const flags=[['is_honeypot','Honeypot möglich'],['cannot_sell_all','Verkauf möglicherweise eingeschränkt'],['hidden_owner','Versteckter Owner'],['is_mintable','Neue Token können gemintet werden'],['is_blacklisted','Blacklist-Funktion vorhanden'],['selfdestruct','Self-destruct-Funktion'],['owner_change_balance','Owner kann Guthaben verändern']];
-   for(const [key,label] of flags)if(String(report[key])==='1')bad.push(label);
-   for(const key of ['buy_tax','sell_tax'])if(report[key]!==undefined&&Number(report[key])>0.1)bad.push((key==='buy_tax'?'Kaufsteuer: ':'Verkaufssteuer: ')+(Number(report[key])*100).toFixed(2)+'%');
-   if(report.holder_count)metrics.push('Holder: '+report.holder_count);
-   if(report.is_open_source==='0')bad.push('Quellcode nicht verifiziert / nicht offen');
-   risks=bad.map(name=>({name,level:'danger',description:'GoPlus hat dieses Risiko-Flag gemeldet.'}));
-   if(report.is_open_source==='1')metrics.push('Quellcode offen');
-   if(report.is_honeypot==='1'||report.cannot_sell_all==='1')rugcheckRisk=95;
-   else if(report.hidden_owner==='1'||report.owner_change_balance==='1')rugcheckRisk=80;
-   else if(bad.length)rugcheckRisk=Math.min(75,35+bad.length*10);
-   metrics.push('Bubble-Map: nur Solana-Token werden von der öffentlichen Bubbles-Map unterstützt');
-  }
-  const dangerCount=risks.filter(r=>['danger','high','critical'].includes(String(r.level||'').toLowerCase())).length;
-  const warnCount=risks.filter(r=>['warn','warning','medium'].includes(String(r.level||'').toLowerCase())).length;
-  const riskList=risks.map(r=>{const level=String(r.level||'').toLowerCase(),cls=['danger','high','critical'].includes(level)?'negative':['warn','medium','warning'].includes(level)?'':'positive';return '<li class="'+cls+'"><strong>'+safe(r.name||'Risiko')+' · '+safe(level||'level unbekannt')+'</strong>'+(r.value?' · '+safe(r.value):'')+'<div class="muted">'+safe(r.description||'')+'</div></li>'}).join('');
-  let rugPercent=null;
-  const scores=[rugcheckRisk,bubbleRisk].filter(v=>Number.isFinite(v));
-  if(scores.length)rugPercent=Math.max(...scores);
-  if(isRugged)rugPercent=100;
-  const severeFlags=bad.some(x=>/honeypot|verkauf|owner|blacklist|mint|self-destruct/i.test(x));
-  const dangerous=isRugged||dangerCount>0||severeFlags||rugPercent>=65;
-  const verdict=isRugged?'ALS RUG GEMELDET':dangerous?'KRITISCHE WARNUNGEN':rugPercent===null?'DATEN UNVOLLSTÄNDIG':rugPercent>=60?'HOHES RISIKO':rugPercent>=30?'ERHÖHTES RISIKO':warnCount?'WARNUNGEN GEFUNDEN':'KEINE STARKEN SIGNALE ERKANNT';
-  const color=dangerous||rugPercent>=60?'negative':rugPercent===null?'':rugPercent>=30||warnCount?'':'positive';
-  const safetyPercent=rugPercent===null?null:Math.max(0,Math.min(100,100-rugPercent));
-  const scoreBlock=rugPercent===null?'<div style="font-size:18px;font-weight:800;margin:8px 0">Keine Prozent-Einschätzung möglich</div><span class="muted">FeeFlow erfindet keinen Sicherheitswert, wenn wichtige Prüfdaten fehlen.</span>':'<div style="display:flex;gap:18px;flex-wrap:wrap;margin:12px 0"><div><div style="font-size:30px;font-weight:850;color:'+(safetyPercent>=60?'var(--green)':safetyPercent>=35?'#e5b94b':'var(--red)')+'">'+safetyPercent.toFixed(0)+'% <span style="font-size:13px;font-weight:650">geschätzte Sicherheit</span></div></div><div><div style="font-size:30px;font-weight:850;color:'+(rugPercent>=35?'var(--red)':'#e5b94b')+'">'+rugPercent.toFixed(0)+'% <span style="font-size:13px;font-weight:650">Rug-Risiko-Hinweise</span></div></div></div><div style="height:9px;background:#302b3b;border-radius:8px;overflow:hidden;margin:8px 0 12px"><div style="height:100%;width:'+safetyPercent+'%;background:'+(safetyPercent>=60?'var(--green)':safetyPercent>=35?'#e5b94b':'var(--red)')+';border-radius:8px"></div></div><span class="muted">'+(scores.length===2?'Aus RugCheck und Bubbles; konservativ wird der höhere Risikowert verwendet':Number.isFinite(rugcheckRisk)?'Aus RugCheck-Risikodaten':'Aus Bubbles-Launch-/Cluster-Daten')+'</span>';
-  const bubbleStatus=chain!=='solana'?'Bubble-Map nicht unterstützt für ausgewählte Chain':bubbleMap?'Bubble-Map-Daten geladen':bubblePending?'Bubble-Map wird noch berechnet':'Keine Bubble-Map-Daten verfügbar';
-  const mapLink=chain==='solana'?'<p><a href="https://bubblemaps.dev/embed/'+encodeURIComponent(address)+'" target="_blank" rel="noopener" style="color:#c69bff">Bubble-Map öffnen ↗</a></p>':'';
-  const factorBlock=bubbleDetails.length?'<p class="muted"><strong>Bubble-Map / Wallet-Verbindungen</strong><br>'+bubbleDetails.map(safe).join('<br>')+'</p>':'';
-  box.innerHTML='<strong class="'+color+'">'+verdict+'</strong>'+scoreBlock+(metrics.length?'<p class="muted">'+metrics.map(safe).join(' · ')+'</p>':'')+'<p class="muted">'+bubbleStatus+'</p>'+factorBlock+mapLink+(riskList?'<ul style="padding-left:18px;margin:12px 0">'+riskList+'</ul>':'<p class="muted">Keine konkreten RugCheck-Warnungen zurückgegeben. Das ist kein Sicherheitsnachweis.</p>')+'<p class="muted">RugCheck-Einträge: '+risks.length+' ('+dangerCount+' kritisch, '+warnCount+' Warnungen). Bubble-Map-Cluster und Launch-Muster fließen ein, wenn Bubbles Daten liefert. Die Sicherheits-% sind eine grobe Gegenrechnung zum technischen Risikowert (100 minus Risiko). Sie sind keine echte statistische Wahrscheinlichkeit und keine Garantie. 70% bedeutet also nicht, dass der Coin mit 70% Wahrscheinlichkeit sicher ist. Wenn eine Map noch erstellt wird, sind die Daten unvollständig.</p><div class="muted" style="margin-top:10px">Quelle: '+provider+' · Geprüft: '+new Date().toLocaleString()+'</div>';
- }catch(e){box.innerHTML='<strong class="negative">Prüfung nicht möglich</strong><span class="muted">'+safe(e.message)+'</span><div class="muted" style="margin-top:8px">Versuche es später erneut oder prüfe die Adresse direkt beim jeweiligen Sicherheitsanbieter.</div>'}
- finally{button.disabled=false;button.textContent='Check'}
-}
-$('riskCheckBtn').addEventListener('click',checkTokenRisk);$('riskAddress').addEventListener('keydown',e=>{if(e.key==='Enter')checkTokenRisk()});
-function updateChartHeader(c){$('chartTitle').textContent=c.name+' ('+c.symbol.toUpperCase()+')';$('chartPrice').textContent=shortNum(c.current_price);const n=Number(c.price_change_percentage_24h);$('chartChange').textContent=(n>=0?'+':'')+(Number.isFinite(n)?n.toFixed(2)+'%':'—')+' · 24h';$('chartChange').className='chart-change '+(n>=0?'positive':'negative')}
-let jupiterScriptPromise=null;
-function loadJupiterScript(){if(window.Jupiter)return Promise.resolve();if(jupiterScriptPromise)return jupiterScriptPromise;jupiterScriptPromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://terminal.jup.ag/main-v4.js';script.async=true;script.onload=()=>window.Jupiter?resolve():reject(new Error('Jupiter konnte nicht initialisiert werden.'));script.onerror=()=>reject(new Error('Jupiter-Script konnte nicht geladen werden.'));document.head.appendChild(script)});return jupiterScriptPromise}
-async function mountJupiterSwap(c){const panel=$('swapPanel'),target=$('swapTerminal');if(String(c?.chainId||'').toLowerCase()!=='solana'||!c?.tokenAddress){panel.hidden=true;return}panel.hidden=false;target.innerHTML='<div class="chart-empty">Lade sicheren Swap-Bereich…</div>';try{await loadJupiterScript();if(state.selected?.tokenAddress!==c.tokenAddress)return;if(window.Jupiter.root){window.Jupiter.close();window.Jupiter.root.unmount();window.Jupiter.root=null}target.innerHTML='';window.Jupiter.init({displayMode:'integrated',integratedTargetId:'swapTerminal',endpoint:'https://api.mainnet-beta.solana.com',defaultExplorer:'Solscan',formProps:{initialInputMint:'So11111111111111111111111111111111111111112',initialOutputMint:c.tokenAddress}})}catch(e){target.innerHTML='<div class="chart-empty">'+safe(e.message)+'<br><a href="https://jup.ag/swap/SOL-'+encodeURIComponent(c.tokenAddress)+'" target="_blank" rel="noopener noreferrer" style="color:#c59aff">Jupiter direkt öffnen ↗</a></div>'}}
-async function selectCoin(c){state.selected=c;state.chartData=[];state.chartViewStart=0;state.chartViewEnd=0;if(!c.dexPair&&state.chartMode==='candles'){state.chartMode='line';document.querySelectorAll('[data-chart-mode]').forEach(b=>b.classList.toggle('active',b.dataset.chartMode==='line'))}updateChartHeader(c);updateTokenActions(c);$('market').scrollIntoView({behavior:'smooth',block:'center'});await Promise.allSettled([loadChart(),loadWhaleTrades(),mountJupiterSwap(c)])}
-function geckoNetwork(chain){return ({ethereum:'eth',solana:'solana',base:'base',bsc:'bsc',polygon:'polygon_pos',arbitrum:'arbitrum',optimism:'optimism',avalanche:'avax',cronos:'cronos',fantom:'ftm',zksync:'zksync',linea:'linea',scroll:'scroll',mantle:'mantle',sui:'sui',ton:'ton'})[String(chain||'').toLowerCase()]||null}
-async function loadChart(){
- const c=state.selected;if(!c)return;
- const request=++state.chartRequest;
- $('chart').innerHTML='<div class="chart-empty">Lade '+(state.chartMode==='candles'?'Candlestick':'Kurs')+'-Chart für '+safe(c.name)+'…</div>';
- try{
-  let points=[],timestamps=[],ohlc=[];
-  if(c.dexPair){
-   const network=geckoNetwork(c.chainId);if(!network)throw new Error('Chart für diese Blockchain wird vom Datenanbieter noch nicht unterstützt.');
-   const timeframe=state.days===1?'minute':'hour',aggregate=state.days===1?'5':state.days===7?'1':'4',limit=state.days===1?100:state.days===7?168:180;
-   const url='https://api.geckoterminal.com/api/v2/networks/'+encodeURIComponent(network)+'/pools/'+encodeURIComponent(c.pairAddress)+'/ohlcv/'+timeframe+'?aggregate='+aggregate+'&limit='+limit+'&currency=usd&token=base';
-   const data=await getJSON(url);const candles=data.data?.attributes?.ohlcv_list||[];
-   candles.sort((a,b)=>a[0]-b[0]);
-   ohlc=candles.filter(x=>x.length>=5&&[0,1,2,3,4].every(i=>Number.isFinite(Number(x[i])))&&Number(x[2])>0&&Number(x[3])>0&&Number(x[4])>0).map(x=>({time:Number(x[0])*1000,open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4])}));
-   points=ohlc.map(x=>x.close);timestamps=ohlc.map(x=>x.time);
-  }else{
-   if(state.chartMode==='candles')throw new Error('Candlestick-Daten sind für diesen Coin aktuell nicht verfügbar. Wähle einen Coin aus dem DEX-Trending-Radar oder schalte auf „Linie“.');
-   const data=await getJSON('https://api.coingecko.com/api/v3/coins/'+encodeURIComponent(c.id)+'/market_chart?vs_currency=usd&days='+state.days);
-   const prices=data.prices||[],valid=prices.filter(p=>Number.isFinite(Number(p[1]))&&Number(p[1])>0);
-   points=valid.map(p=>Number(p[1]));timestamps=valid.map(p=>Number(p[0]));
-  }
-  if(request!==state.chartRequest)return;
-  if(points.length<2)throw new Error('Für diesen Coin sind noch nicht genügend Chart-Daten vorhanden.');
-  if(state.chartMode==='candles'){
-   if(ohlc.length<2)throw new Error('Für diesen Coin sind noch nicht genügend Kerzendaten vorhanden.');
-   state.chartData=ohlc;
-  }else{
-   state.chartData=points.map((value,i)=>({value,time:timestamps[i]}));
-  }
-  state.chartViewStart=0;
-  state.chartViewEnd=state.chartData.length;
-  renderChartView();
-  const first=new Date(timestamps[0]),last=new Date(timestamps[timestamps.length-1]);
-  $('chartStart').textContent=state.days===1?first.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):first.toLocaleDateString();
-  $('chartEnd').textContent=state.days===1?'Letzter Scan '+last.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):last.toLocaleDateString();
- }catch(e){if(request===state.chartRequest)$('chart').innerHTML='<div class="chart-empty">'+safe(e.message)+'<br>Neue Handelspaare haben möglicherweise noch keine Kerzendaten.</div>'}
-}
-function renderChartView(){
- const data=state.chartData;if(!data.length)return;
- const a=Math.max(0,Math.min(data.length-2,Math.floor(state.chartViewStart))),b=Math.max(a+2,Math.min(data.length,Math.ceil(state.chartViewEnd)));
- state.chartViewStart=a;state.chartViewEnd=b;const visible=data.slice(a,b);
- if(state.chartMode==='candles')drawCandles(visible);else drawChart(visible.map(x=>x.value));
- const total=data.length,zoom=Math.round(total/(b-a)*100);
- const hint=$('chartInteractionHint');if(hint)hint.textContent='Zoom '+zoom+'% · Ziehen zum Verschieben · Mausrad / Pinch zum Zoomen';
-}
-function drawCandles(data){
- const w=760,h=260,left=12,right=66,top=12,bottom=24,plotW=w-left-right,plotH=h-top-bottom;
- const min=Math.min(...data.map(x=>x.low)),max=Math.max(...data.map(x=>x.high)),pad=(max-min)*.08||Math.max(max*.01,1e-10),lo=min-pad,hi=max+pad,range=hi-lo;
- const y=v=>top+(hi-v)/range*plotH,step=plotW/data.length,cw=Math.max(2,Math.min(10,step*.62));
- let svg='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Candlestick chart"><title>OHLC Candlestick chart</title>';
- for(let i=0;i<5;i++){const v=hi-(range*i/4),yy=y(v);svg+='<line class="chart-grid" x1="'+left+'" y1="'+yy+'" x2="'+(w-right+4)+'" y2="'+yy+'"/><text class="chart-axis" x="'+(w-right+8)+'" y="'+(yy+4)+'">'+safe(shortNum(v))+'</text>'}
- data.forEach((c,i)=>{const x=left+(i+.5)*step,up=c.close>=c.open,cls=up?'chart-candle-up':'chart-candle-down',bodyY=Math.min(y(c.open),y(c.close)),bodyH=Math.max(1,Math.abs(y(c.open)-y(c.close)));svg+='<line class="'+cls+'" x1="'+x+'" y1="'+y(c.high)+'" x2="'+x+'" y2="'+y(c.low)+'" stroke-width="1.3"/><rect class="'+cls+'" x="'+(x-cw/2)+'" y="'+bodyY+'" width="'+cw+'" height="'+bodyH+'" rx=".7"/>'});
- svg+='</svg>';$('chart').innerHTML=svg;
-}
-function drawChart(values){
- const w=700,h=260,pad=8,min=Math.min(...values),max=Math.max(...values),range=max-min||Math.max(max*.01,.0000001),coords=values.map((v,i)=>[pad+i/(values.length-1)*(w-2*pad),h-pad-(v-min)/range*(h-2*pad)]),line=coords.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' '),area=line+' L '+(w-pad)+' '+(h-pad)+' L '+pad+' '+(h-pad)+' Z';
- $('chart').innerHTML='<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="Live price line chart"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#a66aff" stop-opacity=".38"/><stop offset="1" stop-color="#a66aff" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#chartFill)"/><path d="'+line+'" fill="none" stroke="#b77aff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>';
-}
-function zoomChart(factor,anchor=.5){
- const total=state.chartData.length;if(total<3)return;const old=Math.max(2,state.chartViewEnd-state.chartViewStart),next=Math.max(2,Math.min(total,Math.round(old*factor))),at=state.chartViewStart+old*Math.max(0,Math.min(1,anchor));
- state.chartViewStart=at-next*Math.max(0,Math.min(1,anchor));state.chartViewEnd=state.chartViewStart+next;
- if(state.chartViewStart<0){state.chartViewEnd-=state.chartViewStart;state.chartViewStart=0}if(state.chartViewEnd>total){state.chartViewStart-=state.chartViewEnd-total;state.chartViewEnd=total}
- renderChartView();
-}
-function panChart(delta){const total=state.chartData.length,span=state.chartViewEnd-state.chartViewStart;state.chartViewStart=Math.max(0,Math.min(total-span,state.chartViewStart+delta));state.chartViewEnd=state.chartViewStart+span;renderChartView()}
-function resetChartView(){state.chartViewStart=0;state.chartViewEnd=state.chartData.length;renderChartView()}
-const chartEl=$('chart');chartEl.addEventListener('wheel',e=>{if(!state.chartData.length)return;e.preventDefault();const rect=chartEl.getBoundingClientRect(),anchor=(e.clientX-rect.left)/rect.width;zoomChart(e.deltaY<0?.82:1.22,anchor)},{passive:false});
-chartEl.addEventListener('pointerdown',e=>{if(!state.chartData.length)return;chartEl.setPointerCapture(e.pointerId);state.chartPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});chartEl.dataset.dragX=e.clientX;chartEl.dataset.dragSpan=state.chartViewEnd-state.chartViewStart;chartEl.classList.add('is-dragging')});
-chartEl.addEventListener('pointermove',e=>{if(!state.chartPointers.has(e.pointerId))return;const prev=state.chartPointers.get(e.pointerId);state.chartPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(state.chartPointers.size>=2){const pts=[...state.chartPointers.values()],dist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);if(chartEl.dataset.pinchDist){const factor=Number(chartEl.dataset.pinchDist)/dist;const rect=chartEl.getBoundingClientRect(),anchor=((pts[0].x+pts[1].x)/2-rect.left)/rect.width;if(Math.abs(factor-1)>.025)zoomChart(factor,anchor)}chartEl.dataset.pinchDist=dist;return}const dx=e.clientX-prev.x,span=state.chartViewEnd-state.chartViewStart;if(Math.abs(dx)>0.5)panChart(-dx/chartEl.clientWidth*span)});
-const endChartPointer=e=>{state.chartPointers.delete(e.pointerId);if(state.chartPointers.size<2)delete chartEl.dataset.pinchDist;if(!state.chartPointers.size)chartEl.classList.remove('is-dragging')};
-chartEl.addEventListener('pointerup',endChartPointer);chartEl.addEventListener('pointercancel',endChartPointer);chartEl.addEventListener('lostpointercapture',endChartPointer);
-
-let searchTimer; $('coinSearch').addEventListener('input',()=>{clearTimeout(searchTimer);const q=$('coinSearch').value.trim();if(!q){state.searchMode=false;$('searchResults').hidden=true;$('dataNote').textContent='Die Top-10-Trends bleiben sichtbar. Suche nach einem Coin oder einer Adresse.';return}$('searchResults').hidden=false;$('coinRows').innerHTML='<tr><td colspan="5" class="muted">Suche CoinGecko und DEX Screener…</td></tr>';searchTimer=setTimeout(searchAllCoins,500)});$('searchAllBtn').addEventListener('click',()=>{clearTimeout(searchTimer);searchAllCoins()});$('coinSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){clearTimeout(searchTimer);searchAllCoins()}});$('loadMoreBtn').hidden=true;$('refreshBtn').addEventListener('click',loadMarket);$('trendSort').addEventListener('change',e=>{state.trendSort=e.target.value;renderTrendRows()});$('watchOnly').addEventListener('change',e=>{state.watchOnly=e.target.checked;renderTrendRows()});
-$('trendRows').addEventListener('click',e=>{const star=e.target.closest('[data-watch]');if(star){e.stopPropagation();const key=star.dataset.watch;if(state.watchlist.has(key))state.watchlist.delete(key);else state.watchlist.add(key);try{localStorage.setItem('feeflow_watchlist',JSON.stringify([...state.watchlist]))}catch(err){}renderTrendRows();return}const tr=e.target.closest('tr[data-pair]');if(!tr)return;const c={id:'dex:'+tr.dataset.dexchain+':'+tr.dataset.token,name:tr.dataset.name,symbol:tr.dataset.symbol,current_price:Number(tr.dataset.price)||0,price_change_percentage_24h:Number(tr.dataset.change),market_cap:Number(tr.dataset.mcap)||0,image:tr.dataset.image,dexPair:true,chainId:tr.dataset.dexchain,pairAddress:tr.dataset.pair,tokenAddress:tr.dataset.token};selectCoin(c)});$('trendRows').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-pair]')){e.preventDefault();e.target.click()}});
-function chooseDexRow(tr){if(!tr?.dataset.dexchain||!tr?.dataset.pair)return;const c={id:'dex:'+tr.dataset.dexchain+':'+tr.dataset.token,name:tr.dataset.name,symbol:tr.dataset.symbol,current_price:Number(tr.dataset.price)||0,price_change_percentage_24h:Number(tr.dataset.change),market_cap:Number(tr.dataset.mcap)||0,image:tr.dataset.image,dexPair:true,chainId:tr.dataset.dexchain,pairAddress:tr.dataset.pair,tokenAddress:tr.dataset.token};selectCoin(c)}
-$('coinRows').addEventListener('click',e=>{const tr=e.target.closest('tr');if(!tr)return;if(tr.dataset.dexchain&&tr.dataset.pair){chooseDexRow(tr);return}if(tr.dataset.id){const c=state.coins.find(x=>x.id===tr.dataset.id);if(c)selectCoin(c)}});
-$('coinRows').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-pair]')){e.preventDefault();chooseDexRow(e.target)}});
-const requireChart=()=>{if(!state.selected||!state.chartData.length){toast('Wähle zuerst einen Coin aus der Suche oder dem Trending-Radar.');return false}return true};
-$('chartZoomIn').addEventListener('click',()=>{if(requireChart())zoomChart(.7)});
-$('chartZoomOut').addEventListener('click',()=>{if(requireChart())zoomChart(1.4)});
-$('chartZoomReset').addEventListener('click',()=>{if(requireChart())resetChartView()});
-document.querySelectorAll('[data-days]').forEach(b=>b.addEventListener('click',()=>{if(!state.selected){toast('Wähle zuerst einen Coin aus.');return}state.days=Number(b.dataset.days);document.querySelectorAll('[data-days]').forEach(x=>x.classList.toggle('active',x===b));loadChart()}));
-document.querySelectorAll('[data-chart-mode]').forEach(b=>b.addEventListener('click',()=>{if(!state.selected){toast('Wähle zuerst einen Coin aus.');return}state.chartMode=b.dataset.chartMode;if(!state.selected.dexPair&&state.chartMode==='candles'){state.chartMode='line';toast('Für diesen Coin sind nur Kursdaten verfügbar – Linienchart aktiviert.')}document.querySelectorAll('[data-chart-mode]').forEach(x=>x.classList.toggle('active',x.dataset.chartMode===state.chartMode));loadChart()}));
-setInterval(()=>{if(state.selected&&!document.hidden)loadChart()},30000);
-const amount=$('amount'),rate=$('rate');function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.min(100,Math.max(0,Number(rate.value)||0)),f=a*r/100;$('feeResult').textContent=money(f);$('netResult').textContent='Net amount: '+money(a-f)}amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
-async function connectWallet(){const status=$('walletStatus');status.className='status';status.textContent='Suche nach einer installierten Wallet…';try{
- const solanaWallet=window.phantom?.solana||window.solana;
- if(solanaWallet?.isPhantom){const resp=await solanaWallet.connect();state.provider=solanaWallet;state.account=resp.publicKey.toString();state.chainId='Solana';state.kind='Solana';renderWallet();status.textContent='Phantom verbunden – Read-only Dashboard.';return}
- if(window.ethereum){state.provider=window.ethereum;const accounts=await window.ethereum.request({method:'eth_requestAccounts'});if(!accounts?.length)throw new Error('Kein Konto freigegeben.');state.account=accounts[0];state.chainId=await window.ethereum.request({method:'eth_chainId'});state.kind='EVM';window.ethereum.on?.('accountsChanged',a=>{if(a?.length){state.account=a[0];renderWallet()}else clearWallet()});window.ethereum.on?.('chainChanged',id=>{state.chainId=id;renderWallet()});renderWallet();status.textContent='Wallet verbunden – Read-only Dashboard.';return}
- const isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
- if(isMobile){status.className='status error';status.innerHTML='<strong>Wallet auf dem iPhone verbinden</strong><br>Safari kann Phantom nicht direkt verbinden. Öffne die Phantom-App, tippe unten auf die Suchleiste und gib <b>wnrrzcnnj2-afk.github.io/Feeflow/</b> ein. Öffne FeeFlow dort und tippe erneut auf „Connect wallet“. <a href="https://phantom.com/download" target="_blank" rel="noopener noreferrer" style="color:#c69bff">Phantom installieren ↗</a><br><span>FeeFlow fragt niemals nach deiner Seed Phrase oder deinem Private Key.</span>';return}
- throw new Error('Keine Wallet gefunden. Installiere die Phantom- oder MetaMask-Browser-Erweiterung und lade FeeFlow danach neu.');
- }catch(e){status.textContent=e.code===4001?'Verbindungsanfrage abgelehnt.':e.message||'Wallet-Verbindung fehlgeschlagen.';status.className='status error'}}
-async function uploadLaunchFile(file,jwt){const fd=new FormData();fd.append('network','public');fd.append('file',file);const r=await fetch('https://uploads.pinata.cloud/v3/files',{method:'POST',headers:{Authorization:'Bearer '+jwt},body:fd});const j=await r.json().catch(()=>({}));if(!r.ok||!j.data?.cid)throw new Error(j.error||j.message||'Pinata Upload fehlgeschlagen (HTTP '+r.status+')');return 'https://ipfs.io/ipfs/'+j.data.cid}
-async function launchPhantom(){const p=window.solana;if(!p?.isPhantom)throw new Error('Phantom nicht gefunden. Öffne FeeFlow im Phantom-Browser.');const a=await p.connect();state.provider=p;state.account=a.publicKey.toString();state.chainId='Solana Mainnet';state.kind='Solana';renderWallet();return p}
-async function createLaunchCoin(){const b=$('launchCreateBtn'),st=$('launchStatus'),name=$('launchName').value.trim(),symbol=$('launchSymbol').value.trim().toUpperCase(),desc=$('launchDescription').value.trim(),file=$('launchImage').files[0],jwt=$('launchPinata').value.trim(),buy=Number($('launchBuy').value),website=$('launchWebsite').value.trim(),twitter=$('launchTwitter').value.trim(),telegram=$('launchTelegram').value.trim();if(!name||!symbol||!file||!jwt){st.textContent='Bitte Name, Ticker, Bild und Pinata JWT ausfüllen.';return}if(!/^[A-Z0-9]{2,10}$/.test(symbol)){st.textContent='Ticker: 2–10 Zeichen, nur A–Z und 0–9.';return}if(file.size>5242880||!/^image\/(png|jpeg|webp)$/.test(file.type)){st.textContent='Bitte PNG, JPG oder WebP bis 5 MB wählen.';return}if(!Number.isFinite(buy)||buy<.0001||buy>5){st.textContent='Initialer Kauf muss zwischen 0.0001 und 5 SOL liegen.';return}for(const [n,u] of [['Website',website],['X',twitter],['Telegram',telegram]])if(u&&!/^https:\/\//i.test(u)){st.textContent=n+' muss mit https:// beginnen.';return}b.disabled=true;b.textContent='Erstelle…';try{st.textContent='Verbinde Phantom…';const p=await launchPhantom();if(!window.solanaWeb3?.Keypair||!window.solanaWeb3?.VersionedTransaction)throw new Error('Solana Web3 konnte nicht geladen werden. Bitte Seite neu laden.');const mint=window.solanaWeb3.Keypair.generate();st.textContent='Lade Bild zu IPFS…';const image=await uploadLaunchFile(file,jwt);const metadata=new File([JSON.stringify({name,symbol,image,description:desc,website,twitter,telegram,createdOn:'https://pump.fun'})],'metadata.json',{type:'application/json'});st.textContent='Lade Token-Metadaten zu IPFS…';const uri=await uploadLaunchFile(metadata,jwt);st.textContent='Erstelle Launch-Transaktion…';const r=await fetch('https://pumpportal.fun/api/trade-local',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({publicKey:p.publicKey.toString(),action:'create',tokenMetadata:{name,symbol,uri},mint:mint.publicKey.toBase58(),denominatedInSol:'true',amount:buy,slippage:10,priorityFee:.00001,pool:'pump'})});if(!r.ok)throw new Error('PumpPortal: '+(await r.text()).slice(0,220));const tx=window.solanaWeb3.VersionedTransaction.deserialize(new Uint8Array(await r.arrayBuffer()));tx.sign([mint]);st.textContent='Bitte prüfe die Transaktion sorgfältig in Phantom und bestätige sie nur, wenn alles stimmt…';const sent=await p.signAndSendTransaction(tx),sig=sent.signature||sent,addr=mint.publicKey.toBase58();st.innerHTML='<strong style="color:var(--green)">Transaktion gesendet – warte auf Bestätigung.</strong><br>Mint: <code>'+safe(addr)+'</code><br><a target="_blank" rel="noopener noreferrer" href="https://solscan.io/tx/'+encodeURIComponent(sig)+'">Transaktion auf Solscan ↗</a><br><a target="_blank" rel="noopener noreferrer" href="https://pump.fun/coin/'+encodeURIComponent(addr)+'">Coin auf Pump.fun ↗</a>';$('launchPinata').value=''}catch(e){st.textContent=e.code===4001?'Signatur in Phantom abgelehnt.':e.message||'Coin konnte nicht erstellt werden.'}finally{$('launchPinata').value='';b.disabled=false;b.textContent='🚀 Coin erstellen'}}
-$('launchCreateBtn')?.addEventListener('click',createLaunchCoin);$('launchConnectBtn')?.addEventListener('click',async()=>{try{await launchPhantom();$('launchStatus').textContent='Phantom verbunden: '+state.account}catch(e){$('launchStatus').textContent=e.message||'Phantom-Verbindung fehlgeschlagen.'}});
-function renderWallet(){const addr=state.account||'';const short=addr.length>18?addr.slice(0,8)+'…'+addr.slice(-6):addr;$('walletInfo').innerHTML='<strong>'+safe(state.kind)+' wallet connected</strong><span>'+safe(short)+'</span><span class="muted">Network: '+safe(state.chainId||'Unknown')+'</span>'; $('connectBtn').textContent=short;$('disconnectBtn').hidden=false}
-function clearWallet(){state.account=null;state.provider=null;state.chainId=null;state.kind=null;$('walletInfo').innerHTML='<strong>Not connected</strong><span class="muted">No wallet connected in this session.</span>';$('connectBtn').textContent='Connect wallet';$('disconnectBtn').hidden=true}
-$('connectBtn').addEventListener('click',connectWallet);$('disconnectBtn').addEventListener('click',()=>{clearWallet();$('walletStatus').textContent='Wallet hidden in FeeFlow. If your wallet offers a disconnect option, use it there too.'});
-
-// Mobile quick navigation
-const dockLinks=[...document.querySelectorAll('.mobile-dock a')];
-dockLinks.forEach(link=>link.addEventListener('click',()=>dockLinks.forEach(item=>item.classList.toggle('active',item===link))));
-if('IntersectionObserver' in window){const dockObserver=new IntersectionObserver(entries=>{const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible){const target='#'+visible.target.id;dockLinks.forEach(link=>link.classList.toggle('active',link.getAttribute('href')===target));}},{rootMargin:'-18% 0px -65% 0px',threshold:[0,.2,.5]});['overview','trending','market','rugcheck'].forEach(id=>{const el=$(id);if(el)dockObserver.observe(el)});}
-
-applyLanguage('de');$('searchResults').hidden=true;renderMarketPulse();renderIntel();loadMarket();loadTrendingBoard();setInterval(()=>{if(!document.hidden)loadMarket()},180000);setInterval(()=>{if(!document.hidden)loadTrendingBoard()},120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadMarket();loadTrendingBoard()}});
 </script>
-<div id="ffReadingProgress" aria-hidden="true"></div>
-<button id="ffBackTop" type="button" aria-label="Zurück nach oben" title="Zurück nach oben">↑</button>
-<script>
-(()=> {
- const bar=document.getElementById('ffReadingProgress');
- const top=document.getElementById('ffBackTop');
- if(!bar||!top)return;
- let ticking=false;
- const update=()=>{
-  const root=document.documentElement;
-  const max=root.scrollHeight-root.clientHeight;
-  const pct=max>0?Math.min(100,Math.max(0,window.scrollY/max*100)):0;
-  bar.style.width=pct+'%';
-  top.classList.toggle('is-visible',window.scrollY>520);
-  ticking=false;
- };
- window.addEventListener('scroll',()=>{if(!ticking){ticking=true;window.requestAnimationFrame(update)}},{passive:true});
- window.addEventListener('resize',update,{passive:true});
- top.addEventListener('click',()=>window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
- if('IntersectionObserver'in window&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  const targets=[...document.querySelectorAll('.stat,.pulse-panel,.panel,.intel-panel,.launch-panel')];
-  targets.forEach(el=>el.classList.add('ff-reveal'));
-  document.documentElement.classList.add('ff-reveal-ready');
-  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
-   if(entry.isIntersecting){entry.target.classList.add('ff-visible');observer.unobserve(entry.target)}
-  }),{threshold:.08,rootMargin:'0px 0px -24px 0px'});
-  targets.forEach(el=>observer.observe(el));
- }
- update();
-})();
-</script></body>
+</body>
 </html>
