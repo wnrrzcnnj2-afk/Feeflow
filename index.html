@@ -446,7 +446,8 @@ async function loadMarket(){
   }
   if(!stats)throw new Error(errors.join(' | ')||'Keine Datenquelle erreichbar');
   $('marketCap').textContent='$'+compact(stats.cap);
-  $('marketVolume').textContent='
+  $('marketVolume').textContent='$'+compact(stats.volume);
+  if(stats.count>0)$('coinCount').textContent=compact(stats.count);
   $('marketCapChange').textContent=(stats.change>=0?'+':'')+stats.change.toFixed(2)+'% · 24h · '+source;
   $('marketStatus').textContent='● LIVE';
   $('marketStatus').style.color='var(--green)';
