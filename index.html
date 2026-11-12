@@ -302,6 +302,14 @@ function applyLanguage(value){
  set('#riskResult strong','Bereit zum Prüfen','Ready to check');
  set('#riskResult .muted','Noch keine Adresse geprüft.','No address checked yet.');
  set('#riskSafetyNote','Wichtig: Diese Einschätzung ist nicht zu 100 % sicher und kann einen Rug übersehen. Prüfe den Coin immer selbst.','Important: This assessment is not 100% accurate and may miss a rug. Always do your own research.');
+ const riskNotes=document.querySelectorAll('#rugcheck .notice');if(riskNotes[1])riskNotes[1].textContent=en?'Note: No scanner can rule out a rug with certainty. Data may be missing for new tokens.':'Hinweis: Kein Scanner kann einen Rug sicher ausschließen. Bei neuen Token können Daten fehlen.';
+ const marketNotes=document.querySelectorAll('#market > .notice');if(marketNotes[0])marketNotes[0].textContent=en?'Select a coin to load its chart.':'Wähle einen Coin aus, um den Chart zu laden.';
+ const swapNotes=document.querySelectorAll('#swapPanel .notice');if(swapNotes[1])swapNotes[1].textContent=en?'FeeFlow does not custody coins. Every swap is prepared by Jupiter and must be approved in your wallet.':'FeeFlow verwahrt keine Coins. Jeder Swap wird von Jupiter vorbereitet und muss von deiner Wallet bestätigt werden.';
+ const feeNote=document.querySelector('#fees .notice');if(feeNote)feeNote.textContent=en?'Estimate only. The actual fee depends on the service or network used.':'Nur eine Schätzung. Die tatsächliche Gebühr hängt vom verwendeten Dienst oder Netzwerk ab.';
+ const walletNotes=document.querySelectorAll('#walletPanel .notice');if(walletNotes[0])walletNotes[0].textContent=en?'FeeFlow never holds coins and never asks for your seed phrase. Trades are prepared by the selected DEX and must be confirmed in your wallet.':'FeeFlow verwahrt keine Coins und fragt niemals nach deiner Seed Phrase. Trades werden vom jeweiligen DEX vorbereitet und müssen in deiner Wallet bestätigt werden.';
+ const intelFoot=document.querySelector('.intel-panel > .notice');if(intelFoot)intelFoot.textContent=en?'Price alerts work only while FeeFlow is open. Portfolio values are estimates.':'Preisalarme funktionieren nur bei geöffnetem FeeFlow. Portfolio-Werte sind Schätzungen.';
+ set('#launchStatus','Bereit. Für den IPFS-Upload wird ein eigener Pinata JWT benötigt.','Ready. A dedicated Pinata JWT is required for the IPFS upload.');
+
  set('#riskcheck .pill','TOKEN SAFETY','TOKEN SAFETY');
  set('#chartTitle','Markt-Chart','Market chart');
  document.querySelectorAll('[data-interval]').forEach((el,i)=>{if(i===0)el.textContent=en?'1 sec':'1 Sek.'});
