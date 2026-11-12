@@ -246,14 +246,147 @@ en:{nav:['Overview','Trending','Charts','Fee calculator'],connect:'Connect walle
 };
 function setText(selector,value){const el=document.querySelector(selector);if(el)el.textContent=value}
 function applyLanguage(value){
- language=value==='en'?'en':'de';const t=words[language];document.documentElement.lang=language;
- document.querySelectorAll('.nav a').forEach((a,i)=>{if(t.nav[i])a.textContent=t.nav[i]});
- setText('#connectBtn',t.connect);setText('.hero p',t.hero);setText('#trending h2',t.trend);setText('#rugcheck h2',t.rug);setText('#rugcheck .notice',t.intro);
- const labels=document.querySelectorAll('#rugcheck label');if(labels[0])labels[0].textContent=t.chain;
- $('riskAddress').placeholder=t.address;$('riskCheckBtn').textContent=t.check;
- setText('#riskSafetyNote',t.safety);setText('#market h2',t.chart);setText('#fees h2',t.fee);setText('#walletPanel h2',t.wallet);setText('.disclaimer',t.disclaimer);
+ language=value==='en'?'en':'de';
+ const en=language==='en';
+ const t=words[language];
+ document.documentElement.lang=language;
+ try{localStorage.setItem('feeflow_language',language)}catch(e){}
+ $('languageSelect').value=language;
+ const set=(selector,deText,enText)=>{const el=document.querySelector(selector);if(el)el.textContent=en?enText:deText};
+ const setAll=(selector,deText,enText)=>document.querySelectorAll(selector).forEach(el=>el.textContent=en?enText:deText);
+ const placeholder=(selector,deText,enText)=>{const el=document.querySelector(selector);if(el)el.placeholder=en?enText:deText};
+ const nav=en?['Overview','Trending','Charts','Fee calculator','Create coin']:['Übersicht','Trending','Charts','Gebührenrechner','Coin erstellen'];
+ document.querySelectorAll('.nav a').forEach((a,i)=>{if(nav[i])a.textContent=nav[i]});
+ const dock=en?['Home','Trending','Charts','Rug Check']:['Start','Trending','Charts','Rug Check'];
+ document.querySelectorAll('.mobile-dock a span:last-child').forEach((a,i)=>{if(dock[i])a.textContent=dock[i]});
+ set('.hero .eyebrow','Meme-Coin-Insights, einfach gemacht','Meme coin insights, made simple');
+ set('.hero p','Live-Krypto-Trends, Charts und On-Chain-Checks – alles an einem Ort.','Live crypto trends, charts and on-chain checks — all in one place.');
+ set('.hero-actions a.primary','Trending entdecken ↗','Explore trending ↗');
+ set('.hero-actions a.secondary','Gebühren berechnen','Calculate fees');
+ set('.stats .stat:nth-child(1) small','Globale Marktkapitalisierung','Global market cap');
+ set('.stats .stat:nth-child(2) small','24h Handelsvolumen','24h market volume');
+ set('.stats .stat:nth-child(3) small','Top-Coin heute','Top coin today');
+ set('.stats .stat:nth-child(4) small','Erfasste Coins','Tracked coins');
+ set('#marketPulse h2','Market Pulse · Live-Scan','Market pulse · live scan');
+ set('#marketPulse .pulse-head p','Live-Überblick der aktuell erkannten DEX-Paare.','Live overview of currently detected DEX pairs.');
+ set('#marketPulse .pulse-indicator','AUTO-UPDATE','AUTO UPDATE');
+ const pulseLabels=en?['TOP 1H MOVE','HIGHEST 24H VOLUME','BUY PRESSURE IN RADAR','WATCHLIST']:['STÄRKSTER 1H MOVE','HÖCHSTES 24H VOLUMEN','KAUFDRUCK IM RADAR','WATCHLIST'];
+ document.querySelectorAll('.pulse-grid article small').forEach((el,i)=>{if(pulseLabels[i])el.textContent=pulseLabels[i]});
+ set('#pulseMover','Warte auf Scan…','Waiting for scan…');
+ set('#pulseMoverMeta','Noch keine Daten','No data yet');
+ set('#pulseVolumeMeta','Im aktuellen Radar','In current radar');
+ set('#pulseBuyMeta','Aus verfügbaren Trades','Based on available trades');
+ set('.pulse-grid article:last-child span','Auf diesem Gerät gespeichert','Saved on this device');
+ set('#pulseFoot','Werte werden mit dem nächsten erfolgreichen Scan aktualisiert.','Values update after the next successful scan.');
+ set('#trending h2','Trending jetzt','Trending now');
+ set('#trending .trend-hero p','Coins mit starkem Momentum – automatisch aktualisiert.','Coins with strong momentum — updated automatically.');
+ set('#trendLead','Wird gesucht…','Searching…');
+ set('#trendCount','20 Plätze im Radar','20 radar slots');
+ set('label[for="trendSort"]','Sortieren:','Sort by:');
+ const sort=$('trendSort');if(sort){const opts=en?['Momentum','24h volume','Market cap','Buy pressure']:['Momentum','24h Volumen','Market Cap','Kaufdruck'];[...sort.options].forEach((o,i)=>{if(opts[i])o.textContent=opts[i]})}
+ setAll('label[for="watchOnly"]','Nur Watchlist','Watchlist only');
+ set('#watchCount','0 gespeichert','0 saved');
+ const heads=en?['RANK / TOKEN','MARKET SIGNAL','24H VOLUME']:['RANG / TOKEN','MARKTSIGNAL','24H VOLUMEN'];
+ document.querySelectorAll('.trend-list-head span').forEach((el,i)=>{if(heads[i])el.textContent=heads[i]});
+ set('#trendRows .muted','Live-Trends werden geladen…','Loading live trends…');
+ placeholder('#coinSearch','Coin oder Contract-Adresse suchen…','Search coin or contract address…');
+ set('#searchResults > .muted','Suchergebnisse','Search results');
+ const searchHead=document.querySelector('#searchResults thead');if(searchHead)searchHead.innerHTML=en?'<tr><th>#</th><th>Asset</th><th>Price</th><th>24h</th><th>Market cap</th></tr>':'<tr><th>#</th><th>Asset</th><th>Preis</th><th>24h</th><th>Market Cap</th></tr>';
+ set('#coinRows .muted','Tippe einen Namen, ein Kürzel oder eine Adresse ein.','Enter a name, ticker or address.');
+ set('#dataNote','Daten von DEX Screener und CoinGecko. Sortiert nach FeeFlow-Momentum.','Data from DEX Screener and CoinGecko, ranked by FeeFlow momentum.');
+ set('#rugcheck h2','Rug / Scam Check','Rug / scam check');
+ set('#rugcheck .notice','Füge die Contract- oder Mint-Adresse ein. FeeFlow prüft bekannte On-Chain-Risiken für Solana und EVM-Token.','Enter a contract or mint address. FeeFlow checks known on-chain risks for Solana and EVM tokens.');
+ set('label[for="riskChain"]','Blockchain','Blockchain');
+ placeholder('#riskAddress','Token-Adresse / Mint-Adresse einfügen','Enter token / mint address');
+ set('#riskCheckBtn','Prüfen','Check');
+ set('#riskResult strong','Bereit zum Prüfen','Ready to check');
+ set('#riskResult .muted','Noch keine Adresse geprüft.','No address checked yet.');
+ set('#riskSafetyNote','Wichtig: Diese Einschätzung ist nicht zu 100 % sicher und kann einen Rug übersehen. Prüfe den Coin immer selbst.','Important: This assessment is not 100% accurate and may miss a rug. Always do your own research.');
+ set('#riskcheck .pill','TOKEN SAFETY','TOKEN SAFETY');
+ set('#chartTitle','Markt-Chart','Market chart');
+ set('.chart-meta .muted','Ausgewählter Coin · USD','Selected coin · USD');
+ set('#chartChange','Wähle einen Coin aus der Liste','Choose a coin from the list');
+ set('#chart .chart-empty','Wähle einen Coin aus der Trending-Liste oder Suche, um den Chart zu laden.','Select a coin from Trending or search to load its chart.');
+ set('#chartEnd','Jetzt','Now');
+ set('.chart-type-row > span','CHARTTYP','CHART TYPE');
+ set('[data-chart-mode="candles"]','Kerzen','Candles');set('[data-chart-mode="line"]','Linie','Line');
+ set('#chartInteractionHint','Chart ziehen oder zoomen','Drag or zoom the chart');
+ set('#chartZoomReset','Reset','Reset');
+ set('#copyTokenAddress','Adresse kopieren','Copy address');
+ set('#openDexPair','Pair ansehen ↗','View pair ↗');
+ set('#tradeLink','Auf FOMO kaufen ↗','Buy on FOMO ↗');
+ set('#swapPanel h3','Direkt handeln','Trade directly');
+ set('#swapPanel .notice','Tausche SOL gegen diesen Token oder verkaufe zurück. Verbinde deine Wallet im Jupiter-Fenster und prüfe Netzwerk, Token-Adresse, Kurs und Gebühren vor jeder Bestätigung.','Swap SOL for this token or sell it. Connect your wallet in Jupiter and verify the network, token address, price and fees before confirming.');
+ set('#fees h2','Gebührenrechner','Fee calculator');
+ set('label[for="amount"]','Handelsbetrag (USD)','Trade amount (USD)');
+ set('label[for="rate"]','Gebührensatz (%)','Fee rate (%)');
+ set('.result .muted','Geschätzte Gebühr','Estimated fee');
+ set('#netResult','Netto-Betrag: $991.50','Net amount: $991.50');
+ set('#walletPanel h2','Deine Wallet','Your wallet');
+ set('#walletPanel > p','Verbinde eine installierte Wallet, um deine öffentliche Adresse und das Netzwerk anzuzeigen.','Connect an installed wallet to display your public address and network.');
+ set('#walletInfo strong','Nicht verbunden','Not connected');
+ set('#walletInfo .muted','In dieser Sitzung ist keine Wallet verbunden.','No wallet connected in this session.');
+ set('#disconnectBtn','Wallet ausblenden','Hide wallet');
+ set('#market-intel h2','Markt-Intelligenz','Market intelligence');
+ set('#market-intel .panel-head .notice','Weitere Markt-Tools.','Additional market tools.');
+ const intel=en?[
+ ['🌡️ Market Sentiment','Fear & Greed · Live','Market sentiment is loading…'],
+ ['📊 Coin Performance','Since first observation','Building from new scans…'],
+ ['🚀 New Coin Radar','New pairs','Waiting for live scan…'],
+ ['📈 Gainers & Losers','1h change','Waiting for live scan…'],
+ ['🗺️ Market Heatmap','Trending MC / movement','Waiting for live scan…'],
+ ['🐳 Whale Tracker','Large trades for selected coin','Select a coin above.'],
+ ['⚡ Smart Alerts','Automatic signals','Report 1h move from +15%','Report strong buy pressure from 75% and 20 trades','Checks trending data on every scan. Browser notifications are optional; the page must remain open.'],
+ ['🔔 Price Alerts','Local to this browser','Coin symbol, e.g. BONK','Target price in USD','Alert when price rises above','Alert when price falls below','Save alert'],
+ ['💼 Mini Portfolio','Manual · estimated value','Token contract address','Your token amount','Add position'],
+ ['🧠 Smart Money Watch','Remember wallet addresses','Public wallet address','Save wallet','Watchlist only. Without a specialist data provider, FeeFlow does not claim to show these wallets’ buys or sells.'],
+ ['🫧 Holder Scanner','Wallet concentration','Check holder risks in Rug Check and the Solana Bubble Map.','Open Rug / Holder Check ↓']
+ ]:[
+ ['🌡️ Market Sentiment','Fear & Greed · Live','Marktstimmung wird geladen…'],
+ ['📊 Coin Performance','Seit erster Beobachtung','Wird mit neuen Scans aufgebaut…'],
+ ['🚀 New Coin Radar','Neue Paare','Warte auf Live-Scan…'],
+ ['📈 Gainers & Losers','1h Veränderung','Warte auf Live-Scan…'],
+ ['🗺️ Market Heatmap','Trending MC / Bewegung','Warte auf Live-Scan…'],
+ ['🐳 Whale Tracker','Große Trades des gewählten Coins','Wähle oben einen Coin aus.'],
+ ['⚡ Smart Alerts','Automatische Signale','1h-Bewegung ab +15% melden','Starken Kaufdruck ab 75% und 20 Trades melden','Prüft die Trending-Daten bei jedem Scan. Browser-Mitteilungen sind optional; die Seite muss geöffnet sein.'],
+ ['🔔 Price Alerts','Lokal in diesem Browser','Coin-Symbol, z. B. BONK','Zielpreis in USD','Alarm bei Anstieg über','Alarm bei Fall unter','Alarm speichern'],
+ ['💼 Mini-Portfolio','Manuell · Schätzwert','Token Contract-Adresse','Deine Token-Menge','Position hinzufügen'],
+ ['🧠 Smart Money Watch','Wallet-Adressen merken','Öffentliche Wallet-Adresse','Wallet speichern','Wallet-Liste zum Beobachten. Ohne spezialisierten Datenanbieter werden hier keine Käufe/Verkäufe dieser Wallets behauptet.'],
+ ['🫧 Holder Scanner','Wallet-Konzentration','Prüfe Holder-Risiken im Rug Check und in der Solana Bubble-Map.','Zum Rug / Holder Check ↓']
+ ];
+ document.querySelectorAll('.intel-card').forEach((card,i)=>{const x=intel[i];if(!x)return;const title=card.querySelector('.intel-title strong'),sub=card.querySelector('.intel-title .muted');if(title)title.textContent=x[0];if(sub)sub.textContent=x[1]});
+ set('#sentimentPanel strong','Marktstimmung wird geladen…','Market sentiment is loading…');
+ set('#performanceList .muted','Wird mit neuen Scans aufgebaut…','Building from new scans…');
+ set('#newCoinList .muted','Warte auf Live-Scan…','Waiting for live scan…');
+ set('#moverList .muted','Warte auf Live-Scan…','Waiting for live scan…');
+ set('#heatmap .muted','Warte auf Live-Scan…','Waiting for live scan…');
+ set('#whaleList .muted','Wähle oben einen Coin aus.','Select a coin above.');
+ const smartLabels=document.querySelectorAll('.intel-card:nth-child(7) .intel-form label');if(smartLabels[0])smartLabels[0].lastChild.textContent=en?' Report 1h move from +15%':' 1h-Bewegung ab +15% melden';if(smartLabels[1])smartLabels[1].lastChild.textContent=en?' Report strong buy pressure from 75% and 20 trades':' Starken Kaufdruck ab 75% und 20 Trades melden';
+ const smartNote=document.querySelector('.intel-card:nth-child(7) .notice');if(smartNote)smartNote.textContent=intel[6][4];
+ placeholder('#alertSymbol','Coin-Symbol, z. B. BONK','Coin symbol, e.g. BONK');placeholder('#alertPrice','Zielpreis in USD','Target price in USD');
+ const dir=$('alertDirection');if(dir){dir.options[0].textContent=intel[7][4];dir.options[1].textContent=intel[7][5]}
+ set('#addAlert','Alarm speichern','Save alert');
+ placeholder('#portfolioAddress','Token Contract-Adresse','Token contract address');placeholder('#portfolioQty','Deine Token-Menge','Your token amount');set('#addPosition','Position hinzufügen','Add position');
+ placeholder('#smartWallet','Öffentliche Wallet-Adresse','Public wallet address');set('#addSmartWallet','Wallet speichern','Save wallet');
+ const smartNote2=document.querySelector('.intel-card:nth-child(10) .notice');if(smartNote2)smartNote2.textContent=intel[9][4];
+ set('#openHolderScan','Zum Rug / Holder Check ↓','Open Rug / holder check ↓');
+ set('.launch-panel h2','🚀 Eigenen Coin erstellen','🚀 Create your own coin');
+ set('.launch-panel > .notice','Erstelle einen Solana-Token. Die Transaktion wird in Phantom von dir bestätigt.','Create a Solana token. You will confirm the transaction in Phantom.');
+ const launchLabels=en?['Token name *','Ticker *','Description','Coin image (PNG/JPG/WebP, max. 5 MB) *','Website (optional)','X / Twitter (optional)','Telegram (optional)','Initial buy in SOL','Pinata JWT (upload-only permissions, no admin key) *']:['Token-Name *','Ticker *','Beschreibung','Coin-Bild (PNG/JPG/WebP, max. 5 MB) *','Website (optional)','X / Twitter (optional)','Telegram (optional)','Initialer Kauf in SOL','Pinata JWT (nur Upload-Rechte, kein Admin-Key) *'];
+ document.querySelectorAll('.launch-field label').forEach((el,i)=>{if(launchLabels[i])el.textContent=launchLabels[i]});
+ const launchPlaceholders=en?['e.g. FeeFlow Coin','e.g. FEE','What is your coin about?','Paste upload-only JWT']:['z. B. FeeFlow Coin','z. B. FEE','Worum geht es bei deinem Coin?','Upload-only JWT einfügen'];
+ ['#launchName','#launchSymbol','#launchDescription','#launchPinata'].forEach((s,i)=>placeholder(s,launchPlaceholders[i],launchPlaceholders[i]));
+ set('#launchCreateBtn','🚀 Coin erstellen','🚀 Create coin');set('#launchConnectBtn','Phantom verbinden','Connect Phantom');
+ set('.launch-side > strong','Vor dem Launch','Before launch');
+ const side=document.querySelector('.launch-side .launch-status');if(side)side.innerHTML=en?'1. Create a Pinata API key and paste the JWT.<br><br>2. Upload token details and image.<br><br>3. FeeFlow creates the transaction; Phantom displays it for review and signing.<br><br>4. You receive the mint address and Solscan link.':'1. Pinata API-Key erstellen und JWT einfügen.<br><br>2. Token-Daten und Bild hochladen.<br><br>3. FeeFlow erstellt die Transaktion; Phantom zeigt sie zur Prüfung und Signatur an.<br><br>4. Danach erhältst du Mint-Adresse und Solscan-Link.';
+ const disclaimer=en?'Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by third parties. Trades are routed through linked third-party DEX services; FeeFlow never holds your funds.':'Risikohinweis: Krypto- und Meme-Coins sind sehr volatil; du kannst dein gesamtes Investment verlieren. FeeFlow ist ein Informations-Dashboard und keine Finanzberatung. Marktdaten stammen von Drittanbietern. Trades laufen über verknüpfte DEX-Dienste; FeeFlow verwahrt niemals deine Gelder.';
+ set('.disclaimer','Risikohinweis: Krypto- und Meme-Coins sind sehr volatil; du kannst dein gesamtes Investment verlieren. FeeFlow dient nur der Information und ist keine Finanzberatung.',disclaimer);
+ set('footer span:last-child','Marktdaten: CoinGecko & DEX Screener · Wallet bleibt im Browser','Market data: CoinGecko & DEX Screener · Wallet stays in your browser');
  if(!$('riskAddress').value)$('riskResult').innerHTML='<strong>'+t.ready+'</strong><span class="muted">'+t.none+'</span>';
+ if(state.trendCoins?.length)renderTrendRows();
+ if(state.performance)renderIntel();
 }
+
 $('languageSelect').addEventListener('change',e=>applyLanguage(e.target.value));
 
 const money=(n,opts={})=>Number.isFinite(Number(n))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',...opts}).format(Number(n)):'—';
@@ -781,7 +914,7 @@ const dockLinks=[...document.querySelectorAll('.mobile-dock a')];
 dockLinks.forEach(link=>link.addEventListener('click',()=>dockLinks.forEach(item=>item.classList.toggle('active',item===link))));
 if('IntersectionObserver' in window){const dockObserver=new IntersectionObserver(entries=>{const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(visible){const target='#'+visible.target.id;dockLinks.forEach(link=>link.classList.toggle('active',link.getAttribute('href')===target));}},{rootMargin:'-18% 0px -65% 0px',threshold:[0,.2,.5]});['overview','trending','market','rugcheck'].forEach(id=>{const el=$(id);if(el)dockObserver.observe(el)});}
 
-applyLanguage('de');$('searchResults').hidden=true;renderMarketPulse();renderIntel();loadMarket();loadTrendingBoard();setInterval(()=>{if(!document.hidden)loadMarket()},180000);setInterval(()=>{if(!document.hidden)loadTrendingBoard()},120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadMarket();loadTrendingBoard()}});
+let savedLanguage='de';try{savedLanguage=localStorage.getItem('feeflow_language')||'de'}catch(e){}applyLanguage(savedLanguage);$('searchResults').hidden=true;renderMarketPulse();renderIntel();loadMarket();loadTrendingBoard();setInterval(()=>{if(!document.hidden)loadMarket()},180000);setInterval(()=>{if(!document.hidden)loadTrendingBoard()},120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){loadMarket();loadTrendingBoard()}});
 </script>
 <div id="ffReadingProgress" aria-hidden="true"></div>
 <button id="ffBackTop" type="button" aria-label="Zurück nach oben" title="Zurück nach oben">↑</button>
