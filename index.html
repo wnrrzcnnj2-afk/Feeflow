@@ -304,6 +304,7 @@ function applyLanguage(value){
  set('#riskSafetyNote','Wichtig: Diese Einschätzung ist nicht zu 100 % sicher und kann einen Rug übersehen. Prüfe den Coin immer selbst.','Important: This assessment is not 100% accurate and may miss a rug. Always do your own research.');
  set('#riskcheck .pill','TOKEN SAFETY','TOKEN SAFETY');
  set('#chartTitle','Markt-Chart','Market chart');
+ document.querySelectorAll('[data-interval]').forEach((el,i)=>{if(i===0)el.textContent=en?'1 sec':'1 Sek.'});
  set('.chart-meta .muted','Ausgewählter Coin · USD','Selected coin · USD');
  set('#chartChange','Wähle einen Coin aus der Liste','Choose a coin from the list');
  set('#chart .chart-empty','Wähle einen Coin aus der Trending-Liste oder Suche, um den Chart zu laden.','Select a coin from Trending or search to load its chart.');
@@ -378,6 +379,8 @@ function applyLanguage(value){
  ['#launchName','#launchSymbol','#launchDescription','#launchPinata'].forEach((s,i)=>placeholder(s,launchPlaceholders[i],launchPlaceholders[i]));
  set('#launchCreateBtn','🚀 Coin erstellen','🚀 Create coin');set('#launchConnectBtn','Phantom verbinden','Connect Phantom');
  set('.launch-side > strong','Vor dem Launch','Before launch');
+ set('.launch-warning','Echter Mainnet-Launch: Du benötigst SOL für den initialen Kauf, Netzwerk-/Priority-Gebühren und mögliche Pump.fun-/Trading-Gebühren. Kosten und Ausführung können sich ändern. Prüfe jede Transaktion in Phantom. Verwende nur deinen eigenen Pinata JWT.','Real mainnet launch: You need SOL for the initial buy, network/priority fees and possible Pump.fun/trading fees. Costs and execution may change. Review every transaction in Phantom. Use only your own Pinata JWT.');
+ const sideNotes=document.querySelectorAll('.launch-side .launch-status');if(sideNotes[1])sideNotes[1].textContent=en?'Use a restricted upload-only JWT — never an admin key. The key is cleared from the form after the attempt.':'Nur einen eingeschränkten Upload-JWT verwenden – niemals einen Admin-Key. Der Schlüssel wird nach dem Versuch aus dem Formular gelöscht.';
  const side=document.querySelector('.launch-side .launch-status');if(side)side.innerHTML=en?'1. Create a Pinata API key and paste the JWT.<br><br>2. Upload token details and image.<br><br>3. FeeFlow creates the transaction; Phantom displays it for review and signing.<br><br>4. You receive the mint address and Solscan link.':'1. Pinata API-Key erstellen und JWT einfügen.<br><br>2. Token-Daten und Bild hochladen.<br><br>3. FeeFlow erstellt die Transaktion; Phantom zeigt sie zur Prüfung und Signatur an.<br><br>4. Danach erhältst du Mint-Adresse und Solscan-Link.';
  const disclaimer=en?'Risk notice: Crypto and meme coins are highly volatile; you can lose your entire investment. FeeFlow is an informational dashboard, not financial advice. Market data is provided by third parties. Trades are routed through linked third-party DEX services; FeeFlow never holds your funds.':'Risikohinweis: Krypto- und Meme-Coins sind sehr volatil; du kannst dein gesamtes Investment verlieren. FeeFlow ist ein Informations-Dashboard und keine Finanzberatung. Marktdaten stammen von Drittanbietern. Trades laufen über verknüpfte DEX-Dienste; FeeFlow verwahrt niemals deine Gelder.';
  set('.disclaimer','Risikohinweis: Krypto- und Meme-Coins sind sehr volatil; du kannst dein gesamtes Investment verlieren. FeeFlow dient nur der Information und ist keine Finanzberatung.',disclaimer);
@@ -417,7 +420,7 @@ async function loadMarket(){
  if(state.refreshing)return;
  state.refreshing=true;
  $('refreshBtn').disabled=true;
- $('marketStatus').textContent='UPDATING…';
+ $('marketStatus').textContent=language==='en'?'UPDATING…':'AKTUALISIERE…';
  const providers=[
   {name:'CoinPaprika',url:'https://api.coinpaprika.com/v1/global',parse:g=>({cap:Number(g.market_cap_usd),volume:Number(g.volume_24h_usd),change:Number(g.market_cap_change_24h||0)})},
   {name:'CoinGecko',url:'https://api.coingecko.com/api/v3/global',parse:g=>{const d=g.data||{};return {cap:Number(d.total_market_cap?.usd),volume:Number(d.total_volume?.usd),change:Number(d.market_cap_change_percentage_24h||0)}}}
@@ -442,12 +445,12 @@ async function loadMarket(){
   if(!state.searchMode){$('searchResults').hidden=true;$('loadMoreBtn').hidden=true}
   $('dataNote').textContent='Globale Marktdaten aktualisiert '+new Date().toLocaleTimeString()+' · '+source;
  }catch(err){
-  $('marketCap').textContent='Unavailable';
-  $('marketVolume').textContent='Unavailable';
-  $('marketCapChange').textContent='Marktdaten gerade nicht erreichbar';
+  $('marketCap').textContent=language==='en'?'Unavailable':'Nicht verfügbar';
+  $('marketVolume').textContent=language==='en'?'Unavailable':'Nicht verfügbar';
+  $('marketCapChange').textContent=language==='en'?'Market data temporarily unavailable':'Marktdaten gerade nicht erreichbar';
   $('marketStatus').textContent='DATA UNAVAILABLE';
   $('marketStatus').style.color='var(--red)';
-  $('dataNote').textContent='Marktdaten-Fehler: '+(err?.message||'Unbekannter Fehler');
+  $('dataNote').textContent=(language==='en'?'Market data error: ':'Marktdaten-Fehler: ')+(err?.message|| (language==='en'?'Unknown error':'Unbekannter Fehler'));
  }finally{
   state.refreshing=false;
   $('refreshBtn').disabled=false;
@@ -625,17 +628,17 @@ async function loadTrendingBoard(){
 
   const top=state.trendCoins[0];
   $('topCoin').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'—';
-  $('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · 1h Momentum':'Keine aktiven Coins';
-  $('coinCount').textContent=state.trendCoins.length+' trending';
+  $('topCoinChange').textContent=top?(top.h1>=0?'+':'')+top.h1.toFixed(1)+'% · '+(language==='en'?'1h momentum':'1h Momentum'):(language==='en'?'No active coins':'Keine aktiven Coins');
+  $('coinCount').textContent=state.trendCoins.length+(language==='en'?' trending':' im Trend');
   $('trendCount').textContent=state.trendCoins.length+' Coins · DEX Scanner';
-  $('trendLead').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():'Wartet auf Aktivität';
+  $('trendLead').textContent=top?(top.pair.baseToken?.symbol||top.pair.baseToken?.name||'—').toUpperCase():(language==='en'?'Waiting for activity':'Wartet auf Aktivität');
   $('trendStatus').textContent=feeds.every(r=>r.status==='fulfilled')?'● LIVE SCAN':'● PARTIAL SCAN';
   $('trendStatus').style.color='var(--green)';
   $('dataNote').textContent='Öffentlicher DEX-Scanner: neue Profile, aktuelle und Top-Boosts. Ranking nach Handelsvolumen, Trades und Kaufdruck. Market Cap wird nur angezeigt, wenn der Anbieter einen echten MC-Wert liefert – FDV wird nicht ersatzweise verwendet.';
  }catch(e){
   $('trendStatus').textContent='SCAN PAUSED';$('trendStatus').style.color='var(--red)';
   $('trendRows').innerHTML='<tr><td colspan="4" class="muted">'+safe(e.message)+'</td></tr>';
-  $('trendCount').textContent='Datenquelle nicht erreichbar';
+  $('trendCount').textContent=language==='en'?'Data source unavailable':'Datenquelle nicht erreichbar';
  }
  finally{state.trendRefreshing=false}
 }
@@ -894,7 +897,7 @@ document.querySelectorAll('[data-interval]').forEach(b=>b.addEventListener('clic
 document.querySelectorAll('[data-chart-mode]').forEach(b=>b.addEventListener('click',()=>{if(!state.selected){toast('Wähle zuerst einen Coin aus.');return}state.chartMode=b.dataset.chartMode;if(!state.selected.dexPair&&state.chartMode==='candles'){state.chartMode='line';toast('Für diesen Coin sind nur Kursdaten verfügbar – Linienchart aktiviert.')}document.querySelectorAll('[data-chart-mode]').forEach(x=>x.classList.toggle('active',x.dataset.chartMode===state.chartMode));loadChart()}));
 setInterval(()=>{if(state.selected&&state.interval==='1s'&&!document.hidden)loadChart()},1000);
 setInterval(()=>{if(state.selected&&state.interval!=='1s'&&!document.hidden)loadChart()},30000);
-const amount=$('amount'),rate=$('rate');function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.min(100,Math.max(0,Number(rate.value)||0)),f=a*r/100;$('feeResult').textContent=money(f);$('netResult').textContent='Net amount: '+money(a-f)}amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
+const amount=$('amount'),rate=$('rate');function calculate(){const a=Math.max(0,Number(amount.value)||0),r=Math.min(100,Math.max(0,Number(rate.value)||0)),f=a*r/100;$('feeResult').textContent=money(f);$('netResult').textContent=(language==='en'?'Net amount: ':'Netto-Betrag: ')+money(a-f)}amount.addEventListener('input',calculate);rate.addEventListener('input',calculate);calculate();
 async function connectWallet(){const status=$('walletStatus');status.className='status';status.textContent='Suche nach einer installierten Wallet…';try{
  const solanaWallet=window.phantom?.solana||window.solana;
  if(solanaWallet?.isPhantom){const resp=await solanaWallet.connect();state.provider=solanaWallet;state.account=resp.publicKey.toString();state.chainId='Solana';state.kind='Solana';renderWallet();status.textContent='Phantom verbunden – Read-only Dashboard.';return}
